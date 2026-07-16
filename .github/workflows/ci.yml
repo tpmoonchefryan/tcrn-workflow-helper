@@ -1,0 +1,43 @@
+name: helper-ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: helper-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.16.0
+          check-latest: false
+      - name: Verify helper without dependency installation
+        run: |
+          test "$(node --version)" = "v24.16.0"
+          npm run verify:ci-workflow
+          npm run format
+          npm run lint
+          npm run typecheck
+          npm run archive
+          npm run build
+          npm run checksums
+          npm test
+          npm run verify
+          npm run artifacts:repro
+          npm run ci:replay
