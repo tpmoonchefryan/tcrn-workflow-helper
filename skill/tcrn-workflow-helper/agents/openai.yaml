@@ -1,0 +1,4 @@
+interface:
+  display_name: "TCRN Workflow Helper"
+  short_description: "Trust and operate a verified Workflow install"
+  default_prompt: "Use $tcrn-workflow-helper only after an external trusted bootstrap has accepted the complete archive; then resolve an approved Workflow root."
