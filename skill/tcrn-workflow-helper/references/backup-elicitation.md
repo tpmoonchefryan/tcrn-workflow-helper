@@ -88,8 +88,8 @@ are first-class — always double-quote them.
   always elicit an explicit absolute path. Recommend a destination that is
   **OUTSIDE both** the workspace control directory `.tcrn-workflow`
   (`WORKSPACE_CONTROL_DIRECTORY`) **and** the helper's managed trust-state root
-  `~/.tcrn-workflow` (a distinct tree that holds the machine-bound anti-rollback
-  state — putting a backup there would collide with it). Also keep it out of the
+  `~/.tcrn-workflow` (a distinct tree that holds the machine-bound trust state —
+  putting a backup there would collide with it). Also keep it out of the
   workspace root and out of any live host skills directory (`~/.claude/skills`
   or a project `.claude/skills`) — the same location hygiene the first-run
   wizard enforces for the state root.

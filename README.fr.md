@@ -2,7 +2,16 @@
 
 # TCRN Workflow Helper
 
-**Un amorceur de confiance sans dépendances et une compétence d'agent bi-hôte qui refuse d'exécuter une version de TCRN Workflow qu'il ne peut prouver cryptographiquement.**
+**Un amorceur de confiance sans dépendances et une compétence d'agent bi-hôte qui refuse d'exécuter toute version de TCRN Workflow dont les octets ne correspondent pas aux condensats figés dans l'amorceur que vous avez vérifié hors bande.**
+
+**Vérifiez-le d'abord.** L'amorceur est la seule chose que vous devez croire ; contrôlez-le avant de croire quoi que ce soit qu'il vous dise :
+
+```sh
+shasum -a 256 bootstrap/trusted-bootstrap.mjs
+# 7fa9f51fa024bb38db299f3604a33d071a2fe17e9dc45bc17fe80edc86aea3aa
+```
+
+Ce condensat est publié ici, dans `SECURITY.md` et dans les notes de version GitHub. S'il ne correspond pas, arrêtez-vous.
 
 `Statut : 0.1.0-candidate.4 (candidat de pré-version)` · `Licence : Apache-2.0` · `Node ≥ 24` · `Dépendances : zéro` · `Prend en charge : TCRN Workflow v0.1.0-rc.5`
 
@@ -13,18 +22,18 @@
 Installer une compétence ou un workflow d'agent depuis un dépôt est une décision de chaîne d'approvisionnement, généralement prise à l'aveugle :
 
 - **Aucune identité de version.** Un `git clone` vous donne *un* commit — rien ne le lie à la version qui a été relue et acceptée.
-- **Ni signature, ni plancher anti-retour-arrière.** Rien n'arrête une archive silencieusement remplacée, un fichier de politique transplanté, ou une rétrogradation vers une ancienne version vulnérable qui porte encore une signature d'apparence valide.
-- **La confiance s'amorce depuis la chose à laquelle on fait confiance.** La plupart des installeurs valident une archive à l'aide de fichiers *à l'intérieur* de cette archive — ce qui ne prouve rien.
+- **Rien ne lie les octets.** Une archive silencieusement remplacée ou une rétrogradation vers une ancienne version vulnérable est indiscernable de la vraie. La clé de signature qu'un éditeur isolé se génère à lui-même n'y change rien — elle déplace la même question sans réponse d'un fichier vers la gauche. Ce qui résout le problème, c'est un condensat que vous pouvez obtenir indépendamment du téléchargement.
+- **La confiance s'amorce depuis la chose à laquelle on fait confiance.** La plupart des installeurs valident une archive à l'aide de fichiers *à l'intérieur* de cette archive — ce qui ne prouve rien. Des versions candidates antérieures de ce dépôt ont commis exactement cette erreur sous un costume plus flatteur : une chaîne Ed25519 dont ni l'empreinte racine ni le condensat de l'amorceur n'étaient publiés là où un utilisateur pouvait les atteindre, si bien que chaque contrôle s'exécutait contre une ancre livrée à l'intérieur du téléchargement. Cette chaîne a été supprimée, non déguisée.
 
-Le helper est la réponse pour TCRN Workflow : un amorceur en un seul fichier, sans dépendances, qui valide **l'identité complète de la version signée avant qu'aucun code Workflow ne s'exécute**, sur l'un ou l'autre des hôtes Agent App pris en charge (Codex ou Claude Code). Si une vérification échoue, il s'arrête avec un code de raison stable. Il n'y a pas de `--force`.
+Le helper est la réponse pour TCRN Workflow : un amorceur en un seul fichier, sans dépendances, qui valide **les octets et l'identité complets de la version avant qu'aucun code Workflow ne s'exécute**, sur l'un ou l'autre des hôtes Agent App pris en charge (Codex ou Claude Code). Si une vérification échoue, il s'arrête avec un code de raison stable. Il n'y a pas de `--force`.
 
 ## Ce qu'il impose
 
 | Garantie | Mécanisme |
 | --- | --- |
-| **Identité de version exacte** | La version Workflow acceptée est épinglée par URL de dépôt, version, commit, tree *et* objet de tag annoté. Un manifeste valablement signé pour une version différente échoue fermé (`IDENTITY_MISMATCH`). |
-| **Vraies signatures, confiance externe** | Le manifeste de version Ed25519 et une politique signée séparément sont vérifiés avec une clé publique fournie *indépendamment de l'archive* — l'archive ne peut jamais s'authentifier elle-même. La transplantation et le rejeu de politique sont rejetés avant qu'aucun champ de politique ne soit honoré. |
-| **Anti-retour-arrière** | Un plancher d'époque de politique monotone persisté hors du répertoire de la Skill ; une époque plus ancienne échoue fermé (`ROLLBACK_REJECTED`), même avec une signature valide. |
+| **Identité de version exacte** | La version Workflow acceptée est épinglée par URL de dépôt, version, commit, tree *et* objet de tag annoté. Ces champs sont contrôlés contre un vrai dépôt Git : les identifiants d'objets Git sont des condensats de contenu, donc auto-authentifiants. |
+| **Octets de version figés** | Les condensats de l'archive et de la provenance acceptées sont compilés dans `bootstrap/trusted-bootstrap.mjs`. Le SHA-256 de l'amorceur lui-même est publié ici, dans `SECURITY.md` et dans les notes de version ; vérifiez-le avant de croire ce qu'il affirme. Toute autre archive échoue fermé (`IDENTITY_MISMATCH`). |
+| **Anti-retour-arrière** | Versions immuables GitHub : les étiquettes ne peuvent être ni déplacées ni supprimées, et les actifs ne peuvent être modifiés. Une version plus ancienne échoue également la comparaison au condensat figé, puisque chaque amorceur n'accepte qu'une seule archive. |
 | **Sécurité face aux archives hostiles** | Traversée de chemin, chemins absolus, caractères de contrôle, chemins non-NFC, chemins dupliqués/à collision de casse, liens, fichiers spéciaux, altération de condensat par entrée, et limites d'entrées/octets — tout est rejeté avant extraction. |
 | **Protection des hôtes en production** | Installation, mise à jour, réinstallation et désinstallation opèrent **uniquement** dans des racines jetables `tcrn-helper-test-*`. Tout chemin contenant un composant `.claude` ou `.codex` — quelle que soit la casse — est rejeté lexicalement (`LIVE_LOCATION_FORBIDDEN`) avant même que le système de fichiers ne soit sondé. |
 | **Cycle de vie transactionnel** | Chaque mutation est une transaction échelonnée et journalisée, avec reprise après plantage prouvée par injection de vrais `SIGKILL` ; une opération échouée laisse l'état antérieur identique à l'octet et zéro résidu. |
@@ -36,16 +45,14 @@ Le helper est la réponse pour TCRN Workflow : un amorceur en un seul fichier, s
 # exécuter la suite de preuves complète (hors ligne ; ~10 min, inclut l'injection de fautes SIGKILL)
 npm test
 
-# valider un lot de version signé avant toute exécution
+# valider un lot de version avant toute exécution
 node bootstrap/trusted-bootstrap.mjs validate \
-  --archive <archive.json> --manifest <manifest.json> --policy <policy.json> \
-  --provenance <provenance.json> --state <state.json> --trusted-key <public-key.pem>
+  --archive <archive.json> --provenance <provenance.json> --state <state.json>
 
 # vérifier en lecture seule une copie de ce Skill placée par un installeur standard dans ~/.claude/skills
 node bootstrap/trusted-bootstrap.mjs verify-installed-copy \
   --installed-dir <~/.claude/skills/tcrn-workflow-helper> \
-  --manifest <manifest.json> --policy <policy.json> --provenance <provenance.json> \
-  --state <state.json> --trusted-key <public-key.pem> --marker <marker.json>
+  --provenance <provenance.json> --state <state.json> --marker <marker.json>
 
 # résoudre exactement une extraction Workflow approuvée (rejette ambiguïté, liens symboliques, arbres sales)
 node bootstrap/trusted-bootstrap.mjs resolve --root <workflow-checkout>
@@ -55,8 +62,7 @@ node bootstrap/trusted-bootstrap.mjs plan-network --approved true --operation cl
 
 # cycle de vie limité aux racines de test (approbation explicite requise)
 node bootstrap/trusted-bootstrap.mjs install --test-root <dir>/tcrn-helper-test-x \
-  --archive ... --manifest ... --policy ... --provenance ... --state ... \
-  --trusted-key ... --approved true
+  --archive ... --provenance ... --state ... --approved true
 ```
 
 Le succès émet un reçu JSON canonique (`TRUST_VALIDATED`, `ROOT_RESOLVED`, `NETWORK_PLAN_APPROVED`, `INSTALL_COMPLETED`, `UNINSTALL_COMPLETED`). L'échec émet un code de raison stable. Rien entre les deux.
@@ -65,11 +71,10 @@ Le succès émet un reçu JSON canonique (`TRUST_VALIDATED`, `ROOT_RESOLVED`, `N
 
 ```mermaid
 flowchart TD
-    K[Clé publique de confiance<br/>fournie hors bande] --> P
+    K[bootstrap/trusted-bootstrap.mjs<br/>vérifié contre son SHA-256 publié] --> Verify
     subgraph Verify["trusted-bootstrap.mjs — avant toute exécution de code Workflow"]
-        P[politique signée<br/>plancher d'époque · révocations] --> M[manifeste de version signé<br/>condensat d'archive · identité exacte]
-        M --> A[archive de compétence<br/>chemins sûrs · entrées à condensat vérifié]
-        M --> ID{l'identité égale-t-elle la<br/>version Workflow épinglée ?}
+        A[archive de compétence<br/>chemins sûrs · entrées à condensat vérifié] --> D{le SHA-256 de l'archive est-il égal au<br/>condensat figé dans cet amorceur ?}
+        D --> ID{l'identité du dépôt est-elle égale à la<br/>version Workflow épinglée ?}
     end
     ID -->|oui| R[résoudre une extraction Workflow propre<br/>remote · version · arbre sale]
     ID -->|non| F[échec fermé :<br/>code de raison stable]
@@ -84,7 +89,7 @@ L'amorceur *est* la frontière de confiance. Chaque dépendance serait du code q
 
 ### Alors, comment un utilisateur non technique l'installe-t-il ?
 
-Le texte du Skill (`SKILL.md` + `references/`) **peut** être distribué dans un dossier de compétences d'hôte en production (p. ex. `~/.claude/skills`) par un installeur de compétences standard — ce n'est qu'un placement de fichiers, aucun code ne s'y exécute. Ce qui le rend digne de confiance, c'est qu'un amorceur de confiance **obtenu indépendamment** vérifie ensuite cette copie sur disque **en lecture seule** avec `verify-installed-copy` : il reconstruit l'archive de la copie, la confronte au manifeste signé (identité, condensat, plancher anti-retour-arrière) et écrit un marqueur vérifiable par la machine. Ce n'est qu'une fois ce marqueur présent que l'**assistant de premier lancement** (`references/first-run-wizard.md`) se poursuit — récupérant la version épinglée, la validant et guidant l'utilisateur avec des explications en langage clair de chaque code de raison. Donc : installeur standard pour la distribution, amorceur cryptographique pour la confiance.
+Le texte du Skill (`SKILL.md` + `references/`) **peut** être distribué dans un dossier de compétences d'hôte en production (p. ex. `~/.claude/skills`) par un installeur de compétences standard — ce n'est qu'un placement de fichiers, aucun code ne s'y exécute. Ce qui le rend digne de confiance, c'est qu'un amorceur de confiance **obtenu indépendamment** — par un canal distinct du dépôt et contrôlé contre le SHA-256 publié ci-dessus — vérifie ensuite cette copie sur disque **en lecture seule** avec `verify-installed-copy` : il reconstruit l'archive de la copie, compare son condensat à celui figé dans cet amorceur vérifié, et écrit un marqueur vérifiable par la machine. Ce n'est qu'une fois ce marqueur présent que l'**assistant de premier lancement** (`references/first-run-wizard.md`) se poursuit — récupérant la version épinglée, la validant et guidant l'utilisateur avec des explications en langage clair de chaque code de raison. Donc : installeur standard pour la distribution, amorceur cryptographique pour la confiance.
 
 ### Pourquoi les commandes du helper ne peuvent-elles pas s'installer dans un vrai emplacement de compétence ?
 
@@ -92,14 +97,13 @@ Les commandes **mutantes** du helper (`install`/`update`/`reinstall`/`uninstall`
 
 ### Pourquoi l'épinglage d'identité est-il si agressif — dépôt, version, commit, tree, *et* objet de tag ?
 
-Chaque champ tue une attaque différente : l'URL du dépôt arrête les remotes sosies ; la version arrête « bon dépôt, mauvaise version » ; le commit et le tree arrêtent les réécritures d'historique qui conservent un nom de tag ; l'objet de tag arrête le re-taggage d'un nom existant sur des octets différents. La suite de tests inclut un manifeste *valablement signé et lié à la politique* mais nommant une version différente — il doit échouer sur la comparaison d'identité elle-même (`IDENTITY_MISMATCH`), prouvant que la vérification n'est pas masquée par la validation de signature.
+Chaque champ tue une attaque différente : l'URL du dépôt arrête les remotes sosies ; la version arrête « bon dépôt, mauvaise version » ; le commit et le tree arrêtent les réécritures d'historique qui conservent un nom de tag ; l'objet de tag arrête le re-taggage d'un nom existant sur des octets différents. L'identité du dépôt est vérifiée avec de vrais identifiants d'objets Git — des condensats de contenu, auto-authentifiants, qui ne dépendent jamais de la signature de qui que ce soit.
 
 ### Que couvre réellement la suite de tests ?
 
-**79 tests, tous hors ligne** (le seul usage de `node:net` est une fixture de socket de domaine unix locale pour le rejet de fichiers spéciaux) :
+**72 tests, tous hors ligne** (le seul usage de `node:net` est une fixture de socket de domaine unix locale pour le rejet de fichiers spéciaux) :
 
-- Durcissement du chemin de signature : répertoires de clé accessibles au seul propriétaire, lectures stables par descripteur, rejet de clé malveillante, échecs avant écriture avec zéro résidu.
-- Matrice de confiance : substitution de signature/clé, transplantation et rejeu de politique, retour-arrière d'époque, révocation, expiration, provenance altérée, entrées d'archive altérées, et le manifeste à identité non concordante — chacun affirmant son code de raison exact.
+- Matrice de confiance : condensat figé non concordant, provenance altérée et entrées d'archive altérées — chacun affirmant son code de raison exact.
 - Cycle de vie : installation / mise à jour / réinstallation / désinstallation avec préservation de l'espace de travail privé identique à l'octet, vrais `SIGKILL` à chaque point d'injection effectif (l'inventaire des fautes est découvert à partir des opérations réelles, pas listé à la main), contention de verrou avec concurrents à PID distincts, et préservation des fichiers de remplacement/étrangers.
 - Vérification de la copie installée : reconstruction en lecture seule d'un répertoire de compétence placé par un installeur standard, altération → code de raison exact, rejet de répertoire/entrée en lien symbolique, avancée du plancher anti-retour-arrière en cas de succès, et refus d'emplacement en production pour le chemin d'état/de marqueur.
 - Garde d'emplacement en production : chemins de niveau utilisateur, de niveau projet, `.codex`, et à variante de casse sur les deux formes d'hôte.
@@ -113,12 +117,12 @@ Parce qu'un reçu qui certifie une exécution de validation ne devrait pas être
 
 | Chemin | Contenu |
 | --- | --- |
-| `bootstrap/trusted-bootstrap.mjs` | La frontière de confiance en un seul fichier : validation d'archive, vérification de signature, épinglage d'identité, anti-retour-arrière, cycle de vie transactionnel. |
-| `skill/tcrn-workflow-helper/` | La charge utile de l'Agent Skill : `SKILL.md`, contrat de confiance, référence d'élicitation des réglages, métadonnées par hôte. C'est ce répertoire que contient l'archive signée. |
-| `manifests/` | Le manifeste et la politique de version signés Ed25519, plus la provenance de version Workflow copiée à l'octet. |
+| `bootstrap/trusted-bootstrap.mjs` | La frontière de confiance en un seul fichier : validation d'archive, condensats d'octets de version figés, épinglage d'identité, cycle de vie transactionnel. **Vérifiez son SHA-256 hors bande avant usage.** |
+| `skill/tcrn-workflow-helper/` | La charge utile de l'Agent Skill : `SKILL.md`, contrat de confiance, référence d'élicitation des réglages, métadonnées par hôte. C'est ce répertoire que contient l'archive figée par condensat. |
+| `manifests/` | La provenance de version Workflow copiée à l'octet. Note : il s'agit d'une *déclaration de construction locale auto-affirmée* (type de construction `tcrn.workflow.local-unpublished-candidate.v1`, horodatages à zéro), et non d'une attestation par un constructeur hébergé. Elle est figée par condensat et ne peut donc être substituée ; la vérifiabilité par un tiers vient de la chaîne de construction reproductible, pas de ce fichier. |
 | `artifacts/` | Les cinq artefacts de version reproductibles. |
-| `scripts/` | Générateurs déterministes d'archive/SBOM/sommes de contrôle, vérificateur de version, rejeu CI, outil de signature (la clé privée ne réside jamais dans ce dépôt). |
-| `test/` | La suite de preuves de 79 tests. |
+| `scripts/` | Générateurs déterministes d'archive/SBOM/sommes de contrôle, vérificateur de version, rejeu CI. |
+| `test/` | La suite de preuves de 72 tests. |
 
 ## Ce que gouverne la version Workflow épinglée (nouveau en v0.1.0-rc.5)
 

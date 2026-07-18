@@ -5,7 +5,7 @@ import { lstat, mkdtemp, mkdir, open, readFile, rm, writeFile } from 'node:fs/pr
 import os from 'node:os';
 import { basename, dirname, isAbsolute, relative, resolve } from 'node:path';
 import { promisify } from 'node:util';
-import { canonicalJson, IDENTITY } from '../bootstrap/trusted-bootstrap.mjs';
+import { canonicalJson, EXPECTED_ARCHIVE_SHA256, EXPECTED_PROVENANCE_SHA256, IDENTITY } from '../bootstrap/trusted-bootstrap.mjs';
 
 const execFile = promisify(execFileCallback);
 const root = process.cwd(); const sha = value => createHash('sha256').update(value).digest('hex');
@@ -57,13 +57,13 @@ async function verifyCandidateManifest() {
   exact(document.workflow, ['commit', 'repository', 'tagObject', 'tree', 'version']);
   if (document.schemaVersion !== 'tcrn.workflow.helper.candidate-manifest.v2' || document.skillArchiveSha256 !== sha(skillBytes) || document.sourceArchiveSha256 !== sha(sourceBytes) || document.workflow.repository !== IDENTITY.repository || document.workflow.version !== IDENTITY.version || document.workflow.commit !== IDENTITY.commit || document.workflow.tree !== IDENTITY.tree || document.workflow.tagObject !== IDENTITY.tagObject) fail('candidate manifest does not bind the release artifacts');
 }
+// The trust anchor is now the bootstrap runtime itself: it carries the accepted
+// digests as compiled-in constants. This gate asserts those constants still equal the
+// artifacts actually built here, so the pin can never silently drift from the release.
 async function verifyTrustAnchor() {
   const skillBytes = await boundedBytes(resolve(root, 'artifacts/skill-archive.json'), 16 * 1024 * 1024);
   const provenanceBytes = await boundedBytes(resolve(root, 'manifests/complete-skill-archive.provenance.json'), 1024 * 1024);
-  const manifestBytes = await boundedBytes(resolve(root, 'manifests/complete-skill-archive.manifest.json'), 64 * 1024);
-  const policyBytes = await boundedBytes(resolve(root, 'manifests/complete-skill-archive.policy.json'), 64 * 1024);
-  const manifest = json(manifestBytes, 'release manifest'); const policy = json(policyBytes, 'release policy');
-  if (!Buffer.from(canonicalJson(manifest)).equals(manifestBytes) || !Buffer.from(canonicalJson(policy)).equals(policyBytes)) fail('noncanonical trust anchor');
-  if (manifest.archiveSha256 !== sha(skillBytes) || policy.archiveSha256 !== sha(skillBytes) || manifest.provenanceSha256 !== sha(provenanceBytes) || policy.provenanceSha256 !== sha(provenanceBytes) || policy.manifestSha256 !== sha(canonicalJson(manifest))) fail('trust anchor does not bind the release artifacts');
+  if (sha(skillBytes) !== EXPECTED_ARCHIVE_SHA256) fail('the bootstrap archive pin does not equal the built skill archive');
+  if (sha(provenanceBytes) !== EXPECTED_PROVENANCE_SHA256) fail('the bootstrap provenance pin does not equal the release provenance');
 }
 const expected = ['--checksums', 'artifacts/checksums.txt', '--license', 'LICENSE', '--sbom', 'artifacts/sbom.json', '--source', 'artifacts/source-archive.json']; if (canonicalJson(process.argv.slice(2)) !== canonicalJson(expected)) fail('use the exact governed verification contract'); await verifyLicense(resolve(root, 'LICENSE')); await verifySbom(resolve(root, 'artifacts/sbom.json')); await verifyChecksums(resolve(root, 'artifacts/checksums.txt')); await verifySource(resolve(root, 'artifacts/source-archive.json')); await verifyCandidateManifest(); await verifyTrustAnchor(); console.log(canonicalJson({ reasonCode:'RELEASE_ARTIFACTS_VALIDATED' }));

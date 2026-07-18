@@ -20,20 +20,26 @@ This Skill's prose (SKILL.md + references) may be distributed into a live host
 skills folder by a standard installer. Such a copy is loaded into the agent's
 context automatically and therefore has **no authority on its own** — a tampered
 or look-alike copy could rewrite these instructions. The root of trust is
-anchored out-of-band, through a repository-independent channel, for TWO things:
+anchored out-of-band, through a repository-independent channel, for exactly ONE
+thing:
 
-1. **The trusted public-key fingerprint** — SHA-256
-   `a320188bfc64797931de408f6064e0830d431fb4ebf73322f73219cc91a2ed90` (the
-   Ed25519 key that signs the release manifest and policy).
-2. **The trusted bootstrap runtime digest** — the SHA-256 of the exact
-   `bootstrap/trusted-bootstrap.mjs`. The skills installer copies only the
-   `skill/…` prose, NOT the runtime, so the user must obtain the runtime through
-   the repo-independent channel and verify it against this digest before it is
-   trusted. The verified runtime — never the copied prose — carries the pinned
-   key and identity and is the sole authority that validates anything.
+1. **The trusted bootstrap runtime digest** — the SHA-256 of the exact
+   `bootstrap/trusted-bootstrap.mjs`, published in this repository's `README.md`
+   and `SECURITY.md` and in the GitHub release notes. The skills installer
+   copies only the `skill/…` prose, NOT the runtime, so the user must obtain the
+   runtime through the repo-independent channel and verify it against that
+   published digest before it is trusted. The verified runtime — never the copied
+   prose — carries the pinned release identity and the pinned accepted archive
+   and provenance digests, and is the sole authority that validates anything.
 
-A runtime or copy that cannot be anchored against the published fingerprint/
-digest fails closed. The authority for guided setup is a **successful,
+An earlier candidate of this repository also claimed an Ed25519 signing root.
+Its key fingerprint and its bootstrap digest were published nowhere a user could
+independently reach, so every check ran against an anchor that shipped inside the
+download. That chain has been removed rather than dressed up; the runtime digest
+above is the only anchor, and it is now actually published.
+
+A runtime or copy that cannot be anchored against the published digest fails
+closed. The authority for guided setup is a **successful,
 fail-closed run of `verify-installed-copy` under the anchored runtime** (its
 receipt / process exit), not the presence of any instruction text. The
 `INSTALLED_COPY_VALIDATED` marker (below) is an unsigned convenience record of
@@ -44,18 +50,24 @@ rather than trust a marker file it did not just produce.
 ## verify-installed-copy (read-only)
 
 `verify-installed-copy` reconstructs the on-disk Skill directory's canonical
-archive, authenticates it against the signed manifest + policy (identity,
-archive digest, provenance, and the persisted anti-rollback floor), and — on
-success — **advances the persisted monotonic anti-rollback floor** and writes an
-`INSTALLED_COPY_VALIDATED` marker. Both the state (floor) and the marker are
-written only to the managed state root; a state or marker path resolving inside
-any `.claude`/`.codex` skill/live directory fails closed
+archive, compares its SHA-256 against the archive digest compiled into the
+runtime, validates the release provenance against the provenance digest compiled
+into the runtime, and — on success — records the verified archive digest in
+machine state and writes an `INSTALLED_COPY_VALIDATED` marker. Both the state and
+the marker are written only to the managed state root; a state or marker path
+resolving inside any `.claude`/`.codex` skill/live directory fails closed
 (`LIVE_LOCATION_FORBIDDEN`). It never mutates the Skill directory itself (that
-stays read-only). Because it advances the floor, a later standard-installer
-re-run with an OLDER release fails closed (`ROLLBACK_REJECTED`) on the next
-verify — this is what makes the guided read-only install path downgrade-safe. It
-is how a standard-installer-placed copy in `~/.claude/skills` is proven and
-kept anti-rollback-protected.
+stays read-only).
+
+Stated exactly, a success receipt attests: *the bytes on disk at the installed
+directory reconstruct, under this bootstrap's canonicalization rules, to
+precisely the archive whose SHA-256 is compiled into this bootstrap.* That is a
+byte-identity claim against a runtime the user verified out-of-band. It claims
+nothing about a publisher's key, a validity window, a revocation list, or a
+downgrade history. Downgrade resistance lives in two places instead: each
+bootstrap accepts exactly ONE archive, so an older release fails the digest
+comparison; and GitHub immutable releases prevent a published tag or asset from
+being moved, deleted, or changed at all.
 The helper's own mutating commands (`install`/`update`/`reinstall`/`uninstall`)
 remain test-root-only and never write to a live host Skill location.
 
@@ -77,10 +89,9 @@ special-file rejection):
   byte limits (`ARCHIVE_PATH_INVALID`, `ARCHIVE_ENTRY_INVALID`,
   `ARCHIVE_LIMIT_EXCEEDED`), and per-entry digest tamper
   (`ARCHIVE_DIGEST_MISMATCH`);
-- release trust: identity mismatch, signature and key substitution, policy
-  transplant/replay, epoch rollback, revocation, and expiry
-  (`IDENTITY_MISMATCH`, `MANIFEST_INVALID`, `POLICY_INVALID`,
-  `POLICY_REVOKED`, `POLICY_EXPIRED`, `ROLLBACK_REJECTED`);
+- release trust: an archive whose digest is not the one pinned into the runtime
+  (`IDENTITY_MISMATCH`), missing or tampered provenance (`PROVENANCE_REQUIRED`,
+  `PROVENANCE_INVALID`), and malformed persisted state (`STATE_INVALID`);
 - root resolution: wrong remote, forged checkout, dirty production checkout,
   symlinked root, ambiguity (`ROOT_IDENTITY_MISMATCH`, `ROOT_DIRTY`,
   `ROOT_SYMLINK`, `ROOT_AMBIGUOUS`);
@@ -123,26 +134,34 @@ by normalized path. Every entry is a regular relative file with a canonical
 base64 payload and SHA-256 digest. Validation rejects traversal, absolute paths,
 controls, non-NFC paths, duplicate/case-colliding paths, file/ancestor
 collisions, links, special files, digest mismatch, and configured entry/byte
-limits before extraction. The release manifest binds the archive digest, exact identity,
-issuer, signer, provenance digest, policy epoch, expiry, and a real Ed25519
-signature. The verifier requires a public key supplied independently of the
-manifest and checks its SHA-256 fingerprint against policy; production private
-keys never belong in this repository. The complete policy is separately signed
-by that trusted key and binds the exact manifest and archive digests; reject a
-policy transplant or replay before reading its expiry, revocation, epoch,
-issuer, signer, or provenance fields.
+limits before extraction. The accepted archive digest and the accepted
+provenance digest are compiled into `bootstrap/trusted-bootstrap.mjs` beside the
+pinned release identity. Validation computes the archive digest from the bytes
+and compares it to that compiled-in constant; a mismatch is `IDENTITY_MISMATCH`.
+The authority is the runtime itself, verified out-of-band against its published
+SHA-256 — no document inside or beside the download is trusted to assert what
+the correct digest is.
+
+The release provenance
+(`manifests/complete-skill-archive.provenance.json`) is a **self-asserted local
+build statement**, not a hosted-builder attestation: it declares build type
+`tcrn.workflow.local-unpublished-candidate.v1`, builder id
+`tcrn-workflow-local`, and zeroed timestamps. It is pinned by digest so it cannot
+be swapped, but it is not third-party evidence of how the release was built. The
+reproducible-build chain (`npm run ci:replay`) is what lets a third party check
+the build, by rebuilding the artifacts from a clean checkout and asserting digest
+equality with the committed ones.
 
 ## Stable reason codes
 
 `APPROVAL_REQUIRED`, `ARCHIVE_DIGEST_MISMATCH`, `ARCHIVE_ENTRY_INVALID`,
 `ARCHIVE_LIMIT_EXCEEDED`, `ARCHIVE_PATH_INVALID`, `IDENTITY_MISMATCH`,
-`INPUT_REPLACED`, `INPUT_TOO_LARGE`, `LIVE_LOCATION_FORBIDDEN`,
-`MANIFEST_INVALID`, `POLICY_EXPIRED`, `POLICY_INVALID`, `POLICY_REVOKED`,
-`PROVENANCE_INVALID`, `PROVENANCE_REQUIRED`, `ROLLBACK_REJECTED`,
+`INPUT_REPLACED`, `INPUT_TOO_LARGE`, `INVOCATION_INVALID`,
+`LIVE_LOCATION_FORBIDDEN`, `PROVENANCE_INVALID`, `PROVENANCE_REQUIRED`,
 `ROOT_AMBIGUOUS`, `ROOT_DIRTY`, `ROOT_IDENTITY_MISMATCH`, `ROOT_MISSING`,
-`ROOT_REPLACED`, `ROOT_SYMLINK`, `STATE_PATH_INVALID`, `STATE_REPLACED`,
-`TEST_ROOT_REQUIRED`, `TIME_INVALID`, `TRANSACTION_CONFLICT`,
-`TRANSACTION_INTERRUPTED`, `TRUST_BASIS_REQUIRED`, and `WORKSPACE_INVALID`
+`ROOT_REPLACED`, `ROOT_SYMLINK`, `STATE_INVALID`, `STATE_PATH_INVALID`,
+`STATE_REPLACED`, `TEST_ROOT_REQUIRED`, `TIME_INVALID`,
+`TRANSACTION_CONFLICT`, `TRANSACTION_INTERRUPTED`, and `WORKSPACE_INVALID`
 are fail-closed.
 
 ## Receipts
@@ -151,12 +170,12 @@ Success emits canonical JSON with `reasonCode` and no absolute path.
 `TRUST_VALIDATED`, `ROOT_RESOLVED`, `INSTALLED_COPY_VALIDATED`,
 `INSTALL_COMPLETED`, and `UNINSTALL_COMPLETED` additionally carry immutable
 input or state digests. `INSTALLED_COPY_VALIDATED` also names the reconstructed
-archive digest, policy epoch, and release version; the receipt itself is the
+archive digest and the pinned release version; the receipt itself is the
 authority, and (when a marker path is given) an unsigned copy is also recorded at
 that managed-state-root path as a convenience.
 `NETWORK_PLAN_APPROVED` carries only the validated static plan
 (`operation` limited to `clone` or `update`,
 `networkMutationPerformed: false`); it binds no inputs because it performs no
-operation. Persist mutable anti-rollback state and private Workspace outside
+operation. Persist mutable machine state and private Workspace outside
 the Skill directory. Installation and removal are test-root-only in this
 candidate; validation and root resolution are read-only.

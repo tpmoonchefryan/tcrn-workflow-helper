@@ -5,10 +5,10 @@ import test from 'node:test';
 
 const archivePath = fileURLToPath(new URL('../artifacts/skill-archive.json', import.meta.url));
 
-// Positive allowlist: the signed skill archive must contain EXACTLY this fixed
+// Positive allowlist: the pinned skill archive must contain EXACTLY this fixed
 // file set — no more. Absence of embedded work/knowledge data (constraint: the
 // Skill teaches querying, it never carries data) is proven by this closed
-// manifest + the signed archive digest, not by grepping for a negative.
+// manifest + the archive digest pinned into the bootstrap, not by grepping for a negative.
 const ALLOWED = [
   'SKILL.md',
   'agents/openai.yaml',
@@ -21,7 +21,7 @@ const ALLOWED = [
   'scripts/create-skill-archive.mjs',
 ].sort();
 
-test('the signed skill archive contains exactly the allowlisted guidance/instruction files and no data payload', async () => {
+test('the pinned skill archive contains exactly the allowlisted guidance/instruction files and no data payload', async () => {
   const archive = JSON.parse(await readFile(archivePath, 'utf8'));
   const paths = archive.entries.map(entry => entry.path).sort();
   assert.deepEqual(paths, ALLOWED, 'skill archive must equal the fixed guidance/instruction file manifest');

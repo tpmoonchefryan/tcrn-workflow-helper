@@ -10,27 +10,18 @@ Format: `CODE` — what happened / security stop? / what to do.
 
 ## Trust and identity
 
-- `TRUST_BASIS_REQUIRED` — the independently supplied trusted key is missing or
-  wrong. / yes / obtain the correct trusted key through the documented
-  out-of-band channel and retry.
-- `IDENTITY_MISMATCH` — the signed release names a different repository, version,
-  commit, tree, or tag than the one this Skill trusts. / yes / you have the wrong
-  or a substituted release; get the exact pinned release.
-- `MANIFEST_INVALID` — the release manifest is malformed, unsigned, or its
-  signature does not verify. / yes / re-download the release; do not proceed.
-- `POLICY_INVALID` — the signed policy is malformed, its signature fails, or it
-  does not bind this exact archive/manifest (this also fires when installed bytes
-  were tampered so the archive digest no longer matches). / yes / re-download; a
-  mismatch here often means the copy was altered.
-- `POLICY_EXPIRED` — the release policy's validity window has passed. / yes / use
-  a current release.
-- `POLICY_REVOKED` — this release version was revoked. / yes / do not use it;
-  upgrade to a supported release.
-- `ROLLBACK_REJECTED` — someone is trying to install an OLDER release than one
-  this machine already accepted (anti-downgrade). / yes / this is a downgrade
-  attempt; keep the newer release.
-- `PROVENANCE_REQUIRED` / `PROVENANCE_INVALID` — the build provenance is missing
-  or does not match. / yes / re-download the full signed release set.
+- `IDENTITY_MISMATCH` — the archive's SHA-256 is not the digest pinned into this
+  trusted bootstrap. The bootstrap accepts exactly one archive, so this fires for
+  a substituted archive, a tampered archive, and an older or newer release
+  alike. / yes / you do not have the release this bootstrap accepts; obtain the
+  exact pinned archive, or obtain (and independently verify) the bootstrap
+  published for the release you want.
+- `PROVENANCE_REQUIRED` / `PROVENANCE_INVALID` — the build provenance is missing,
+  or does not match the provenance digest pinned into this bootstrap. / yes /
+  re-download the full release set.
+- `STATE_INVALID` — the persisted machine state file is malformed or does not
+  match its schema. / yes / do not proceed; inspect the managed state root, and
+  remove the corrupt state file only after confirming it was not tampered with.
 
 ## Archive safety
 
@@ -66,7 +57,7 @@ Format: `CODE` — what happened / security stop? / what to do.
 
 - `INPUT_REPLACED` / `INPUT_TOO_LARGE` — an input file was swapped mid-read or is
   too large. / yes / retry from clean inputs.
-- `STATE_PATH_INVALID` / `STATE_REPLACED` — the anti-rollback state file path is
+- `STATE_PATH_INVALID` / `STATE_REPLACED` — the machine state file path is
   invalid or was swapped. / yes / use the managed state root.
 - `WORKSPACE_INVALID` — the private Workspace failed its integrity check. / yes /
   do not proceed; report it.
@@ -75,15 +66,20 @@ Format: `CODE` — what happened / security stop? / what to do.
 - `APPROVAL_REQUIRED` — a network or mutating step ran without explicit approval.
   / no / ask the user to approve, then retry.
 - `TIME_INVALID` — a bad timestamp was supplied. / no / retry with a proper time.
+- `INVOCATION_INVALID` — the command line itself is wrong: an unknown flag, a
+  missing required flag, a repeated flag, or an unknown command. / no / fix the
+  invocation and retry. This is an argument fault, never a trust finding.
 
 ## New in this candidate (guided-install surfaces)
 
-- `INSTALLED_COPY_VALIDATED` — success receipt: the on-disk Skill copy matches the
-  signed release; the anti-rollback floor is advanced and the marker written into
-  the managed state root. / (not a stop) / proceed. A later re-install of an older
-  release will now be caught as `ROLLBACK_REJECTED`.
-- (Any `verify-installed-copy` failure reuses the trust codes above — e.g.
-  `POLICY_INVALID` when the copy was altered, `ROLLBACK_REJECTED` on downgrade.)
+- `INSTALLED_COPY_VALIDATED` — success receipt: the bytes on disk reconstruct to
+  precisely the archive whose SHA-256 is compiled into this bootstrap. The
+  verified digest is recorded in machine state and the marker written into the
+  managed state root. / (not a stop) / proceed. The marker is an unsigned
+  convenience record and is not tamper-evident, so re-run `verify-installed-copy`
+  each session rather than trusting a marker you did not just produce.
+- (Any `verify-installed-copy` failure reuses the codes above — e.g.
+  `IDENTITY_MISMATCH` when the copy was altered or is a different release.)
 
 ## Governed workspace surface (product codes, new in `0.1.0-rc.5`)
 

@@ -1,4 +1,4 @@
-import { createHash, randomUUID, verify as verifySignature } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { constants } from 'node:fs';
 import { access, lstat, link, mkdir, open, readdir, realpath, rename, rm, rmdir, stat, unlink, writeFile } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
@@ -10,19 +10,19 @@ export const IDENTITY = Object.freeze({
   commit: 'e9629dd4510ea428851eadc01a2fb7e8dcae6d5d', tree: '6272dda6ac2164429afad391c07e70ae47c4e3cc',
   tagObject: '08bcc0527dd0090b6b36328b05b0a48cd89beccc',
 });
+// The accepted release bytes are pinned HERE, in the runtime the user verifies
+// out-of-band against its published SHA-256 -- not in a document that ships beside
+// the download and could be rewritten by whoever rewrote the download.
+export const EXPECTED_ARCHIVE_SHA256 = 'b02a0d22631256798e8d6ddda01e1a110b5e79adcd507698e30d03a12441bc63';
+export const EXPECTED_PROVENANCE_SHA256 = '0a7666e42bafe0c71ba3af25ec23f1eac3dfec44d6330c33adb5d0007873f7d8';
 const ARCHIVE_SCHEMA = 'tcrn.workflow.helper.archive.v1';
-const MANIFEST_SCHEMA = 'tcrn.workflow.helper.release-manifest.v1';
-const POLICY_SCHEMA = 'tcrn.workflow.helper.policy.v1';
 const STATE_SCHEMA = 'tcrn.workflow.helper.state.v1';
 const TXN_SCHEMA = 'tcrn.workflow.helper.transaction.v2';
 const MAX_ENTRIES = 256; const MAX_BYTES = 2 * 1024 * 1024;
 const MAX_ARCHIVE_DOCUMENT_BYTES = 3 * 1024 * 1024;
-const MAX_METADATA_DOCUMENT_BYTES = 256 * 1024;
 const MAX_STATE_DOCUMENT_BYTES = 16 * 1024;
 const MAX_BASE64_BYTES = 4 * Math.ceil(MAX_BYTES / 3);
 const TXN_DIR = '.tcrn-helper-transaction'; const TXN_ATTEMPT = '.tcrn-helper-transaction-attempt'; const TXN_ATTEMPT_STAGE_PREFIX = '.tcrn-helper-transaction-attempt-stage-'; const TXN_RECEIPT = '.tcrn-helper-transaction-terminal'; const TXN_RECEIPT_STAGE_PREFIX = '.tcrn-helper-transaction-terminal-stage-'; const TXN_STAGE_PREFIX = '.tcrn-helper-transaction-stage-'; const TXN_CLAIM_STAGE_PREFIX = '.tcrn-helper-transaction-claim-stage-'; const LOCK_DIR = '.tcrn-helper-lock'; const LOCK_STAGE_PREFIX = '.tcrn-helper-lock-stage-';
-const TRUSTED_PUBLIC_KEY_PEM = '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAoN15ouVWei/yYTln7KCkZ2ecgokhj8HoWDBQyB5XaPY=\n-----END PUBLIC KEY-----\n';
-const TRUSTED_PUBLIC_KEY_SHA256 = 'a320188bfc64797931de408f6064e0830d431fb4ebf73322f73219cc91a2ed90';
 const ACTIVE_TRANSACTION_IDS = new Set(); const ACTIVE_RECEIPT_STAGES = new Map();
 
 export class BootstrapError extends Error { constructor(reasonCode, message = reasonCode) { super(message); this.reasonCode = reasonCode; } }
@@ -82,10 +82,6 @@ function decodedBase64(entry, remaining) {
   if (output.length !== decodedLength || output.toString('base64') !== entry.contentBase64) fail('ARCHIVE_ENTRY_INVALID');
   return output;
 }
-function signatureBytes(value, code) { if (typeof value !== 'string' || value.length !== 88 || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)) fail(code); const bytes = Buffer.from(value, 'base64'); if (bytes.length !== 64 || bytes.toString('base64') !== value) fail(code); return bytes; }
-export function canonicalUtc(value) { if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value)) return null; const parsed = Date.parse(value); return Number.isFinite(parsed) && new Date(parsed).toISOString() === (value.includes('.') ? value : `${value.slice(0, -1)}.000Z`) ? parsed : null; }
-function authorityName(value) { return typeof value === 'string' && value.isWellFormed() && /^[a-z][a-z0-9-]{0,63}$/.test(value); }
-function releaseVersion(value) { return typeof value === 'string' && value.isWellFormed() && /^v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(value); }
 export function validateArchive(documentValue) {
   exact(documentValue, ['entries', 'schemaVersion'], 'ARCHIVE_ENTRY_INVALID');
   if (documentValue.schemaVersion !== ARCHIVE_SCHEMA || !Array.isArray(documentValue.entries) || documentValue.entries.length > MAX_ENTRIES) fail('ARCHIVE_LIMIT_EXCEEDED');
@@ -100,43 +96,21 @@ export function validateArchive(documentValue) {
   }
   return { archiveSha256:sha256(canonicalJson(documentValue)), entries:documentValue.entries, totalBytes:total };
 }
-function authenticatePolicy(policy, manifest, archiveSha256, trustedPublicKeyPem, now) {
-  if (trustedPublicKeyPem !== TRUSTED_PUBLIC_KEY_PEM || sha256(trustedPublicKeyPem) !== TRUSTED_PUBLIC_KEY_SHA256) fail('TRUST_BASIS_REQUIRED');
-  exact(policy, ['archiveSha256', 'expiresAt', 'issuer', 'manifestSha256', 'minimumPolicyEpoch', 'provenanceSha256', 'revokedVersions', 'schemaVersion', 'signatureBase64', 'signer', 'trustedPublicKeySha256'], 'POLICY_INVALID');
-  const { signatureBase64, ...unsigned } = policy; let signatureValid = false;
-  try { signatureValid = verifySignature(null, Buffer.from(canonicalJson(unsigned)), trustedPublicKeyPem, signatureBytes(signatureBase64, 'POLICY_INVALID')); } catch { fail('POLICY_INVALID'); }
-  const expiry = canonicalUtc(policy.expiresAt);
-  if (!signatureValid || policy.schemaVersion !== POLICY_SCHEMA || policy.trustedPublicKeySha256 !== TRUSTED_PUBLIC_KEY_SHA256 || policy.archiveSha256 !== archiveSha256 || policy.manifestSha256 !== sha256(canonicalJson(manifest)) || !Number.isSafeInteger(policy.minimumPolicyEpoch) || policy.minimumPolicyEpoch < 0 || !authorityName(policy.issuer) || !authorityName(policy.signer) || !Array.isArray(policy.revokedVersions) || !policy.revokedVersions.every(releaseVersion) || new Set(policy.revokedVersions).size !== policy.revokedVersions.length || policy.revokedVersions.some((value, index) => index && policy.revokedVersions[index - 1] >= value) || !/^[a-f0-9]{64}$/.test(policy.provenanceSha256) || expiry === null) fail('POLICY_INVALID');
-  if (expiry <= now) fail('POLICY_EXPIRED'); return policy;
-}
-function validateManifest(manifest, archiveSha256, policy, trustedPublicKeyPem, now) {
-  exact(manifest, ['archiveSha256', 'commit', 'expiresAt', 'issuer', 'policyEpoch', 'provenanceSha256', 'repository', 'schemaVersion', 'signatureBase64', 'signer', 'tagObject', 'tree', 'version'], 'MANIFEST_INVALID');
-  if (manifest.schemaVersion !== MANIFEST_SCHEMA || manifest.archiveSha256 !== archiveSha256 || manifest.repository !== IDENTITY.repository || manifest.version !== IDENTITY.version || manifest.commit !== IDENTITY.commit || manifest.tree !== IDENTITY.tree || manifest.tagObject !== IDENTITY.tagObject || !/^[a-f0-9]{64}$/.test(manifest.provenanceSha256) || !authorityName(manifest.issuer) || !authorityName(manifest.signer) || canonicalUtc(manifest.expiresAt) === null) fail('IDENTITY_MISMATCH');
-  if (policy.issuer !== manifest.issuer || policy.signer !== manifest.signer || !Number.isSafeInteger(manifest.policyEpoch) || manifest.policyEpoch < policy.minimumPolicyEpoch || manifest.provenanceSha256 !== policy.provenanceSha256) fail('POLICY_INVALID');
-  const { signatureBase64, ...unsigned } = manifest; let signatureValid = false;
-  try { signatureValid = verifySignature(null, Buffer.from(canonicalJson(unsigned)), trustedPublicKeyPem, signatureBytes(signatureBase64, 'MANIFEST_INVALID')); } catch { fail('MANIFEST_INVALID'); }
-  // A bad signature on the manifest is a manifest fault, not a policy fault. This
-  // reported POLICY_INVALID while the malformed-signature path one line above reported
-  // MANIFEST_INVALID, so the same failure class produced two different diagnostics
-  // depending only on whether the bad signature happened to be well-formed base64.
-  if (!signatureValid) fail('MANIFEST_INVALID');
-  // expiresAt already round-tripped through canonicalUtc in the IDENTITY_MISMATCH gate
-  // above, so this cannot be null here; recomputed only to read the value.
-  const expiry = canonicalUtc(manifest.expiresAt);
-  if (expiry <= now) fail('POLICY_EXPIRED'); if (policy.revokedVersions.includes(manifest.version)) fail('POLICY_REVOKED'); return manifest;
-}
 async function readState(statePath) {
-  try { await lstat(statePath); } catch (error) { if (error?.code === 'ENOENT') return { value:{ schemaVersion:STATE_SCHEMA, highestPolicyEpoch:0 }, fingerprint:null }; throw error; }
-  const value = await document(statePath, MAX_STATE_DOCUMENT_BYTES, 'ROLLBACK_REJECTED', { privateFile:true }); exact(value, ['highestPolicyEpoch', 'schemaVersion'], 'ROLLBACK_REJECTED'); if (value.schemaVersion !== STATE_SCHEMA || !Number.isSafeInteger(value.highestPolicyEpoch) || value.highestPolicyEpoch < 0) fail('ROLLBACK_REJECTED'); return { value, fingerprint:sha256(canonicalJson(value)) };
+  try { await lstat(statePath); } catch (error) { if (error?.code === 'ENOENT') return { value:{ schemaVersion:STATE_SCHEMA, verifiedArchiveSha256:null }, fingerprint:null }; throw error; }
+  const value = await document(statePath, MAX_STATE_DOCUMENT_BYTES, 'STATE_INVALID', { privateFile:true }); exact(value, ['schemaVersion', 'verifiedArchiveSha256'], 'STATE_INVALID'); if (value.schemaVersion !== STATE_SCHEMA || value.verifiedArchiveSha256 !== null && !/^[a-f0-9]{64}$/.test(value.verifiedArchiveSha256)) fail('STATE_INVALID'); return { value, fingerprint:sha256(canonicalJson(value)) };
 }
 async function validateProvenance(provenancePath, expectedSha256) { if (typeof provenancePath !== 'string' || !provenancePath) fail('PROVENANCE_REQUIRED'); const provenance = await document(provenancePath, MAX_ARCHIVE_DOCUMENT_BYTES, 'PROVENANCE_INVALID'); exact(provenance, ['_type', 'predicate', 'predicateType', 'subject'], 'PROVENANCE_INVALID'); if (sha256(canonicalJson(provenance)) !== expectedSha256 || provenance._type !== 'https://in-toto.io/Statement/v1' || provenance.predicateType !== 'https://slsa.dev/provenance/v1' || !Array.isArray(provenance.subject) || provenance.subject.length !== 1 || provenance.predicate?.buildDefinition?.externalParameters?.tag !== IDENTITY.version || provenance.predicate?.buildDefinition?.externalParameters?.version !== IDENTITY.version.slice(1)) fail('PROVENANCE_INVALID'); return provenance; }
-async function prepareTrust({ archivePath, manifestPath, policyPath, provenancePath, statePath, trustedPublicKeyPem, now = Date.now() }) {
-  if (!Number.isFinite(now)) fail('TIME_INVALID');
+// The expected digests default to the compiled-in pins; they are parameters only so
+// tests can pin a synthetic archive, the same pattern resolveWorkflowRoot uses for
+// `identity`. Production callers never pass them.
+async function prepareTrust({ archivePath, provenancePath, statePath, expectedArchiveSha256 = EXPECTED_ARCHIVE_SHA256, expectedProvenanceSha256 = EXPECTED_PROVENANCE_SHA256 }) {
   const archive = await document(archivePath, MAX_ARCHIVE_DOCUMENT_BYTES, 'ARCHIVE_ENTRY_INVALID'); const validated = validateArchive(archive);
-  const manifest = await document(manifestPath, MAX_METADATA_DOCUMENT_BYTES, 'MANIFEST_INVALID'); const policy = authenticatePolicy(await document(policyPath, MAX_METADATA_DOCUMENT_BYTES, 'POLICY_INVALID'), manifest, validated.archiveSha256, trustedPublicKeyPem, now); validateManifest(manifest, validated.archiveSha256, policy, trustedPublicKeyPem, now); await validateProvenance(provenancePath, manifest.provenanceSha256);
-  const state = await readState(statePath); if (manifest.policyEpoch < state.value.highestPolicyEpoch) fail('ROLLBACK_REJECTED');
-  const receipt = { reasonCode:'TRUST_VALIDATED', archiveSha256:validated.archiveSha256, manifestDigest:sha256(canonicalJson(manifest)), policyDigest:sha256(canonicalJson(policy)), policyEpoch:manifest.policyEpoch };
-  return { archive, validated, receipt, state, nextState:{ schemaVersion:STATE_SCHEMA, highestPolicyEpoch:manifest.policyEpoch } };
+  if (validated.archiveSha256 !== expectedArchiveSha256) fail('IDENTITY_MISMATCH');
+  await validateProvenance(provenancePath, expectedProvenanceSha256);
+  const state = await readState(statePath);
+  const receipt = { reasonCode:'TRUST_VALIDATED', archiveSha256:validated.archiveSha256, version:IDENTITY.version };
+  return { archive, validated, receipt, state, nextState:{ schemaVersion:STATE_SCHEMA, verifiedArchiveSha256:validated.archiveSha256 } };
 }
 export async function validateTrust(options) { return (await prepareTrust(options)).receipt; }
 const INSTALLED_COPY_MARKER_SCHEMA = 'tcrn.workflow.helper.installed-copy-marker.v1';
@@ -176,26 +150,24 @@ async function atomicPrivateOverwrite(path, bytes) {
   try { await handle.writeFile(bytes); await handle.sync(); } finally { await handle.close(); }
   try { await rename(stage, resolve(path)); } catch (error) { await unlink(stage).catch(() => {}); throw error; }
 }
-export async function verifyInstalledCopy({ installedDir, manifestPath, policyPath, provenancePath, statePath, trustedPublicKeyPem, now = Date.now() }) {
-  if (!Number.isFinite(now)) fail('TIME_INVALID');
-  // The anti-rollback state and any marker are written to the managed state
-  // root, never inside a skill/live directory (verify never mutates the copied
-  // skill dir, which stays read-only).
+// Attests exactly this: the bytes on disk at installedDir reconstruct, under this
+// bootstrap's canonicalization rules, to precisely the archive whose SHA-256 is
+// compiled into this bootstrap. It claims nothing about a key, a validity window,
+// a revocation list, or a downgrade history.
+export async function verifyInstalledCopy({ installedDir, provenancePath, statePath, expectedArchiveSha256 = EXPECTED_ARCHIVE_SHA256, expectedProvenanceSha256 = EXPECTED_PROVENANCE_SHA256 }) {
+  // State and any marker are written to the managed state root, never inside a
+  // skill/live directory (verify never mutates the copied skill dir, which stays
+  // read-only).
   await assertManagedStatePath(statePath);
   const archive = await reconstructArchiveFromDirectory(installedDir);
   const validated = validateArchive(archive);
-  const manifest = await document(manifestPath, MAX_METADATA_DOCUMENT_BYTES, 'MANIFEST_INVALID');
-  const policy = authenticatePolicy(await document(policyPath, MAX_METADATA_DOCUMENT_BYTES, 'POLICY_INVALID'), manifest, validated.archiveSha256, trustedPublicKeyPem, now);
-  validateManifest(manifest, validated.archiveSha256, policy, trustedPublicKeyPem, now);
-  await validateProvenance(provenancePath, manifest.provenanceSha256);
-  const state = await readState(statePath); if (manifest.policyEpoch < state.value.highestPolicyEpoch) fail('ROLLBACK_REJECTED');
-  // Advance the persisted monotonic anti-rollback floor so a later
-  // standard-installer re-run with an OLDER release fails closed on the next
-  // verify — this is what makes the guided read-only path downgrade-safe.
-  if (manifest.policyEpoch > state.value.highestPolicyEpoch) {
-    await atomicPrivateOverwrite(statePath, canonicalJson({ schemaVersion:STATE_SCHEMA, highestPolicyEpoch:manifest.policyEpoch }));
+  if (validated.archiveSha256 !== expectedArchiveSha256) fail('IDENTITY_MISMATCH');
+  await validateProvenance(provenancePath, expectedProvenanceSha256);
+  const state = await readState(statePath);
+  if (state.value.verifiedArchiveSha256 !== validated.archiveSha256) {
+    await atomicPrivateOverwrite(statePath, canonicalJson({ schemaVersion:STATE_SCHEMA, verifiedArchiveSha256:validated.archiveSha256 }));
   }
-  return { reasonCode:'INSTALLED_COPY_VALIDATED', archiveSha256:validated.archiveSha256, manifestDigest:sha256(canonicalJson(manifest)), policyEpoch:manifest.policyEpoch, version:manifest.version };
+  return { reasonCode:'INSTALLED_COPY_VALIDATED', archiveSha256:validated.archiveSha256, version:IDENTITY.version };
 }
 function git(args, root) { return new Promise((resolvePromise, rejectPromise) => { const maximumBytes = 64 * 1024; let settled = false; const finish = callback => value => { if (!settled) { settled = true; callback(value); } }; const child = spawn('/usr/bin/git', ['-c', 'core.hooksPath=/dev/null', '-c', 'core.fsmonitor=false', '--no-optional-locks', '-C', root, ...args], { shell:false, env:{ PATH:'/usr/bin:/bin', HOME:'/dev/null', GIT_CONFIG_NOSYSTEM:'1', GIT_CONFIG_GLOBAL:'/dev/null', GIT_CONFIG_SYSTEM:'/dev/null', GIT_ATTR_NOSYSTEM:'1', GIT_TERMINAL_PROMPT:'0', LC_ALL:'C' } }); let out = Buffer.alloc(0); let err = Buffer.alloc(0); const append = (current, chunk) => Buffer.concat([current, Buffer.from(chunk)]); const overflow = () => { child.kill('SIGKILL'); finish(rejectPromise)(new Error('git output exceeds budget')); }; child.stdout.on('data', chunk => { out = append(out, chunk); if (out.length + err.length > maximumBytes) overflow(); }); child.stderr.on('data', chunk => { err = append(err, chunk); if (out.length + err.length > maximumBytes) overflow(); }); child.on('error', finish(rejectPromise)); child.on('close', code => { if (settled) return; if (code === 0) finish(resolvePromise)(out.toString('utf8').trim()); else finish(rejectPromise)(new Error(err.toString('utf8'))); }); }); }
 async function rootControl(path) { try { const requested = resolve(path); const root = await lstat(requested); const control = await lstat(resolve(requested, '.git')); const physical = await realpath(requested); const controlPhysical = await realpath(resolve(requested, '.git')); if (physical !== requested || controlPhysical !== resolve(requested, '.git') || !root.isDirectory() || root.isSymbolicLink() || !control.isDirectory() || control.isSymbolicLink()) fail('ROOT_SYMLINK'); return { root, control, physical, controlPhysical }; } catch (error) { if (error instanceof BootstrapError) throw error; fail('ROOT_IDENTITY_MISMATCH'); } }
@@ -510,7 +482,7 @@ async function publishTransaction(base, attempt, intent, faultAt) {
     throw error;
   }
 }
-async function readJournal(txn) { const value = await document(resolve(txn, 'journal.json'), MAX_STATE_DOCUMENT_BYTES, 'TRANSACTION_CONFLICT', { privateFile:true }); exact(value, ['baseIdentity', 'directory', 'directoryIdentity', 'id', 'nextState', 'operation', 'ownerFingerprint', 'phase', 'priorInstall', 'priorState', 'schemaVersion', 'terminalInstall', 'terminalState'], 'TRANSACTION_CONFLICT'); if (value.schemaVersion !== TXN_SCHEMA || typeof value.id !== 'string' || !['install', 'update', 'reinstall', 'uninstall'].includes(value.operation) || value.nextState !== null && (!Number.isSafeInteger(value.nextState) || value.nextState < 0) || value.phase !== 'prepared') fail('TRANSACTION_CONFLICT'); validDirectoryIdentity(value.baseIdentity); validDirectoryIdentity(value.directoryIdentity); validTransactionIntent(value); const ownerPath = resolve(txn, 'owner.json'); const owner = await document(ownerPath, MAX_STATE_DOCUMENT_BYTES, 'TRANSACTION_CONFLICT', { privateFile:true }); exact(owner, ['attemptFingerprint', 'attemptSha256', 'directoryIdentity', 'id', 'pid', 'schemaVersion'], 'TRANSACTION_CONFLICT'); if (owner.schemaVersion !== 'tcrn.workflow.helper.transaction-owner.v3' || owner.id !== value.id || !Number.isSafeInteger(owner.pid) || owner.pid <= 0 || !/^[a-f0-9]{64}$/.test(owner.attemptSha256) || !validStatFingerprint(owner.attemptFingerprint) || !validDirectoryIdentity(owner.directoryIdentity) || !sameDirectoryIdentity(owner.directoryIdentity, value.directoryIdentity) || !sameFingerprint(value.ownerFingerprint, statFingerprint(await lstat(ownerPath)))) fail('TRANSACTION_CONFLICT'); return value; }
+async function readJournal(txn) { const value = await document(resolve(txn, 'journal.json'), MAX_STATE_DOCUMENT_BYTES, 'TRANSACTION_CONFLICT', { privateFile:true }); exact(value, ['baseIdentity', 'directory', 'directoryIdentity', 'id', 'nextState', 'operation', 'ownerFingerprint', 'phase', 'priorInstall', 'priorState', 'schemaVersion', 'terminalInstall', 'terminalState'], 'TRANSACTION_CONFLICT'); if (value.schemaVersion !== TXN_SCHEMA || typeof value.id !== 'string' || !['install', 'update', 'reinstall', 'uninstall'].includes(value.operation) || value.nextState !== null && !/^[a-f0-9]{64}$/.test(value.nextState) || value.phase !== 'prepared') fail('TRANSACTION_CONFLICT'); validDirectoryIdentity(value.baseIdentity); validDirectoryIdentity(value.directoryIdentity); validTransactionIntent(value); const ownerPath = resolve(txn, 'owner.json'); const owner = await document(ownerPath, MAX_STATE_DOCUMENT_BYTES, 'TRANSACTION_CONFLICT', { privateFile:true }); exact(owner, ['attemptFingerprint', 'attemptSha256', 'directoryIdentity', 'id', 'pid', 'schemaVersion'], 'TRANSACTION_CONFLICT'); if (owner.schemaVersion !== 'tcrn.workflow.helper.transaction-owner.v3' || owner.id !== value.id || !Number.isSafeInteger(owner.pid) || owner.pid <= 0 || !/^[a-f0-9]{64}$/.test(owner.attemptSha256) || !validStatFingerprint(owner.attemptFingerprint) || !validDirectoryIdentity(owner.directoryIdentity) || !sameDirectoryIdentity(owner.directoryIdentity, value.directoryIdentity) || !sameFingerprint(value.ownerFingerprint, statFingerprint(await lstat(ownerPath)))) fail('TRANSACTION_CONFLICT'); return value; }
 async function bindTransaction(base, transaction, journal) { const claim = transaction.value; const directory = await lstat(transaction.txn).catch(() => fail('TRANSACTION_CONFLICT')); const root = await lstat(base).catch(() => fail('TRANSACTION_CONFLICT')); if (!sameDirectoryIdentity(claim.baseIdentity, directoryIdentity(root)) || !sameDirectoryIdentity(claim.directoryIdentity, directoryIdentity(directory)) || claim.id !== journal.id || claim.directory !== journal.directory || claim.operation !== journal.operation || claim.journalSha256 !== sha256(canonicalJson(journal)) || !sameFingerprint(claim.priorInstall, journal.priorInstall) || !sameFingerprint(claim.priorState, journal.priorState) || !sameFingerprint(claim.terminalInstall, journal.terminalInstall) || !sameFingerprint(claim.terminalState, journal.terminalState)) fail('TRANSACTION_CONFLICT'); }
 async function claimedResultMatches(base, statePath, transaction, result = 'terminal') { const install = await installedBinding(resolve(base, 'install')); const state = await stateBinding(statePath); const expectedInstall = result === 'terminal' ? transaction.value.terminalInstall : transaction.value.priorInstall; const expectedState = result === 'terminal' ? transaction.value.terminalState : transaction.value.priorState; const installMatches = expectedInstall.present ? sameMovedTreeBinding(expectedInstall, install) : sameFingerprint(install, expectedInstall); const stateMatches = result === 'terminal' ? sameRelocatedStateBinding(expectedState, state) : sameFingerprint(state, expectedState); return installMatches && stateMatches; }
 async function terminalMatches(base, statePath, transaction) { return claimedResultMatches(base, statePath, transaction, 'terminal'); }
@@ -604,13 +576,13 @@ async function withLock(base, statePath, faultAt, operation) {
   if (thrown) { if (thrown instanceof BootstrapError) throw thrown; fail('TRANSACTION_CONFLICT'); }
   return outcome;
 }
-export async function installArchive({ testRoot:root, archivePath, manifestPath, policyPath, provenancePath, statePath = resolve(root, 'state.json'), trustedPublicKeyPem, approved:isApproved, operation = 'install', interrupt = false, faultAt = null, now = Date.now() }) {
+export async function installArchive({ testRoot:root, archivePath, provenancePath, statePath = resolve(root, 'state.json'), expectedArchiveSha256, expectedProvenanceSha256, approved:isApproved, operation = 'install', interrupt = false, faultAt = null }) {
   approved(isApproved);
   const base = await testRoot(root);
   const authorizedState = await authorizedStatePath(base, statePath);
   const activeFault = faultAt ?? (interrupt ? 'interrupt' : null);
   return withLock(base, authorizedState, activeFault, async held => {
-    const prepared = await prepareTrust({ archivePath, manifestPath, policyPath, provenancePath, statePath:authorizedState, trustedPublicKeyPem, now });
+    const prepared = await prepareTrust({ archivePath, provenancePath, statePath:authorizedState, expectedArchiveSha256, expectedProvenanceSha256 });
     const workspace = resolve(base, 'workspace');
     const before = await treeDigest(workspace);
     const install = resolve(base, 'install');
@@ -620,7 +592,7 @@ export async function installArchive({ testRoot:root, archivePath, manifestPath,
       terminalInstall:contentBinding(true, archiveTreeDigest(prepared.archive)),
       terminalState:contentBinding(true, sha256(canonicalJson(prepared.nextState))),
     };
-    const attempt = await createTransaction(base, operation, prepared.nextState.highestPolicyEpoch, activeFault, intent, held);
+    const attempt = await createTransaction(base, operation, prepared.nextState.verifiedArchiveSha256, activeFault, intent, held);
     const { txn } = attempt;
     const stage = resolve(txn, 'stage');
     attempt.stagePath = stage;
@@ -676,8 +648,13 @@ export async function installArchive({ testRoot:root, archivePath, manifestPath,
   });
 }
 export async function uninstallArchive({ testRoot:root, statePath = resolve(root, 'state.json'), approved:isApproved, faultAt = null }) { approved(isApproved); const base = await testRoot(root); const authorizedState = await authorizedStatePath(base, statePath); return withLock(base, authorizedState, faultAt, async held => { const workspace = resolve(base, 'workspace'); const before = await treeDigest(workspace); const install = resolve(base, 'install'); const present = await lstat(install).catch(error => error?.code === 'ENOENT' ? null : Promise.reject(error)); if (present) { if (!present.isDirectory() || present.isSymbolicLink()) fail('TRANSACTION_CONFLICT'); const priorState = await stateBinding(authorizedState); const intent = { priorInstall:await installedBinding(install), priorState, terminalInstall:contentBinding(false, null), terminalState:priorState }; const attempt = await createTransaction(base, 'uninstall', null, faultAt, intent, held); const transaction = await publishTransaction(base, attempt, intent, faultAt); const { txn } = transaction; const backup = resolve(txn, 'backup'); if (!sameFingerprint(await installedBinding(install), transaction.journal.priorInstall)) fail('TRANSACTION_CONFLICT'); await renameDurable(install, backup, faultAt, 'uninstall'); await removeBoundTree(backup, transaction.journal.priorInstall, { faultAt, movedRoot:true, point:'uninstall-backup-cleanup' }); await readJournal(txn); await publishTerminalReceipt(base, authorizedState, transaction, faultAt); await clearTransaction(base, transaction, faultAt); } const after = await treeDigest(workspace); if (before !== after) fail('TRANSACTION_INTERRUPTED'); return { reasonCode:'UNINSTALL_COMPLETED', workspaceSha256:after }; }); }
-function values(argv) { const out = {}; for (let index = 0; index < argv.length; index += 2) { if (!argv[index]?.startsWith('--') || !argv[index + 1]) fail('MANIFEST_INVALID'); const key = argv[index].slice(2); if (Object.hasOwn(out, key)) fail('MANIFEST_INVALID'); out[key] = argv[index + 1]; } return out; }
-function exactCliOptions(command, value) { const contracts = { install:{ allowed:['approved', 'archive', 'fault', 'manifest', 'now', 'policy', 'provenance', 'state', 'test-root', 'trusted-key'], required:['approved', 'archive', 'manifest', 'policy', 'provenance', 'state', 'test-root', 'trusted-key'] }, 'verify-installed-copy':{ allowed:['installed-dir', 'manifest', 'marker', 'now', 'policy', 'provenance', 'state', 'trusted-key'], required:['installed-dir', 'manifest', 'policy', 'provenance', 'state', 'trusted-key'] }, 'plan-network':{ allowed:['approved', 'operation'], required:['approved'] }, reinstall:{ allowed:['approved', 'archive', 'fault', 'manifest', 'now', 'policy', 'provenance', 'state', 'test-root', 'trusted-key'], required:['approved', 'archive', 'manifest', 'policy', 'provenance', 'state', 'test-root', 'trusted-key'] }, resolve:{ allowed:['candidates', 'root'], required:[] }, uninstall:{ allowed:['approved', 'fault', 'state', 'test-root'], required:['approved', 'state', 'test-root'] }, update:{ allowed:['approved', 'archive', 'fault', 'manifest', 'now', 'policy', 'provenance', 'state', 'test-root', 'trusted-key'], required:['approved', 'archive', 'manifest', 'policy', 'provenance', 'state', 'test-root', 'trusted-key'] }, validate:{ allowed:['archive', 'manifest', 'now', 'policy', 'provenance', 'state', 'trusted-key'], required:['archive', 'manifest', 'policy', 'provenance', 'state', 'trusted-key'] } }[command]; if (!contracts || Object.keys(value).some(key => !contracts.allowed.includes(key)) || contracts.required.some(key => !Object.hasOwn(value, key))) fail('MANIFEST_INVALID'); }
+function values(argv) { const out = {}; for (let index = 0; index < argv.length; index += 2) { if (!argv[index]?.startsWith('--') || !argv[index + 1]) fail('INVOCATION_INVALID'); const key = argv[index].slice(2); if (Object.hasOwn(out, key)) fail('INVOCATION_INVALID'); out[key] = argv[index + 1]; } return out; }
+// INVOCATION_INVALID, not MANIFEST_INVALID: a malformed command line is an argument
+// fault. Reporting it as a trust-document fault was always a misnomer, and there is no
+// manifest left to be invalid.
+function exactCliOptions(command, value) { const contracts = { install:{ allowed:['approved', 'archive', 'fault', 'provenance', 'state', 'test-root'], required:['approved', 'archive', 'provenance', 'state', 'test-root'] }, 'verify-installed-copy':{ allowed:['installed-dir', 'marker', 'now', 'provenance', 'state'], required:['installed-dir', 'provenance', 'state'] }, 'plan-network':{ allowed:['approved', 'operation'], required:['approved'] }, reinstall:{ allowed:['approved', 'archive', 'fault', 'provenance', 'state', 'test-root'], required:['approved', 'archive', 'provenance', 'state', 'test-root'] }, resolve:{ allowed:['candidates', 'root'], required:[] }, uninstall:{ allowed:['approved', 'fault', 'state', 'test-root'], required:['approved', 'state', 'test-root'] }, update:{ allowed:['approved', 'archive', 'fault', 'provenance', 'state', 'test-root'], required:['approved', 'archive', 'provenance', 'state', 'test-root'] }, validate:{ allowed:['archive', 'provenance', 'state'], required:['archive', 'provenance', 'state'] } }[command]; if (!contracts || Object.keys(value).some(key => !contracts.allowed.includes(key)) || contracts.required.some(key => !Object.hasOwn(value, key))) fail('INVOCATION_INVALID'); }
+// `now` survives in one place only -- the marker's verifiedAt below -- which keeps this
+// helper and TIME_INVALID real rather than vestigial.
 function cliNow(value) { if (value === undefined) return Date.now(); if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value)) fail('TIME_INVALID'); const parsed = Date.parse(value); if (!Number.isFinite(parsed) || new Date(parsed).toISOString() !== (value.includes('.') ? value : `${value.slice(0, -1)}.000Z`)) fail('TIME_INVALID'); return parsed; }
-async function main() { const [command, ...rest] = process.argv.slice(2); const value = values(rest); exactCliOptions(command, value); const trustedPublicKeyPem = value['trusted-key'] ? await boundedBytes(value['trusted-key'], MAX_METADATA_DOCUMENT_BYTES, 'TRUST_BASIS_REQUIRED').then(bytes => new TextDecoder('utf-8', { fatal:true }).decode(bytes)) : undefined; const now = cliNow(value.now); if (command === 'validate') console.log(canonicalJson(await validateTrust({ archivePath:value.archive, manifestPath:value.manifest, policyPath:value.policy, provenancePath:value.provenance, statePath:value.state, trustedPublicKeyPem, now }))); else if (command === 'verify-installed-copy') { if (value.marker) await assertManagedStatePath(value.marker); const receipt = await verifyInstalledCopy({ installedDir:value['installed-dir'], manifestPath:value.manifest, policyPath:value.policy, provenancePath:value.provenance, statePath:value.state, trustedPublicKeyPem, now }); const marker = { ...receipt, schemaVersion:INSTALLED_COPY_MARKER_SCHEMA, verifiedAt:new Date(now).toISOString() }; if (value.marker) await atomicPrivateOverwrite(value.marker, canonicalJson(marker)); console.log(canonicalJson(receipt)); } else if (command === 'resolve') console.log(canonicalJson(await resolveWorkflowRoot({ explicitPath:value.root ?? null, candidates:value.candidates ? value.candidates.split(',') : [] }))); else if (command === 'plan-network') { approved(value.approved === 'true'); const operation = value.operation ?? 'clone'; if (!['clone', 'update'].includes(operation)) fail('MANIFEST_INVALID'); console.log(canonicalJson({ reasonCode:'NETWORK_PLAN_APPROVED', operation, networkMutationPerformed:false })); } else if (['install', 'update', 'reinstall'].includes(command)) console.log(canonicalJson(await installArchive({ testRoot:value['test-root'], archivePath:value.archive, manifestPath:value.manifest, policyPath:value.policy, provenancePath:value.provenance, statePath:value.state, trustedPublicKeyPem, approved:value.approved === 'true', operation:command, faultAt:value.fault ?? null, now }))); else if (command === 'uninstall') console.log(canonicalJson(await uninstallArchive({ testRoot:value['test-root'], statePath:value.state, approved:value.approved === 'true', faultAt:value.fault ?? null }))); else fail('MANIFEST_INVALID'); }
+async function main() { const [command, ...rest] = process.argv.slice(2); const value = values(rest); exactCliOptions(command, value); if (command === 'validate') console.log(canonicalJson(await validateTrust({ archivePath:value.archive, provenancePath:value.provenance, statePath:value.state }))); else if (command === 'verify-installed-copy') { const now = cliNow(value.now); if (value.marker) await assertManagedStatePath(value.marker); const receipt = await verifyInstalledCopy({ installedDir:value['installed-dir'], provenancePath:value.provenance, statePath:value.state }); const marker = { ...receipt, schemaVersion:INSTALLED_COPY_MARKER_SCHEMA, verifiedAt:new Date(now).toISOString() }; if (value.marker) await atomicPrivateOverwrite(value.marker, canonicalJson(marker)); console.log(canonicalJson(receipt)); } else if (command === 'resolve') console.log(canonicalJson(await resolveWorkflowRoot({ explicitPath:value.root ?? null, candidates:value.candidates ? value.candidates.split(',') : [] }))); else if (command === 'plan-network') { approved(value.approved === 'true'); const operation = value.operation ?? 'clone'; if (!['clone', 'update'].includes(operation)) fail('INVOCATION_INVALID'); console.log(canonicalJson({ reasonCode:'NETWORK_PLAN_APPROVED', operation, networkMutationPerformed:false })); } else if (['install', 'update', 'reinstall'].includes(command)) console.log(canonicalJson(await installArchive({ testRoot:value['test-root'], archivePath:value.archive, provenancePath:value.provenance, statePath:value.state, approved:value.approved === 'true', operation:command, faultAt:value.fault ?? null }))); else if (command === 'uninstall') console.log(canonicalJson(await uninstallArchive({ testRoot:value['test-root'], statePath:value.state, approved:value.approved === 'true', faultAt:value.fault ?? null }))); else fail('INVOCATION_INVALID'); }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main().catch(error => { console.error(canonicalJson({ ok:false, reasonCode:error.reasonCode ?? 'INTERNAL_ERROR' })); process.exitCode = 1; });

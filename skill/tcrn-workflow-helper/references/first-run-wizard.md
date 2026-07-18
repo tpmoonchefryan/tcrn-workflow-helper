@@ -19,12 +19,13 @@ tampered or look-alike copy could simply rewrite these steps. Therefore:
   independently verified runtime — never this copied text — is the root of trust.
 - **Step 1 (enforced precondition).** Run the verified runtime's
   `verify-installed-copy` against this on-disk Skill directory. On success it
-  advances the persisted anti-rollback floor and writes a machine-checkable
-  **marker**, both into the managed state root (a state or marker path inside a
-  `.claude`/`.codex` directory fails closed). The agent MUST observe that marker
-  before honoring any later step, and should re-run `verify-installed-copy` each
-  session so a downgraded re-install is caught (`ROLLBACK_REJECTED`). If the
-  marker is absent or `verify-installed-copy` fails closed, stop and explain (see
+  records the verified archive digest in machine state and writes a
+  machine-checkable **marker**, both into the managed state root (a state or
+  marker path inside a `.claude`/`.codex` directory fails closed). The agent MUST
+  observe that marker before honoring any later step, and MUST re-run
+  `verify-installed-copy` each session — the marker is unsigned and not
+  tamper-evident, so it is only evidence of a run the agent itself just made. If
+  the marker is absent or `verify-installed-copy` fails closed, stop and explain (see
   `reason-codes.md`); do not proceed on the strength of this prose alone.
 
 ## Managed defaults (so the user never types a path)
@@ -39,13 +40,14 @@ tampered or look-alike copy could simply rewrite these steps. Therefore:
 
 1. **Root of trust + marker** — Steps 0 and 1 above. Explain in plain language
    what "verified the installed copy" means before continuing.
-2. **Resolve the trusted key and fetch pinned assets** — with the user's
-   approval for the network step, download the exact signed release assets for
-   the pinned Workflow release (archive, manifest, policy, provenance) from the
-   GitHub release into the state root. The trusted key is embedded in the
-   verified runtime and anchored by the out-of-band fingerprint.
+2. **Fetch the pinned assets** — with the user's approval for the network step,
+   download the exact release assets for the pinned Workflow release (archive and
+   provenance) from the GitHub release into the state root. The accepted digests
+   for both are compiled into the verified runtime and anchored by its
+   out-of-band published SHA-256.
 3. **Validate** — run `validate`; narrate the `TRUST_VALIDATED` receipt: "This
-   confirms the release you downloaded is exactly the reviewed, signed one."
+   confirms the bytes you downloaded are exactly the bytes this verified
+   bootstrap accepts — nothing else is accepted."
 4. **Obtain a clean Workflow checkout** — with the user's approval for the
    network step, `git clone` the pinned Workflow release **at its tag** into the
    state root, then run `resolve` to confirm the checkout's remote and identity.

@@ -2,7 +2,7 @@
 
 # TCRN Workflow Helper
 
-**A dependency-free trusted bootstrap and dual-host Agent Skill that refuses to run a TCRN Workflow release it cannot cryptographically prove.**
+**A dependency-free trusted bootstrap and dual-host Agent Skill that refuses to run any TCRN Workflow release whose bytes do not match the digests pinned into the bootstrap you verified out-of-band.**
 
 `Status: 0.1.0-candidate.4 (pre-release candidate)` · `License: Apache-2.0` · `Node ≥ 24` · `Dependencies: zero` · `Supports: TCRN Workflow v0.1.0-rc.5`
 
@@ -13,22 +13,31 @@
 Installing an agent skill or workflow from a repository is a supply-chain decision, usually made blind:
 
 - **No release identity.** A `git clone` gives you *some* commit — nothing binds it to the release that was reviewed and accepted.
-- **No signature, no rollback floor.** Nothing stops a silently replaced archive, a transplanted policy file, or a downgrade to an older, vulnerable release that still carries a valid-looking signature.
-- **Trust bootstrapped from the thing being trusted.** Most installers validate an archive using files *inside* that archive — which proves nothing.
+- **Nothing binds the bytes.** A silently replaced archive or a downgrade to an older, vulnerable release looks identical to the real thing. A solo publisher's self-generated signing key does not fix this — it moves the same unanswered question one file to the left. What fixes it is a digest you can obtain independently of the download.
+- **Trust bootstrapped from the thing being trusted.** Most installers validate an archive using files *inside* that archive — which proves nothing. Earlier candidates of this repository committed exactly this error in a more flattering costume: an Ed25519 chain whose root fingerprint and whose bootstrap digest were published nowhere a user could reach, so every check ran against an anchor that shipped inside the download. That chain has been removed rather than dressed up.
 
-The helper is the answer for TCRN Workflow: a single-file, zero-dependency bootstrap that validates **the complete signed release identity before any Workflow code executes**, on either supported Agent App host (Codex or Claude Code). If any check fails, it stops with a stable reason code. There is no `--force`.
+The helper is the answer for TCRN Workflow: a single-file, zero-dependency bootstrap that validates **the complete release bytes and identity before any Workflow code executes**, on either supported Agent App host (Codex or Claude Code). If any check fails, it stops with a stable reason code. There is no `--force`.
+
+**Verify this first.** The bootstrap is the only thing you have to trust, so check it before you trust anything it tells you:
+
+```sh
+shasum -a 256 bootstrap/trusted-bootstrap.mjs
+# 7fa9f51fa024bb38db299f3604a33d071a2fe17e9dc45bc17fe80edc86aea3aa
+```
+
+That digest is published here, in `SECURITY.md`, and in the GitHub release notes. If it does not match, stop.
 
 ## What it enforces
 
 | Guarantee | Mechanism |
 | --- | --- |
-| **Exact release identity** | The accepted Workflow release is pinned by repository URL, version, commit, tree, *and* annotated tag object. A validly signed manifest for a different release fails closed (`IDENTITY_MISMATCH`). |
-| **Real signatures, external trust** | The Ed25519 release manifest and a separately signed policy are verified against a public key supplied *independently of the archive* — the archive can never authenticate itself. Policy transplant and replay are rejected before any policy field is honored. |
-| **Anti-rollback** | A monotonic policy epoch floor persisted outside the Skill directory; an older epoch fails closed (`ROLLBACK_REJECTED`), even with a valid signature. |
+| **Reproducible release artifacts** | The skill archive, source archive, and SBOM are deterministic; a clean-clone CI replay rebuilds them and asserts digest equality with the committed artifacts under a fixed locale/timezone environment. This is the primary trust primitive: anyone can rebuild the bytes and check them. |
+| **Exact release identity** | The accepted Workflow release is pinned by repository URL, version, commit, tree, *and* annotated tag object. These are checked against a real Git checkout with real Git object ids, which are content hashes and therefore self-authenticating. |
+| **Pinned release bytes** | The accepted archive and provenance digests are compiled into `bootstrap/trusted-bootstrap.mjs`. The bootstrap's own SHA-256 is published in this README, in `SECURITY.md`, and in the release notes; verify it before you trust anything it says. Any other archive fails closed (`IDENTITY_MISMATCH`). |
+| **Anti-rollback** | GitHub immutable releases: tags cannot be moved or deleted and assets cannot be changed. An older release also fails the pinned-digest comparison, because each bootstrap accepts exactly one archive. |
 | **Hostile-archive safety** | Path traversal, absolute paths, control characters, non-NFC paths, duplicate/case-colliding paths, links, special files, per-entry digest tampering, and entry/byte limits are all rejected before extraction. |
 | **Live-host protection** | Install, update, reinstall, and uninstall operate **only** inside disposable `tcrn-helper-test-*` roots. Any path containing a `.claude` or `.codex` component — in any letter case — is rejected lexically (`LIVE_LOCATION_FORBIDDEN`) before the filesystem is even probed. |
 | **Transactional lifecycle** | Every mutation is a staged, journaled transaction with crash recovery proven by real `SIGKILL` injection; a failed operation leaves byte-identical prior state and zero residue. |
-| **Reproducible release artifacts** | The skill archive, source archive, and SBOM are deterministic; a clean-clone CI replay rebuilds them and asserts digest equality with the committed artifacts under a fixed locale/timezone environment. |
 
 ## Quick start
 
@@ -36,16 +45,14 @@ The helper is the answer for TCRN Workflow: a single-file, zero-dependency boots
 # run the full proof suite (offline; ~10 minutes, includes SIGKILL fault injection)
 npm test
 
-# validate a signed release bundle before anything executes
+# validate a release bundle before anything executes
 node bootstrap/trusted-bootstrap.mjs validate \
-  --archive <archive.json> --manifest <manifest.json> --policy <policy.json> \
-  --provenance <provenance.json> --state <state.json> --trusted-key <public-key.pem>
+  --archive <archive.json> --provenance <provenance.json> --state <state.json>
 
 # verify a copy of this Skill that a standard installer placed in ~/.claude/skills (read-only)
 node bootstrap/trusted-bootstrap.mjs verify-installed-copy \
   --installed-dir <~/.claude/skills/tcrn-workflow-helper> \
-  --manifest <manifest.json> --policy <policy.json> --provenance <provenance.json> \
-  --state <state.json> --trusted-key <public-key.pem> --marker <marker.json>
+  --provenance <provenance.json> --state <state.json> --marker <marker.json>
 
 # resolve exactly one approved Workflow checkout (rejects ambiguity, symlinks, dirty trees)
 node bootstrap/trusted-bootstrap.mjs resolve --root <workflow-checkout>
@@ -55,8 +62,7 @@ node bootstrap/trusted-bootstrap.mjs plan-network --approved true --operation cl
 
 # test-root-only lifecycle (explicit approval required)
 node bootstrap/trusted-bootstrap.mjs install --test-root <dir>/tcrn-helper-test-x \
-  --archive ... --manifest ... --policy ... --provenance ... --state ... \
-  --trusted-key ... --approved true
+  --archive ... --provenance ... --state ... --approved true
 ```
 
 Success emits one canonical JSON receipt (`TRUST_VALIDATED`, `ROOT_RESOLVED`, `NETWORK_PLAN_APPROVED`, `INSTALL_COMPLETED`, `UNINSTALL_COMPLETED`). Failure emits one stable reason code. Nothing in between.
@@ -65,11 +71,10 @@ Success emits one canonical JSON receipt (`TRUST_VALIDATED`, `ROOT_RESOLVED`, `N
 
 ```mermaid
 flowchart TD
-    K[Trusted public key<br/>supplied out-of-band] --> P
+    K[bootstrap/trusted-bootstrap.mjs<br/>verified against its published SHA-256] --> Verify
     subgraph Verify["trusted-bootstrap.mjs — before any Workflow code runs"]
-        P[signed policy<br/>epoch floor · revocations] --> M[signed release manifest<br/>archive digest · exact identity]
-        M --> A[skill archive<br/>path-safe · digest-checked entries]
-        M --> ID{identity equals the pinned<br/>Workflow release?}
+        A[skill archive<br/>path-safe · digest-checked entries] --> D{archive SHA-256 equals the<br/>digest compiled into this bootstrap?}
+        D --> ID{checkout identity equals the pinned<br/>Workflow release?}
     end
     ID -->|yes| R[resolve one clean Workflow checkout<br/>remote · version · dirty-tree checks]
     ID -->|no| F[fail closed:<br/>stable reason code]
@@ -84,7 +89,7 @@ The bootstrap *is* the trust boundary. Every dependency would be code that runs 
 
 ### How does a non-technical user install this, then?
 
-The Skill's prose (`SKILL.md` + `references/`) may be distributed into a live host skills folder (e.g. `~/.claude/skills`) by a standard skills installer — that placement is just files, no code runs from it. What makes it trustworthy is that an **independently obtained** trusted bootstrap then verifies that on-disk copy **read-only** with `verify-installed-copy`, which reconstructs the copy's archive, checks it against the signed manifest (identity, digest, anti-rollback floor), and writes a machine-checkable marker. Only after that marker exists does the guided **first-run wizard** (`references/first-run-wizard.md`) proceed — fetching the pinned release, validating it, and walking the user through setup with plain-language explanations of every reason code. So: standard installer for distribution, cryptographic bootstrap for trust.
+The Skill's prose (`SKILL.md` + `references/`) may be distributed into a live host skills folder (e.g. `~/.claude/skills`) by a standard skills installer — that placement is just files, no code runs from it. What makes it trustworthy is that an **independently obtained** trusted bootstrap — obtained through a repo-independent channel and checked against the SHA-256 published above — then verifies that on-disk copy **read-only** with `verify-installed-copy`, which reconstructs the copy's archive, compares its digest against the digest compiled into that verified bootstrap, and writes a machine-checkable marker. Only after that marker exists does the guided **first-run wizard** (`references/first-run-wizard.md`) proceed — fetching the pinned release, validating it, and walking the user through setup with plain-language explanations of every reason code. So: standard installer for distribution, cryptographic bootstrap for trust.
 
 ### Why can't the helper's own commands install into a real skill location?
 
@@ -92,16 +97,15 @@ The helper's **mutating** commands (`install`/`update`/`reinstall`/`uninstall`) 
 
 ### Why is the identity pin so aggressive — repository, version, commit, tree, *and* tag object?
 
-Each field kills a different attack: the repository URL stops look-alike remotes; the version stops "right repo, wrong release"; the commit and tree stop history rewrites that keep a tag name; the tag object stops re-tagging an existing name onto different bytes. The test suite includes a manifest that is *validly signed and policy-bound* but names a different version — it must fail on the identity comparison itself (`IDENTITY_MISMATCH`), proving the check is not shadowed by signature validation.
+Each field kills a different attack: the repository URL stops look-alike remotes; the version stops "right repo, wrong release"; the commit and tree stop history rewrites that keep a tag name; the tag object stops re-tagging an existing name onto different bytes. The checkout identity is verified with real Git object ids, which are content hashes — self-authenticating, and never dependent on anyone's signature.
 
 ### What does the test suite actually cover?
 
-**79 tests, all offline** (the only `node:net` use is a local unix-domain-socket fixture for special-file rejection):
+**72 tests, all offline** (the only `node:net` use is a local unix-domain-socket fixture for special-file rejection):
 
-- Signing-path hardening: owner-only key directories, descriptor-stable reads, rogue-key rejection, pre-write failures with zero residue.
-- Trust matrix: signature/key substitution, policy transplant and replay, epoch rollback, revocation, expiry, tampered provenance, tampered archive entries, and the mismatched-identity manifest — each asserting its exact reason code.
+- Trust matrix: pinned-digest mismatch, tampered provenance, and tampered archive entries — each asserting its exact reason code.
 - Lifecycle: install / update / reinstall / uninstall with byte-identical private workspace preservation, real `SIGKILL` at every effective injection point (the fault inventory is discovered from the real operations, not hand-listed), lock contention with distinct-PID contenders, and replacement/foreign-file preservation.
-- Installed-copy verification: read-only reconstruction of a standard-installer-placed skill directory, tamper → exact reason code, symlinked directory/entry rejection, anti-rollback floor advancement on success, and live-location refusal of the state/marker path.
+- Installed-copy verification: read-only reconstruction of a standard-installer-placed skill directory, tamper → exact reason code, symlinked directory/entry rejection, verified-digest recording on success, and live-location refusal of the state/marker path.
 - Live-location guard: user-level, project-level, `.codex`, and case-variant paths on both host shapes.
 - Reproducibility: deterministic archives under perturbed `LANG`/`LC_ALL`/`TZ`/`umask` environments, byte-equality with committed artifacts, and a full clean-clone CI replay (`npm run ci:replay`) that re-runs the entire command sequence and asserts rebuilt digests equal committed digests.
 
@@ -113,12 +117,12 @@ Because a receipt that certifies a validation run should not itself be certified
 
 | Path | Contents |
 | --- | --- |
-| `bootstrap/trusted-bootstrap.mjs` | The single-file trust boundary: archive validation, signature verification, identity pinning, anti-rollback, transactional lifecycle. |
-| `skill/tcrn-workflow-helper/` | The Agent Skill payload: `SKILL.md`, trust contract, settings-elicitation reference, per-host metadata. This directory is what the signed archive contains. |
-| `manifests/` | The Ed25519-signed release manifest and policy, plus the byte-copied Workflow release provenance. |
+| `bootstrap/trusted-bootstrap.mjs` | The single-file trust boundary: archive validation, pinned release-byte digests, identity pinning, transactional lifecycle. **Verify its SHA-256 out-of-band before use.** |
+| `skill/tcrn-workflow-helper/` | The Agent Skill payload: `SKILL.md`, trust contract, settings-elicitation reference, per-host metadata. This directory is what the pinned archive contains. |
+| `manifests/` | The byte-copied Workflow release provenance. Note: it is a *self-asserted local build statement* (build type `tcrn.workflow.local-unpublished-candidate.v1`, zeroed timestamps), not a hosted-builder attestation. It is pinned by digest so it cannot be swapped; third-party checkability comes from the reproducible-build chain, not from this file. |
 | `artifacts/` | The five reproducible release artifacts. |
-| `scripts/` | Deterministic archive/SBOM/checksum generators, release verifier, CI replay, signing tool (the private key never lives in this repository). |
-| `test/` | The 79-test proof suite. |
+| `scripts/` | Deterministic archive/SBOM/checksum generators, release verifier, CI replay. |
+| `test/` | The 72-test proof suite. |
 
 ## What the pinned Workflow release governs (new in v0.1.0-rc.5)
 
@@ -136,6 +140,7 @@ Prose triggering of these deliberations is advisory and unreliable-by-design pen
 
 - `0.1.0-candidate.4` is a **pre-release candidate** supporting exactly TCRN Workflow `v0.1.0-rc.5`.
 - Installation and removal are **test-root-only** on both hosts; no live Codex or Claude Code host support is asserted.
+- **The self-built Ed25519 signing chain was removed on 2026-07-19, in `0.1.0-candidate.4`.** It was never anchored: the bootstrap digest and key fingerprint it depended on were published nowhere a user could independently obtain them, so the chain proved nothing to anyone outside this repository. The key was generated by an automated agent rather than signed for by the human owner, sat unencrypted on disk, and had no rotation path (byte-equality against a compiled-in constant). Its expiry was hardcoded to a fixed date, which scheduled an outage for every honest install while constraining no attacker. The install base was zero. What replaces it: a bootstrap digest that is *actually published*, accepted release digests compiled into that bootstrap, GitHub immutable releases, and the reproducible-build chain.
 - The three Claude-Code-specific behaviors (settings-fragment reversibility, user-vs-project precedence, CLAUDE.md fallback) are implemented and proven **in the pinned Workflow release**, not in this repository — see `skill/tcrn-workflow-helper/references/trust-contract.md` for the exact evidence map.
 
 ## Support & security

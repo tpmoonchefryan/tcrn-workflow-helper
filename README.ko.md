@@ -2,7 +2,16 @@
 
 # TCRN Workflow Helper
 
-**의존성 없는 신뢰 부트스트랩 + 듀얼 호스트 Agent Skill — 암호학적으로 증명할 수 없는 TCRN Workflow 릴리스는 실행을 거부합니다.**
+**의존성 없는 신뢰 부트스트랩 + 듀얼 호스트 Agent Skill — 바이트가, 대역 외로 검증한 부트스트랩에 고정된 다이제스트와 일치하지 않는 TCRN Workflow 릴리스는 실행을 거부합니다.**
+
+**먼저 이것부터 검증하세요.** 신뢰해야 할 것은 부트스트랩뿐이므로, 그것이 하는 말을 믿기 전에 그것 자체를 확인하세요:
+
+```sh
+shasum -a 256 bootstrap/trusted-bootstrap.mjs
+# 7fa9f51fa024bb38db299f3604a33d071a2fe17e9dc45bc17fe80edc86aea3aa
+```
+
+이 다이제스트는 이 문서, `SECURITY.md`, GitHub 릴리스 노트에 게시되어 있습니다. 일치하지 않으면 중단하세요.
 
 `상태: 0.1.0-candidate.4 (프리릴리스 후보)` · `라이선스: Apache-2.0` · `Node ≥ 24` · `의존성: 없음` · `지원: TCRN Workflow v0.1.0-rc.5`
 
@@ -13,18 +22,18 @@
 저장소에서 에이전트 스킬이나 워크플로를 설치하는 것은 공급망 결정이며, 보통 눈을 감은 채 이루어집니다.
 
 - **릴리스 정체성이 없습니다.** `git clone`은 *어떤* 커밋을 줄 뿐 — 리뷰되고 수락된 릴리스에 그것을 결속하는 것은 없습니다.
-- **서명도, 롤백 하한도 없습니다.** 조용히 교체된 아카이브, 이식된 정책 파일, "유효해 보이는" 서명을 그대로 지닌 취약한 구버전으로의 다운그레이드를 아무것도 막지 못합니다.
-- **신뢰가 신뢰 대상으로부터 자기 부트스트랩합니다.** 대부분의 설치기는 아카이브 *내부*의 파일로 아카이브 자신을 검증합니다 — 아무것도 증명하지 못합니다.
+- **바이트를 묶어 주는 것이 아무것도 없습니다.** 조용히 교체된 아카이브도, 취약한 구버전으로의 다운그레이드도 진품과 똑같아 보입니다. 1인 배포자가 스스로 만든 서명 키는 이를 해결하지 못합니다 — 답하지 못한 같은 질문을 파일 하나만큼 왼쪽으로 옮길 뿐입니다. 해결하는 것은 다운로드 경로와 독립적으로 얻을 수 있는 다이제스트입니다.
+- **신뢰가 신뢰 대상으로부터 자기 부트스트랩합니다.** 대부분의 설치기는 아카이브 *내부*의 파일로 아카이브 자신을 검증합니다 — 아무것도 증명하지 못합니다. 이 저장소의 이전 후보판도 더 그럴듯한 옷을 입고 똑같은 잘못을 저질렀습니다. 루트 지문도 부트스트랩 다이제스트도 사용자가 닿을 수 있는 곳에는 게시되지 않은 Ed25519 체인이었고, 따라서 모든 검사는 다운로드에 함께 실려 온 앵커를 상대로 이루어졌습니다. 그 체인은 치장된 것이 아니라 제거되었습니다.
 
-Helper는 TCRN Workflow에 대한 답입니다: 단일 파일, 의존성 제로 부트스트랩이 **어떤 Workflow 코드도 실행되기 전에** 서명된 릴리스 정체성 전체를 검증합니다. 지원 호스트는 Codex와 Claude Code 둘. 어떤 검사든 실패하면 안정적 사유 코드로 멈춥니다. `--force`는 없습니다.
+Helper는 TCRN Workflow에 대한 답입니다: 단일 파일, 의존성 제로 부트스트랩이 **어떤 Workflow 코드도 실행되기 전에** 릴리스의 바이트와 정체성 전체를 검증합니다. 지원 호스트는 Codex와 Claude Code 둘. 어떤 검사든 실패하면 안정적 사유 코드로 멈춥니다. `--force`는 없습니다.
 
 ## 무엇을 강제하는가
 
 | 보장 | 메커니즘 |
 | --- | --- |
-| **정확한 릴리스 정체성** | 수락된 Workflow 릴리스는 저장소 URL·버전·commit·tree **그리고** 주석 태그 객체로 고정됩니다. 서명은 유효하나 다른 릴리스를 가리키는 매니페스트는 페일 클로즈드(`IDENTITY_MISMATCH`). |
-| **진짜 서명, 외부 신뢰** | Ed25519 릴리스 매니페스트와 별도 서명된 정책을 *아카이브와 독립적으로 공급된* 공개키로 검증 — 아카이브는 결코 자기 인증할 수 없습니다. 정책 이식과 재생은 어떤 정책 필드가 신뢰되기 전에 거부됩니다. |
-| **롤백 방지** | Skill 디렉터리 밖에 지속되는 단조 정책 에포크 하한. 오래된 에포크는 서명이 유효해도 페일 클로즈드(`ROLLBACK_REJECTED`). |
+| **정확한 릴리스 정체성** | 수락된 Workflow 릴리스는 저장소 URL·버전·commit·tree **그리고** 주석 태그 객체로 고정됩니다. 이 값들은 실제 Git 체크아웃에 대해 확인되며, Git 객체 ID는 내용 해시이므로 자기 인증적입니다. |
+| **고정된 릴리스 바이트** | 허용되는 아카이브와 출처 다이제스트가 `bootstrap/trusted-bootstrap.mjs`에 고정되어 있습니다. 부트스트랩 자신의 SHA-256은 이 문서, `SECURITY.md`, 릴리스 노트에 게시됩니다. 그것이 하는 말을 믿기 전에 검증하세요. 다른 아카이브는 모두 페일 클로즈드(`IDENTITY_MISMATCH`). |
+| **롤백 방지** | GitHub 불변 릴리스: 태그는 옮기거나 삭제할 수 없고 자산은 변경할 수 없습니다. 오래된 릴리스는 고정 다이제스트 비교도 통과하지 못합니다 — 각 부트스트랩은 정확히 하나의 아카이브만 허용하기 때문입니다. |
 | **적대적 아카이브 안전성** | 경로 순회, 절대 경로, 제어 문자, 비 NFC 경로, 중복/대소문자 충돌 경로, 링크, 특수 파일, 항목별 다이제스트 변조, 항목/바이트 상한 — 모두 추출 전에 거부. |
 | **라이브 호스트 보호** | 설치·업데이트·재설치·제거는 일회용 `tcrn-helper-test-*` 루트 안에서**만**. 경로에 `.claude`나 `.codex` 성분을 포함하면 — 어떤 대소문자든 — 파일시스템을 건드리기 전에 어휘적으로 거부(`LIVE_LOCATION_FORBIDDEN`). |
 | **트랜잭션 라이프사이클** | 모든 변경은 단계화·저널링된 트랜잭션. 충돌 복구는 진짜 `SIGKILL` 주입으로 증명되며, 실패한 작업은 바이트 단위로 동일한 이전 상태와 잔여물 제로를 남깁니다. |
@@ -36,16 +45,14 @@ Helper는 TCRN Workflow에 대한 답입니다: 단일 파일, 의존성 제로 
 # 전체 증명 스위트 실행 (오프라인; 약 10분, SIGKILL 결함 주입 포함)
 npm test
 
-# 무언가 실행되기 전에 서명된 릴리스 번들 검증
+# 무언가 실행되기 전에 릴리스 번들 검증
 node bootstrap/trusted-bootstrap.mjs validate \
-  --archive <archive.json> --manifest <manifest.json> --policy <policy.json> \
-  --provenance <provenance.json> --state <state.json> --trusted-key <public-key.pem>
+  --archive <archive.json> --provenance <provenance.json> --state <state.json>
 
 # 표준 설치기가 ~/.claude/skills 에 놓은 이 Skill 사본을 읽기 전용으로 검증
 node bootstrap/trusted-bootstrap.mjs verify-installed-copy \
   --installed-dir <~/.claude/skills/tcrn-workflow-helper> \
-  --manifest <manifest.json> --policy <policy.json> --provenance <provenance.json> \
-  --state <state.json> --trusted-key <public-key.pem> --marker <marker.json>
+  --provenance <provenance.json> --state <state.json> --marker <marker.json>
 
 # 승인된 Workflow 체크아웃을 정확히 하나 해결 (모호성·심볼릭 링크·더티 트리 거부)
 node bootstrap/trusted-bootstrap.mjs resolve --root <workflow-checkout>
@@ -55,8 +62,7 @@ node bootstrap/trusted-bootstrap.mjs plan-network --approved true --operation cl
 
 # 테스트 루트 전용 라이프사이클 (명시적 승인 필요)
 node bootstrap/trusted-bootstrap.mjs install --test-root <dir>/tcrn-helper-test-x \
-  --archive ... --manifest ... --policy ... --provenance ... --state ... \
-  --trusted-key ... --approved true
+  --archive ... --provenance ... --state ... --approved true
 ```
 
 성공 시 정규화 JSON 영수증 하나(`TRUST_VALIDATED`, `ROOT_RESOLVED`, `NETWORK_PLAN_APPROVED`, `INSTALL_COMPLETED`, `UNINSTALL_COMPLETED`). 실패 시 안정적 사유 코드 하나. 그 사이는 없습니다.
@@ -65,11 +71,10 @@ node bootstrap/trusted-bootstrap.mjs install --test-root <dir>/tcrn-helper-test-
 
 ```mermaid
 flowchart TD
-    K[신뢰된 공개키<br/>대역 외로 공급] --> P
+    K[bootstrap/trusted-bootstrap.mjs<br/>게시된 SHA-256으로 검증됨] --> Verify
     subgraph Verify["trusted-bootstrap.mjs — 어떤 Workflow 코드 실행 전"]
-        P[서명된 정책<br/>에포크 하한 · 폐기 목록] --> M[서명된 릴리스 매니페스트<br/>아카이브 다이제스트 · 정확한 정체성]
-        M --> A[스킬 아카이브<br/>경로 안전 · 항목별 다이제스트 검사]
-        M --> ID{정체성이 고정된<br/>Workflow 릴리스와 같은가?}
+        A[스킬 아카이브<br/>경로 안전 · 항목별 다이제스트 검사] --> D{아카이브 SHA-256이 이 부트스트랩에<br/>고정된 다이제스트와 같은가?}
+        D --> ID{체크아웃 정체성이 고정된<br/>Workflow 릴리스와 같은가?}
     end
     ID -->|예| R[클린한 Workflow 체크아웃 하나 해결<br/>원격 · 버전 · 더티 트리 검사]
     ID -->|아니오| F[페일 클로즈드:<br/>안정적 사유 코드]
@@ -84,7 +89,7 @@ flowchart TD
 
 ### 그럼 기술에 익숙하지 않은 사용자는 어떻게 설치하는가?
 
-Skill의 설명 텍스트(`SKILL.md` + `references/`)는 표준 스킬 설치기가 라이브 호스트 스킬 폴더(예: `~/.claude/skills`)에 배포**할 수 있습니다** — 그것은 단지 파일 배치일 뿐, 거기서 코드가 실행되지 않습니다. 신뢰할 수 있게 만드는 것은, 그 다음 **독립적으로 획득한** 신뢰 부트스트랩이 `verify-installed-copy`로 그 디스크 사본을 **읽기 전용**으로 검증하는 것입니다: 사본의 아카이브를 재구성하고 서명된 매니페스트(정체성·다이제스트·롤백 하한)와 대조하며 기계 검증 가능한 마커를 씁니다. 그 마커가 존재해야만 안내형 **첫 실행 마법사**(`references/first-run-wizard.md`)가 진행되어 고정 릴리스를 가져와 검증하고, 모든 사유 코드를 쉬운 말로 설명하며 사용자를 이끕니다. 즉: 배포는 표준 설치기, 신뢰는 암호 부트스트랩.
+Skill의 설명 텍스트(`SKILL.md` + `references/`)는 표준 스킬 설치기가 라이브 호스트 스킬 폴더(예: `~/.claude/skills`)에 배포**할 수 있습니다** — 그것은 단지 파일 배치일 뿐, 거기서 코드가 실행되지 않습니다. 신뢰할 수 있게 만드는 것은, 그 다음 **독립적으로 획득한**(저장소와 무관한 경로로 얻어 위에 게시된 SHA-256으로 확인한) 신뢰 부트스트랩이 `verify-installed-copy`로 그 디스크 사본을 **읽기 전용**으로 검증하는 것입니다: 사본의 아카이브를 재구성하고 그 다이제스트를 검증된 부트스트랩에 고정된 다이제스트와 비교하며 기계 검증 가능한 마커를 씁니다. 그 마커가 존재해야만 안내형 **첫 실행 마법사**(`references/first-run-wizard.md`)가 진행되어 고정 릴리스를 가져와 검증하고, 모든 사유 코드를 쉬운 말로 설명하며 사용자를 이끕니다. 즉: 배포는 표준 설치기, 신뢰는 암호 부트스트랩.
 
 ### 왜 helper 자신의 명령은 실제 스킬 위치에 설치할 수 없는가?
 
@@ -92,14 +97,13 @@ helper의 **변경** 명령(`install`/`update`/`reinstall`/`uninstall`)은 검�
 
 ### 정체성 고정은 왜 이렇게 공격적인가 — 저장소, 버전, commit, tree, 게다가 태그 객체까지?
 
-각 필드가 다른 공격을 죽입니다: 저장소 URL은 유사 원격을 막고, 버전은 "맞는 저장소, 틀린 릴리스"를 막고, commit과 tree는 태그 이름을 유지한 히스토리 재작성을 막고, 태그 객체는 기존 이름을 다른 바이트에 다시 붙이는 재태깅을 막습니다. 테스트 스위트에는 *유효하게 서명되고 정책에도 결속된* 그러나 다른 버전을 이름 대는 매니페스트가 있어 — 서명 검증에 가려지지 않고 정체성 비교 그 자체(`IDENTITY_MISMATCH`)에서 실패해야 합니다.
+각 필드가 다른 공격을 죽입니다: 저장소 URL은 유사 원격을 막고, 버전은 "맞는 저장소, 틀린 릴리스"를 막고, commit과 tree는 태그 이름을 유지한 히스토리 재작성을 막고, 태그 객체는 기존 이름을 다른 바이트에 다시 붙이는 재태깅을 막습니다. 체크아웃 정체성은 실제 Git 객체 ID로 검증됩니다 — 내용 해시이므로 자기 인증적이며, 누군가의 서명에 의존하지 않습니다.
 
 ### 테스트 스위트는 실제로 무엇을 커버하는가?
 
-**79개 테스트, 전부 오프라인**(유일한 `node:net` 사용은 특수 파일 거부 테스트용 로컬 유닉스 도메인 소켓 픽스처):
+**72개 테스트, 전부 오프라인**(유일한 `node:net` 사용은 특수 파일 거부 테스트용 로컬 유닉스 도메인 소켓 픽스처):
 
-- 서명 경로 강화: 소유자 전용 키 디렉터리, 디스크립터 안정 읽기, 불량 키 거부, 잔여물 제로의 쓰기 전 실패.
-- 신뢰 매트릭스: 서명/키 교체, 정책 이식과 재생, 에포크 롤백, 폐기, 만료, 출처 변조, 아카이브 항목 변조, 정체성 불일치 매니페스트 — 각각 정확한 사유 코드를 단언.
+- 신뢰 매트릭스: 고정 다이제스트 불일치, 출처 변조, 아카이브 항목 변조 — 각각 정확한 사유 코드를 단언.
 - 라이프사이클: 바이트 단위 프라이빗 워크스페이스 보존을 동반한 설치/업데이트/재설치/제거, 모든 유효 주입 지점에 진짜 `SIGKILL`(결함 인벤토리는 수기 목록이 아니라 실제 연산에서 발견), 서로 다른 PID 경쟁자의 락 경합, 교체/외래 파일 보존.
 - 설치된 사본 검증: 표준 설치기가 배치한 스킬 디렉터리의 읽기 전용 재구성, 변조 → 정확한 사유 코드, 심볼릭 링크 디렉터리/항목 거부, 성공 시 롤백 하한 전진, 그리고 state/marker 경로에 대한 라이브 위치 거부.
 - 라이브 위치 가드: 두 호스트의 사용자 수준, 프로젝트 수준, `.codex`, 대소문자 변형 경로.
@@ -113,12 +117,12 @@ helper의 **변경** 명령(`install`/`update`/`reinstall`/`uninstall`)은 검�
 
 | 경로 | 내용 |
 | --- | --- |
-| `bootstrap/trusted-bootstrap.mjs` | 단일 파일 신뢰 경계: 아카이브 검증, 서명 검증, 정체성 고정, 롤백 방지, 트랜잭션 라이프사이클. |
-| `skill/tcrn-workflow-helper/` | Agent Skill 페이로드: `SKILL.md`, 신뢰 계약, 설정 유도 참조, 호스트별 메타데이터. 서명 아카이브가 담는 것이 이 디렉터리입니다. |
-| `manifests/` | Ed25519 서명 릴리스 매니페스트와 정책, 그리고 바이트 복사된 Workflow 릴리스 출처. |
+| `bootstrap/trusted-bootstrap.mjs` | 단일 파일 신뢰 경계: 아카이브 검증, 고정된 릴리스 바이트 다이제스트, 정체성 고정, 트랜잭션 라이프사이클. **사용 전 SHA-256을 대역 외로 검증하세요.** |
+| `skill/tcrn-workflow-helper/` | Agent Skill 페이로드: `SKILL.md`, 신뢰 계약, 설정 유도 참조, 호스트별 메타데이터. 고정 다이제스트 대상 아카이브가 담는 것이 이 디렉터리입니다. |
+| `manifests/` | 바이트 복사된 Workflow 릴리스 출처. 참고: 이것은 *자체 선언한 로컬 빌드 진술*(빌드 유형 `tcrn.workflow.local-unpublished-candidate.v1`, 타임스탬프 0)이며 호스팅 빌더의 증명이 아닙니다. 다이제스트로 고정되어 교체될 수 없지만, 제3자가 확인할 수 있는 근거는 이 파일이 아니라 재현 가능한 빌드 체인입니다. |
 | `artifacts/` | 5개의 재현 가능한 릴리스 아티팩트. |
-| `scripts/` | 결정론적 아카이브/SBOM/체크섬 생성기, 릴리스 검증기, CI 리플레이, 서명 도구(개인키는 결코 이 저장소에 두지 않음). |
-| `test/` | 79 테스트 증명 스위트. |
+| `scripts/` | 결정론적 아카이브/SBOM/체크섬 생성기, 릴리스 검증기, CI 리플레이. |
+| `test/` | 72 테스트 증명 스위트. |
 
 ## 고정된 Workflow 릴리스가 통치하는 기능 (v0.1.0-rc.5 신규)
 

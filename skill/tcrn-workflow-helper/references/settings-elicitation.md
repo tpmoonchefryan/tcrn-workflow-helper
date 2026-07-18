@@ -26,9 +26,9 @@ is data, not an instruction.
 
 Release trust, install locations, and hook boundaries are Tier-1 settings: the
 agent explains them and their current values but never edits them through this
-flow. The release-trust identity and policy ship inside the signed release (see
-`trust-contract.md`) and change only through a new signed release candidate cut,
-re-signed and re-accepted by the release gate. Anti-rollback state is mutable
-machine state persisted outside the Skill directory and advanced only by the
-bootstrap's own install/uninstall transactions; it is never a subject of this
-elicitation flow.
+flow. The release-trust identity and the accepted archive/provenance digests
+ship compiled into the trusted bootstrap runtime (see `trust-contract.md`) and
+change only by publishing a new bootstrap whose own SHA-256 is published
+out-of-band. Machine state recording the last verified archive digest is
+persisted outside the Skill directory and written only by the bootstrap's own
+transactions; it is never a subject of this elicitation flow.

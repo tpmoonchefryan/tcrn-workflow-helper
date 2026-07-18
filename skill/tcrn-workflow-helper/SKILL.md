@@ -1,6 +1,6 @@
 ---
 name: tcrn-workflow-helper
-description: Validate and exercise a trusted TCRN Workflow helper from a verified immutable Skill archive. Use when Codex or Claude Code must discover, inspect, or test-only install, update, reinstall, uninstall, or invoke TCRN Workflow while enforcing release identity, policy, anti-rollback, offline-safe validation, and explicit approval.
+description: Validate and exercise a trusted TCRN Workflow helper from a verified immutable Skill archive. Use when Codex or Claude Code must discover, inspect, or test-only install, update, reinstall, uninstall, or invoke TCRN Workflow while enforcing release identity, pinned release-byte digests, offline-safe validation, and explicit approval.
 ---
 
 # TCRN Workflow Helper
@@ -54,14 +54,14 @@ automated guarantee.
 
 1. Read `references/trust-contract.md` before an installation or root decision.
 2. Before extracting or installing this Skill, run the independently supplied
-   trusted-bootstrap runtime against the complete archive, release manifest,
-   policy, and machine state path. Require its canonical receipt. Do not use a
-   file from this archive to authenticate this archive.
+   trusted-bootstrap runtime against the complete archive and machine state
+   path. Require its canonical receipt. Do not use a file from this archive to
+   authenticate this archive.
 3. Resolve one explicit approved root with `resolve`; reject ambiguity, symlinks,
    replacement, wrong remote/version, and dirty production checkout on either
    host.
 4. Run Workflow only after both commands succeed. Keep the clone, private
-   Workspace, cache, and anti-rollback state outside this Skill directory.
+   Workspace, cache, and machine trust state outside this Skill directory.
 
 ## Mutating Operations
 
@@ -79,8 +79,8 @@ candidate on both hosts.
 
 ## Failure Handling
 
-Stop on the stable reason code. Do not retry by weakening identity, expiry,
-revocation, checksum, provenance, root, archive, or rollback checks. Read
+Stop on the stable reason code. Do not retry by weakening identity, digest,
+checksum, provenance, root, or archive checks. Read
 `references/trust-contract.md` for the receipt and input contracts.
 
 ## Resources
