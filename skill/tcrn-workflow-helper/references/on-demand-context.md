@@ -17,25 +17,43 @@ domains. The commands below belong to the installed **TCRN Workflow** CLI
 (`node scripts/tcrn-workflow.mjs …`) at the pinned release, and are invoked only
 after the Workflow is verified and resolved.
 
-## The metadata-first query commands to teach
+## What `context-route` actually does — and does NOT do
 
-- `context-route` — the P6 context router: given a scope/risk/budget, it returns
-  a **metadata-first** selection of the relevant records, with explicit,
-  separate body reads. Use this to find "what is relevant to this prompt"
-  without pulling bodies.
+A common misreading is that `context-route` is a search: hand it a prompt and it
+picks the relevant records for you. **It does not.** `context-route` performs
+**no relevance selection.** It is the P6 enforcement gate: you hand it a
+candidate set that *you* selected, and it applies freshness, budget, and
+authority policy to that set, returning the admitted metadata-first references
+(never bodies). Relevance is decided *before* `context-route`, by the listing
+and candidate verbs — never by the router itself.
+
+## The metadata-first query commands to teach (the real pipeline)
+
 - `knowledge-list` — lists knowledge records by metadata (never opens bodies).
+  The starting point for enumerating what exists in scope.
+- `knowledge-candidates` — the relevance-selection verb (present at the pinned
+  release): given a scope/query it returns a **candidate set** of record
+  references by metadata, ranked/filtered, still bodies-closed. This is where
+  "what is relevant to this prompt" is decided.
+- `context-route` — the P6 router/enforcer: given the candidate set you built,
+  it enforces **freshness / budget / authority** and returns the admitted
+  metadata-first references. No relevance selection; no bodies.
 - `knowledge-snippet` — returns a bounded snippet, not a full body.
 - `knowledge-body` — returns a single record's body **only when explicitly
   requested** for that one record.
 - `knowledge-freshness` — checks freshness metadata.
 
-## The rule for the agent
+## The rule for the agent (the pipeline order matters)
 
-1. Query metadata first (`context-route` / `knowledge-list`) to identify the one
-   or few records relevant to the current prompt.
-2. Read a body (`knowledge-body`) only for a specific record the task actually
-   needs, and only when asked — one at a time, within budget.
-3. Never bulk-load work items or knowledge bodies "just in case", and never let
+1. Enumerate with `knowledge-list`, then narrow to relevant candidates with
+   `knowledge-candidates` — this is the only step that decides relevance, and it
+   stays metadata-first (no bodies).
+2. Construct a `context-route` request from that candidate set; let the router
+   enforce freshness, budget, and authority. Treat what it admits as the
+   governed working set — it filtered on policy, not on relevance.
+3. Read a body (`knowledge-body`) only for a specific admitted record the task
+   actually needs, and only when asked — one at a time, within budget.
+4. Never bulk-load work items or knowledge bodies "just in case", and never let
    this Skill or its wizard place that data into context preemptively.
 
 This mirrors — and is meant to demonstrate — the Workflow's own P6 discipline:

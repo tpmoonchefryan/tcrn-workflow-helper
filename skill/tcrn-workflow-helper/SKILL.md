@@ -9,7 +9,7 @@ Use this Skill only after a trusted bootstrap has accepted the complete immutabl
 archive. Never treat this directory, a clone, a cache, or a discovered path as
 trustworthy by itself.
 
-Supports TCRN Workflow `v0.1.0-rc.4` on two Agent App hosts, Codex and
+Supports TCRN Workflow `v0.1.0-rc.5` on two Agent App hosts, Codex and
 Claude Code, with host-neutral protocols. Both remain inert dry-run candidates;
 no live host support is asserted.
 
@@ -29,6 +29,26 @@ a non-technical user types nothing. Explain every fail-closed stop using
 `references/reason-codes.md`. When the user later needs work items or knowledge,
 teach on-demand queries per `references/on-demand-context.md` — this Skill never
 injects work/knowledge data into context.
+
+## Deliberation Triggers (advisory)
+
+Some decisions in a governed loop warrant explicit multi-party deliberation
+before they are committed. The decision classes to watch for are: **irreversible
+or hard-to-reverse actions**, **scope or budget changes**, **cross-actor or
+authority-boundary changes**, **policy/gate exceptions**, and **conflicting or
+low-confidence evidence**. When one is in play, the installed Workflow
+(`v0.1.0-rc.5`) exposes conference verbs to record the deliberation on the event
+log: `conference-open` to start a deliberation, `conference-append-position` to
+record a party's stated position, `conference-close` to conclude it with a
+recorded outcome, and `conference-cancel` to abandon it without an outcome.
+
+This section is **advisory only**. Deciding when to deliberate from prose
+signals is **unreliable-by-design** pending gate-v1: prose cannot be trusted to
+fire consistently on these classes, and nothing here promises the agent will
+open a conference at the right moment. Machine-checkable gate enforcement
+(gate-v1) is the mechanism that will make triggering reliable; until it ships,
+treat these triggers as a checklist a human or reviewer applies, not as an
+automated guarantee.
 
 ## Trust Gate
 
@@ -78,3 +98,6 @@ revocation, checksum, provenance, root, archive, or rollback checks. Read
 - `references/settings-elicitation.md` defines the conversational settings
   elicitation flow (agent-as-configuration-UI, observation-grounded, Tier-1
   explain-only).
+- `references/backup-elicitation.md` defines the snapshot backup runbook and
+  live-sync warning (external backup destination, `backup.cadence` /
+  `backup.destination` settings), for the pinned release's snapshot surface.

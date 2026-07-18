@@ -13,12 +13,12 @@ import { privateKeyBytes } from '../scripts/sign-release.mjs';
 
 const execFile = promisify(execFileCallback); const sha = value => createHash('sha256').update(value).digest('hex'); const now = Date.parse('2026-07-14T14:00:00Z');
 const trustedPublicKey = '-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAoN15ouVWei/yYTln7KCkZ2ecgokhj8HoWDBQyB5XaPY=\n-----END PUBLIC KEY-----\n';
-const manifestSignature = 'LGLJfI4Xs6xU22xprmCanwh3AnsIL3IMhE/8N3uffbh43iU6jWXijJziPqa20tEc4Ym0Wpu7hdJemlTlNBn/Dw==';
-const policySignature = 'MwsOQdhaJUle2QJJt9dsG/LoUN2Kbe78q72Y09TElKa4dTVAWQyk06E2JBb8+eS33cya9+hisLYbb7ZGsVH7BQ==';
-const revokedPolicySignature = 'Ko8/bUtfgcnXc7LFhNpMiUr5q1c/zKJlt2ZNpusKKC/jMfZM/SJJ6Y5eaIRbaQDHnlYkTqiivTUy0d1AGFlaCw==';
-const expiredPolicySignature = 'IeJydZcC8dr9FSBmgtI7NRU9xoObTNYU7nyN3V8z7mC4w5Ju5DoV/SH/DxdDWMGtSyqmNN1Ju5314HiQUOCIBw==';
-const identityMismatchManifestSignature = '2TQdGzX+0EJasrdueJQKm5/wB4CtUGVzPhTAY/HEIqI3ca8NEKsZvG71U4suXPAPifpppFBp9Cc0htWD0vzBCw==';
-const identityMismatchPolicySignature = 'XgEe3aDYfbxTey7N6qTCx4RDJLPeB4qp7Z7KtbO6yt68q0p8Tos1GOM8vTbR4R/GXms0Xv2fFHEchM46uySWDQ==';
+const manifestSignature = 'o1/xKeqiTh7yrZdzrBrIl19EquxMWufL1lD8UDl4vOHqqC8LfeSYcOr6M6Nu5Ypqx6XQdeWaTuhIcrOyJW6YCg==';
+const policySignature = 'OrH3G/WPLuFWXzqGGesU8gMOf6SdRMxogzUjDUxRy7fU0gszn6Ho1HprYIto4cyg6BUOaMm8+C3OdS71ywg2Cg==';
+const revokedPolicySignature = 'ZrBiAVFpTS8QNc5QZ1fWse7ZhdYonZRJUuEsXYc1eJjBcjD4NoKI5a5XRX9Isdebg/KI4g7Pusji3X1LnqP6Bw==';
+const expiredPolicySignature = '2or8pjCTvGpmooliDWG2p1n9cgKrGPYIr4nIN/CR3hltNuGVbUZjLdyULV0XoeUbJNoWMI0RqpRcgHRoZkOBCA==';
+const identityMismatchManifestSignature = '8aixueDDZFT9NPm0oziY1karCHqPHKdKIWLLBCL5JH+gmASDGJRDgLI08/P3twEthDr78aq/2Fh2azu/9zZPBg==';
+const identityMismatchPolicySignature = 'J1drD+WQoGDvoeqSjrcwrPh/QtNKie/yyit605gG3o4HVpzZtyNY47oX4vZlifck7jslJjNOcHNnbHhHVpXrAQ==';
 const acceptedProvenancePath = join(process.cwd(), 'manifests/complete-skill-archive.provenance.json');
 const installArchive = options => installArchiveImplementation({ ...options, provenancePath:options.provenancePath ?? acceptedProvenancePath });
 test('release signing binds an owner-only descriptor-stable key parent and immutable trusted key before output paths', async () => {
@@ -58,7 +58,7 @@ test('privateKeyBytes rejects a deterministic post-stat parent swap and preserve
 async function fixture() {
   const root = await mkdtemp(join(await realpath(os.tmpdir()), 'tcrn-helper-test-')); const archive = { schemaVersion:'tcrn.workflow.helper.archive.v1', entries:[{ path:'skill/SKILL.md', type:'file', contentBase64:Buffer.from('skill').toString('base64'), sha256:sha('skill') }] };
   const archivePath = join(root, 'archive.json'); await writeFile(archivePath, canonicalJson(archive)); const archiveSha256 = sha(canonicalJson(archive)); const publicKey = trustedPublicKey;
-  const manifest = { schemaVersion:'tcrn.workflow.helper.release-manifest.v1', archiveSha256, commit:IDENTITY.commit, expiresAt:'2027-07-14T00:00:00Z', issuer:'tcrn', policyEpoch:3, provenanceSha256:'e40925499667ec983c224faee1a1967ca2286e8a8e92938087e8a98988cd1415', repository:IDENTITY.repository, signer:'tcrn-signer', tagObject:IDENTITY.tagObject, tree:IDENTITY.tree, version:IDENTITY.version };
+  const manifest = { schemaVersion:'tcrn.workflow.helper.release-manifest.v1', archiveSha256, commit:IDENTITY.commit, expiresAt:'2027-07-14T00:00:00Z', issuer:'tcrn', policyEpoch:3, provenanceSha256:'0a7666e42bafe0c71ba3af25ec23f1eac3dfec44d6330c33adb5d0007873f7d8', repository:IDENTITY.repository, signer:'tcrn-signer', tagObject:IDENTITY.tagObject, tree:IDENTITY.tree, version:IDENTITY.version };
   manifest.signatureBase64 = manifestSignature; const policy = { schemaVersion:'tcrn.workflow.helper.policy.v1', archiveSha256, expiresAt:'2027-07-14T00:00:00Z', issuer:'tcrn', manifestSha256:sha(canonicalJson(manifest)), minimumPolicyEpoch:3, provenanceSha256:manifest.provenanceSha256, revokedVersions:[], signer:'tcrn-signer', trustedPublicKeySha256:'a320188bfc64797931de408f6064e0830d431fb4ebf73322f73219cc91a2ed90', signatureBase64:policySignature };
   const manifestPath = join(root, 'manifest.json'); const policyPath = join(root, 'policy.json'); const provenancePath = join(process.cwd(), 'manifests/complete-skill-archive.provenance.json'); const statePath = join(root, 'state.json'); const trustedKeyPath = join(root, 'trusted-key.pem'); await writeFile(manifestPath, canonicalJson(manifest)); await writeFile(policyPath, canonicalJson(policy)); await writeFile(trustedKeyPath, publicKey, { mode:0o600 }); return { root, archive, archivePath, manifest, manifestPath, policy, policyPath, provenancePath, statePath, trustedKeyPath, publicKey };
 }

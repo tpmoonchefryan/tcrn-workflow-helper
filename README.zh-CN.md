@@ -4,7 +4,7 @@
 
 **零依赖的可信引导程序 + 双宿主 Agent Skill——凡是无法用密码学证明的 TCRN Workflow 发布,一律拒绝运行。**
 
-`状态: 0.1.0-candidate.3(预发布候选)` · `许可证: Apache-2.0` · `Node ≥ 24` · `依赖: 零` · `支持: TCRN Workflow v0.1.0-rc.4`
+`状态: 0.1.0-candidate.4(预发布候选)` · `许可证: Apache-2.0` · `Node ≥ 24` · `依赖: 零` · `支持: TCRN Workflow v0.1.0-rc.5`
 
 ---
 
@@ -120,9 +120,21 @@ helper 的**变更类**命令(`install`/`update`/`reinstall`/`uninstall`)只做�
 | `scripts/` | 确定性归档/SBOM/校验和生成器、发布校验器、CI 重放、签名工具(私钥永不进入本仓库)。 |
 | `test/` | 79 测试证明套件。 |
 
+## 钉定的 Workflow 发布所治理的能力(v0.1.0-rc.5 新增)
+
+助手的职责不变——在发布运行前先证明它——但它现在钉定的发布 TCRN Workflow `v0.1.0-rc.5` 提供了更广的受治理面,Skill 的参考文档会教操作者驱动它:
+
+- **会议与门治理** — 审议被记录到事件日志(`conference-open` / `-append-position` / `-close` / `-cancel`);待决门会阻止某工作项到达 `done`,直到会议纪要证据将其解除(`WORKSPACE_GATE_PENDING`、`WORKSPACE_GATE_EVIDENCE_UNRESOLVED`)。
+- **执行者证明** — 每个变更类动词都必须归属一个执行者,执行者缺失或格式非法即失败闭合(`WORKSPACE_ACTOR_REQUIRED`、`WORKSPACE_ACTOR_INVALID`)。
+- **激活阶梯** — 受治理面按分级逐级激活,而非单一全局开关;不含治理记录的工作区行为不变。
+- **备份与恢复** — 密闭、同路径、整树的快照,带确定性收据和逐字节一致的证明(`snapshot-manifest` / `snapshot-verify` → `SNAPSHOT_VERIFIED`);见 `skill/tcrn-workflow-helper/references/backup-elicitation.md`。
+- **蒸馏** — 对受治理存储的对账式知识蒸馏。
+
+用散文触发这些审议是建议性的,且在 gate-v1 落地前按设计不可靠;Skill 对此明确说明,并将可靠的强制执行推迟到机器可校验的门。
+
 ## 状态(如实陈述)
 
-- `0.1.0-candidate.3` 是**预发布候选**,精确支持 TCRN Workflow `v0.1.0-rc.4`。
+- `0.1.0-candidate.4` 是**预发布候选**,精确支持 TCRN Workflow `v0.1.0-rc.5`。
 - 两宿主上的安装与卸载均**仅限测试根**;不声称任何在线 Codex 或 Claude Code 宿主支持。
 - 三项 Claude Code 专属行为(设置片段可逆性、用户级/项目级优先序、CLAUDE.md 回退)在**钉定的 Workflow 发布**中实现并证明,不在本仓库——精确证据映射见 `skill/tcrn-workflow-helper/references/trust-contract.md`。
 

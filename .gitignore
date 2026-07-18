@@ -1,3 +1,4 @@
 node_modules/
 .DS_Store
 artifacts/ci-replay-readback.json
+pnpm-lock.yaml

@@ -4,7 +4,7 @@
 
 **依存ゼロの信頼ブートストラップ+デュアルホスト Agent Skill——暗号学的に証明できない TCRN Workflow リリースの実行を拒否します。**
 
-`ステータス: 0.1.0-candidate.3(プレリリース候補)` · `ライセンス: Apache-2.0` · `Node ≥ 24` · `依存関係: ゼロ` · `対応: TCRN Workflow v0.1.0-rc.4`
+`ステータス: 0.1.0-candidate.4(プレリリース候補)` · `ライセンス: Apache-2.0` · `Node ≥ 24` · `依存関係: ゼロ` · `対応: TCRN Workflow v0.1.0-rc.5`
 
 ---
 
@@ -120,9 +120,21 @@ helper の**変更系**コマンド(`install`/`update`/`reinstall`/`uninstall`)�
 | `scripts/` | 決定論的アーカイブ/SBOM/チェックサム生成器、リリース検証器、CI リプレイ、署名ツール(秘密鍵は決してこのリポジトリに置かれません)。 |
 | `test/` | 79 テストの証明スイート。 |
 
+## 固定された Workflow リリースが統治する機能(v0.1.0-rc.5 で新規)
+
+ヘルパーの役割は変わりません——リリースを実行前に証明する——が、いま固定するリリース TCRN Workflow `v0.1.0-rc.5` は、より広い統治対象面を備えており、Skill のリファレンスがその操作をオペレーターに教えます:
+
+- **カンファレンスとゲートの統治** — 審議はイベントログに記録され(`conference-open` / `-append-position` / `-close` / `-cancel`)、ペンディングのゲートは、カンファレンス議事録の証拠が解決するまで作業項目が `done` に到達するのを阻止します(`WORKSPACE_GATE_PENDING`、`WORKSPACE_GATE_EVIDENCE_UNRESOLVED`)。
+- **アクター証明** — すべての変更系動詞は実行アクターを帰属させねばならず、アクターが不在または不正な形式なら fail-closed します(`WORKSPACE_ACTOR_REQUIRED`、`WORKSPACE_ACTOR_INVALID`)。
+- **アクティベーションの段階** — 統治対象面は単一のグローバルスイッチではなく段階的な段で有効化され、統治レコードを持たないワークスペースの挙動は変わりません。
+- **バックアップとリストア** — 密閉・同一パス・ツリー全体のスナップショットを、決定論的レシートとバイト同一の証明つきで取得します(`snapshot-manifest` / `snapshot-verify` → `SNAPSHOT_VERIFIED`)。`skill/tcrn-workflow-helper/references/backup-elicitation.md` を参照。
+- **蒸留** — 統治ストアに対する突合済みのナレッジ蒸留。
+
+これらの審議を散文で発火させることは助言的であり、gate-v1 が入るまでは設計上信頼できません。Skill はその旨を明示し、信頼できる強制は機械検証可能なゲートに委ねます。
+
 ## ステータス(正直に)
 
-- `0.1.0-candidate.3` は TCRN Workflow `v0.1.0-rc.4` をちょうど対象とする**プレリリース候補**です。
+- `0.1.0-candidate.4` は TCRN Workflow `v0.1.0-rc.5` をちょうど対象とする**プレリリース候補**です。
 - 両ホストでインストールと削除は**テストルート限定**。ライブの Codex / Claude Code ホストサポートは主張しません。
 - Claude Code 固有の 3 挙動(設定フラグメントの可逆性、ユーザー/プロジェクト優先順位、CLAUDE.md フォールバック)は本リポジトリではなく**固定された Workflow リリース側**で実装・証明されています——正確な証拠マップは `skill/tcrn-workflow-helper/references/trust-contract.md` を参照。
 

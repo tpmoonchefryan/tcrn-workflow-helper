@@ -4,7 +4,7 @@
 
 **의존성 없는 신뢰 부트스트랩 + 듀얼 호스트 Agent Skill — 암호학적으로 증명할 수 없는 TCRN Workflow 릴리스는 실행을 거부합니다.**
 
-`상태: 0.1.0-candidate.3 (프리릴리스 후보)` · `라이선스: Apache-2.0` · `Node ≥ 24` · `의존성: 없음` · `지원: TCRN Workflow v0.1.0-rc.4`
+`상태: 0.1.0-candidate.4 (프리릴리스 후보)` · `라이선스: Apache-2.0` · `Node ≥ 24` · `의존성: 없음` · `지원: TCRN Workflow v0.1.0-rc.5`
 
 ---
 
@@ -120,9 +120,21 @@ helper의 **변경** 명령(`install`/`update`/`reinstall`/`uninstall`)은 검�
 | `scripts/` | 결정론적 아카이브/SBOM/체크섬 생성기, 릴리스 검증기, CI 리플레이, 서명 도구(개인키는 결코 이 저장소에 두지 않음). |
 | `test/` | 79 테스트 증명 스위트. |
 
+## 고정된 Workflow 릴리스가 통치하는 기능 (v0.1.0-rc.5 신규)
+
+헬퍼의 역할은 그대로입니다 — 릴리스를 실행 전에 증명하는 것 — 그러나 지금 고정하는 릴리스 TCRN Workflow `v0.1.0-rc.5`는 더 넓은 통치 대상 면을 제공하며, Skill의 참조 문서가 운영자에게 그 구동법을 가르칩니다:
+
+- **컨퍼런스 및 게이트 통치** — 심의는 이벤트 로그에 기록되고(`conference-open` / `-append-position` / `-close` / `-cancel`), 대기 중 게이트는 컨퍼런스 회의록 증거가 이를 해소할 때까지 작업 항목이 `done`에 도달하는 것을 막습니다(`WORKSPACE_GATE_PENDING`, `WORKSPACE_GATE_EVIDENCE_UNRESOLVED`).
+- **행위자 증명** — 모든 변경 동사는 수행 행위자를 귀속해야 하며, 행위자가 없거나 형식이 잘못되면 fail-closed 됩니다(`WORKSPACE_ACTOR_REQUIRED`, `WORKSPACE_ACTOR_INVALID`).
+- **활성화 사다리** — 통치 대상 면은 단일 전역 스위치가 아니라 단계적 단으로 활성화되며, 통치 레코드가 없는 워크스페이스의 동작은 변하지 않습니다.
+- **백업 및 복원** — 밀폐·동일 경로·전체 트리 스냅샷을 결정론적 영수증과 바이트 동일 증명과 함께 제공합니다(`snapshot-manifest` / `snapshot-verify` → `SNAPSHOT_VERIFIED`). `skill/tcrn-workflow-helper/references/backup-elicitation.md` 참조.
+- **증류** — 통치 저장소에 대한 대사 완료된 지식 증류.
+
+이 심의들을 산문으로 촉발하는 것은 권고적이며 gate-v1 이전에는 설계상 신뢰할 수 없습니다. Skill은 이를 명시하고, 신뢰 가능한 강제는 기계 검증 가능한 게이트에 맡깁니다.
+
 ## 상태 (정직하게)
 
-- `0.1.0-candidate.3`는 TCRN Workflow `v0.1.0-rc.4`를 정확히 지원하는 **프리릴리스 후보**입니다.
+- `0.1.0-candidate.4`는 TCRN Workflow `v0.1.0-rc.5`를 정확히 지원하는 **프리릴리스 후보**입니다.
 - 두 호스트에서 설치와 제거는 **테스트 루트 전용**; 라이브 Codex나 Claude Code 호스트 지원은 주장하지 않습니다.
 - Claude Code 전용 세 동작(설정 프래그먼트 가역성, 사용자/프로젝트 우선순위, CLAUDE.md 폴백)은 이 저장소가 아니라 **고정된 Workflow 릴리스 쪽**에서 구현·증명됩니다 — 정확한 증거 맵은 `skill/tcrn-workflow-helper/references/trust-contract.md` 참조.
 

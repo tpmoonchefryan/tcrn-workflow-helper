@@ -4,7 +4,7 @@
 
 **Un amorceur de confiance sans dépendances et une compétence d'agent bi-hôte qui refuse d'exécuter une version de TCRN Workflow qu'il ne peut prouver cryptographiquement.**
 
-`Statut : 0.1.0-candidate.3 (candidat de pré-version)` · `Licence : Apache-2.0` · `Node ≥ 24` · `Dépendances : zéro` · `Prend en charge : TCRN Workflow v0.1.0-rc.4`
+`Statut : 0.1.0-candidate.4 (candidat de pré-version)` · `Licence : Apache-2.0` · `Node ≥ 24` · `Dépendances : zéro` · `Prend en charge : TCRN Workflow v0.1.0-rc.5`
 
 ---
 
@@ -120,9 +120,21 @@ Parce qu'un reçu qui certifie une exécution de validation ne devrait pas être
 | `scripts/` | Générateurs déterministes d'archive/SBOM/sommes de contrôle, vérificateur de version, rejeu CI, outil de signature (la clé privée ne réside jamais dans ce dépôt). |
 | `test/` | La suite de preuves de 79 tests. |
 
+## Ce que gouverne la version Workflow épinglée (nouveau en v0.1.0-rc.5)
+
+Le rôle du helper est inchangé — prouver la version avant qu'elle ne s'exécute — mais la version qu'il épingle désormais, TCRN Workflow `v0.1.0-rc.5`, embarque une surface gouvernée plus large que les références du Skill apprennent à l'opérateur à piloter :
+
+- **Gouvernance des conférences et des portes** — les délibérations sont consignées dans le journal d'événements (`conference-open` / `-append-position` / `-close` / `-cancel`), et une porte en attente empêche un élément de travail d'atteindre `done` tant qu'une preuve de compte rendu de conférence ne l'a pas levée (`WORKSPACE_GATE_PENDING`, `WORKSPACE_GATE_EVIDENCE_UNRESOLVED`).
+- **Attestation d'acteur** — chaque verbe mutateur doit attribuer un acteur agissant, échouant fermé si l'acteur est absent ou mal formé (`WORKSPACE_ACTOR_REQUIRED`, `WORKSPACE_ACTOR_INVALID`).
+- **Échelle d'activation** — la surface gouvernée s'active par échelons successifs plutôt que par un unique interrupteur global ; un espace de travail sans enregistrement de gouvernance reste inchangé dans son comportement.
+- **Sauvegarde et restauration** — des instantanés hermétiques, sur le même chemin et de l'arbre entier, avec un reçu déterministe et une preuve identique à l'octet (`snapshot-manifest` / `snapshot-verify` → `SNAPSHOT_VERIFIED`) ; voir `skill/tcrn-workflow-helper/references/backup-elicitation.md`.
+- **Distillation** — une distillation de connaissances rapprochée sur le magasin gouverné.
+
+Déclencher ces délibérations à partir de la prose est indicatif et non fiable par conception en attendant gate-v1 ; le Skill l'indique explicitement et confie l'application fiable à des portes vérifiables par la machine.
+
 ## Statut, honnêtement
 
-- `0.1.0-candidate.3` est un **candidat de pré-version** prenant en charge exactement TCRN Workflow `v0.1.0-rc.4`.
+- `0.1.0-candidate.4` est un **candidat de pré-version** prenant en charge exactement TCRN Workflow `v0.1.0-rc.5`.
 - L'installation et la suppression sont **limitées aux racines de test** sur les deux hôtes ; aucune prise en charge en production de Codex ou Claude Code n'est revendiquée.
 - Les trois comportements spécifiques à Claude Code (réversibilité du fragment de réglages, priorité utilisateur/projet, repli CLAUDE.md) sont implémentés et prouvés **dans la version Workflow épinglée**, pas dans ce dépôt — voir `skill/tcrn-workflow-helper/references/trust-contract.md` pour la carte de preuves exacte.
 

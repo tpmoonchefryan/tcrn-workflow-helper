@@ -6,9 +6,9 @@ import { basename, dirname, isAbsolute, relative, resolve, sep } from 'node:path
 import { fileURLToPath } from 'node:url';
 
 export const IDENTITY = Object.freeze({
-  repository: 'https://github.com/tpmoonchefryan/tcrn-workflow.git', version: 'v0.1.0-rc.4',
-  commit: 'e70b8eb6f9a85374c51fc6846172313734ec82e3', tree: 'ba334160ff88d461534c735d20e300ed1f8afd83',
-  tagObject: '86207d61bec98b451513eaf9bd391fb98d474179',
+  repository: 'https://github.com/tpmoonchefryan/tcrn-workflow.git', version: 'v0.1.0-rc.5',
+  commit: 'e9629dd4510ea428851eadc01a2fb7e8dcae6d5d', tree: '6272dda6ac2164429afad391c07e70ae47c4e3cc',
+  tagObject: '08bcc0527dd0090b6b36328b05b0a48cd89beccc',
 });
 const ARCHIVE_SCHEMA = 'tcrn.workflow.helper.archive.v1';
 const MANIFEST_SCHEMA = 'tcrn.workflow.helper.release-manifest.v1';

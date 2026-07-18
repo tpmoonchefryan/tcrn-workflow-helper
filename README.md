@@ -4,7 +4,7 @@
 
 **A dependency-free trusted bootstrap and dual-host Agent Skill that refuses to run a TCRN Workflow release it cannot cryptographically prove.**
 
-`Status: 0.1.0-candidate.3 (pre-release candidate)` · `License: Apache-2.0` · `Node ≥ 24` · `Dependencies: zero` · `Supports: TCRN Workflow v0.1.0-rc.4`
+`Status: 0.1.0-candidate.4 (pre-release candidate)` · `License: Apache-2.0` · `Node ≥ 24` · `Dependencies: zero` · `Supports: TCRN Workflow v0.1.0-rc.5`
 
 ---
 
@@ -120,9 +120,21 @@ Because a receipt that certifies a validation run should not itself be certified
 | `scripts/` | Deterministic archive/SBOM/checksum generators, release verifier, CI replay, signing tool (the private key never lives in this repository). |
 | `test/` | The 79-test proof suite. |
 
+## What the pinned Workflow release governs (new in v0.1.0-rc.5)
+
+The helper's job is unchanged — prove the release before it runs — but the release it now pins, TCRN Workflow `v0.1.0-rc.5`, ships a broader governed surface that the Skill's references teach the operator to drive:
+
+- **Conference & gate governance** — deliberations are recorded on the event log (`conference-open` / `-append-position` / `-close` / `-cancel`), and a pending gate blocks a work item from reaching `done` until conference-minutes evidence resolves it (`WORKSPACE_GATE_PENDING`, `WORKSPACE_GATE_EVIDENCE_UNRESOLVED`).
+- **Actor attestation** — every mutating verb must attribute an acting actor, failing closed on an absent or malformed actor (`WORKSPACE_ACTOR_REQUIRED`, `WORKSPACE_ACTOR_INVALID`).
+- **Activation ladder** — the governed surface activates in staged rungs rather than through a single global switch; a workspace with no governance records is behaviorally unchanged.
+- **Backup & restore** — hermetic, same-path, whole-tree snapshots with a deterministic receipt and a byte-identical proof (`snapshot-manifest` / `snapshot-verify` → `SNAPSHOT_VERIFIED`); see `skill/tcrn-workflow-helper/references/backup-elicitation.md`.
+- **Distillation** — reconciled knowledge distillation over the governed store.
+
+Prose triggering of these deliberations is advisory and unreliable-by-design pending gate-v1; the Skill states so explicitly and defers reliable enforcement to machine-checkable gates.
+
 ## Status, honestly
 
-- `0.1.0-candidate.3` is a **pre-release candidate** supporting exactly TCRN Workflow `v0.1.0-rc.4`.
+- `0.1.0-candidate.4` is a **pre-release candidate** supporting exactly TCRN Workflow `v0.1.0-rc.5`.
 - Installation and removal are **test-root-only** on both hosts; no live Codex or Claude Code host support is asserted.
 - The three Claude-Code-specific behaviors (settings-fragment reversibility, user-vs-project precedence, CLAUDE.md fallback) are implemented and proven **in the pinned Workflow release**, not in this repository — see `skill/tcrn-workflow-helper/references/trust-contract.md` for the exact evidence map.
 
