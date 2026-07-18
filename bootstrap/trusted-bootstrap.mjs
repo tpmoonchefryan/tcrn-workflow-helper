@@ -83,7 +83,7 @@ function decodedBase64(entry, remaining) {
   return output;
 }
 function signatureBytes(value, code) { if (typeof value !== 'string' || value.length !== 88 || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)) fail(code); const bytes = Buffer.from(value, 'base64'); if (bytes.length !== 64 || bytes.toString('base64') !== value) fail(code); return bytes; }
-function canonicalUtc(value) { if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value)) return null; const parsed = Date.parse(value); return Number.isFinite(parsed) && new Date(parsed).toISOString() === (value.includes('.') ? value : `${value.slice(0, -1)}.000Z`) ? parsed : null; }
+export function canonicalUtc(value) { if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value)) return null; const parsed = Date.parse(value); return Number.isFinite(parsed) && new Date(parsed).toISOString() === (value.includes('.') ? value : `${value.slice(0, -1)}.000Z`) ? parsed : null; }
 function authorityName(value) { return typeof value === 'string' && value.isWellFormed() && /^[a-z][a-z0-9-]{0,63}$/.test(value); }
 function releaseVersion(value) { return typeof value === 'string' && value.isWellFormed() && /^v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(value); }
 export function validateArchive(documentValue) {
@@ -115,8 +115,15 @@ function validateManifest(manifest, archiveSha256, policy, trustedPublicKeyPem, 
   if (policy.issuer !== manifest.issuer || policy.signer !== manifest.signer || !Number.isSafeInteger(manifest.policyEpoch) || manifest.policyEpoch < policy.minimumPolicyEpoch || manifest.provenanceSha256 !== policy.provenanceSha256) fail('POLICY_INVALID');
   const { signatureBase64, ...unsigned } = manifest; let signatureValid = false;
   try { signatureValid = verifySignature(null, Buffer.from(canonicalJson(unsigned)), trustedPublicKeyPem, signatureBytes(signatureBase64, 'MANIFEST_INVALID')); } catch { fail('MANIFEST_INVALID'); }
-  if (!signatureValid) fail('POLICY_INVALID'); const expiry = canonicalUtc(manifest.expiresAt);
-  if (expiry === null) fail('MANIFEST_INVALID'); if (expiry <= now) fail('POLICY_EXPIRED'); if (policy.revokedVersions.includes(manifest.version)) fail('POLICY_REVOKED'); return manifest;
+  // A bad signature on the manifest is a manifest fault, not a policy fault. This
+  // reported POLICY_INVALID while the malformed-signature path one line above reported
+  // MANIFEST_INVALID, so the same failure class produced two different diagnostics
+  // depending only on whether the bad signature happened to be well-formed base64.
+  if (!signatureValid) fail('MANIFEST_INVALID');
+  // expiresAt already round-tripped through canonicalUtc in the IDENTITY_MISMATCH gate
+  // above, so this cannot be null here; recomputed only to read the value.
+  const expiry = canonicalUtc(manifest.expiresAt);
+  if (expiry <= now) fail('POLICY_EXPIRED'); if (policy.revokedVersions.includes(manifest.version)) fail('POLICY_REVOKED'); return manifest;
 }
 async function readState(statePath) {
   try { await lstat(statePath); } catch (error) { if (error?.code === 'ENOENT') return { value:{ schemaVersion:STATE_SCHEMA, highestPolicyEpoch:0 }, fingerprint:null }; throw error; }

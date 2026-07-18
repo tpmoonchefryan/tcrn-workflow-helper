@@ -3,7 +3,7 @@ import { constants } from 'node:fs';
 import { lstat, open, readFile, rename, unlink, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { canonicalJson, IDENTITY } from '../bootstrap/trusted-bootstrap.mjs';
+import { canonicalJson, canonicalUtc, IDENTITY } from '../bootstrap/trusted-bootstrap.mjs';
 
 const sha256 = value => createHash('sha256').update(value).digest('hex');
 const fail = message => { throw new Error(message); };
@@ -44,10 +44,17 @@ async function atomicPrivateWrite(path, bytes) {
 function canonicalDocument(bytes, label) { let value; try { value = JSON.parse(new TextDecoder('utf-8', { fatal:true }).decode(bytes)); } catch { fail(`SIGN_${label}_INVALID`); } if (!Buffer.from(canonicalJson(value)).equals(bytes)) fail(`SIGN_${label}_INVALID`); return value; }
 
 async function main(argv = process.argv.slice(2)) {
-  const expected = ['--private-key', '--archive', '--provenance', '--manifest', '--policy'];
+  // --expires-at is required rather than defaulted. The previous hardcoded
+  // 2027-07-14T00:00:00Z was baked into every signed manifest and policy, and
+  // trusted-bootstrap fails POLICY_EXPIRED past it, so the whole install base stops
+  // working on that date whether or not anyone still holds the signing key. An expiry
+  // that far-reaching must be a decision the signer states out loud, once per release.
+  const expected = ['--private-key', '--archive', '--provenance', '--manifest', '--policy', '--expires-at'];
   const args = argv;
   if (args.length !== expected.length * 2 || expected.some((name, index) => args[index * 2] !== name || !args[index * 2 + 1])) fail('SIGN_RELEASE_CLI_INVALID');
-  const [privateKeyPath, archivePath, provenancePath, manifestPath, policyPath] = expected.map((_, index) => resolve(args[index * 2 + 1]));
+  const [privateKeyPath, archivePath, provenancePath, manifestPath, policyPath] = expected.slice(0, 5).map((_, index) => resolve(args[index * 2 + 1]));
+  const expiresAt = args[11];
+  if (canonicalUtc(expiresAt) === null) fail('SIGN_EXPIRY_INVALID');
   const privateKey = createPrivateKey(await privateKeyBytes(privateKeyPath));
   if (privateKey.asymmetricKeyType !== 'ed25519') fail('SIGNING_KEY_INVALID');
   const publicKeyPem = createPublicKey(privateKey).export({ type:'spki', format:'pem' });
@@ -57,7 +64,7 @@ async function main(argv = process.argv.slice(2)) {
   const unsignedManifest = {
   archiveSha256:sha256(archiveBytes),
   commit:IDENTITY.commit,
-  expiresAt:'2027-07-14T00:00:00Z',
+  expiresAt,
   issuer:'tcrn',
   policyEpoch:6,
   provenanceSha256:sha256(provenanceBytes),
@@ -71,7 +78,7 @@ async function main(argv = process.argv.slice(2)) {
   const manifest = { ...unsignedManifest, signatureBase64:sign(null, Buffer.from(canonicalJson(unsignedManifest)), privateKey).toString('base64') };
   const unsignedPolicy = {
   archiveSha256:unsignedManifest.archiveSha256,
-  expiresAt:'2027-07-14T00:00:00Z',
+  expiresAt,
   issuer:'tcrn',
   manifestSha256:sha256(canonicalJson(manifest)),
   minimumPolicyEpoch:6,

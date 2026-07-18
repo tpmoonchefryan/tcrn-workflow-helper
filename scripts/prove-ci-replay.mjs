@@ -96,7 +96,8 @@ export async function runCommand({ checkout, command, commands, exec = execFile 
   commands.push({ command:command.command, elapsedMilliseconds:Date.now() - started, exitStatus:0, expectedTerminal:command.expectedTerminal, stderrBytes:commandStderrBytes, stdoutSha256:sha256(result.stdout), terminalReason:observedTerminal });
   if (commandStderrBytes !== 0) fail('CI_REPLAY_STDERR_NONZERO');
   if (command.expectedTerminal !== null && observedTerminal !== command.expectedTerminal) fail('CI_REPLAY_TERMINAL_INVALID');
-  return commandStderrBytes;
+  // Nothing to return: a non-zero stderr already failed above, so the only value this
+  // could ever have carried was zero.
 }
 
 export async function replay({ output, replayRoot = process.cwd(), exec = execFile }) {
@@ -105,7 +106,6 @@ export async function replay({ output, replayRoot = process.cwd(), exec = execFi
   const temporary = await mkdtemp(join(tmpdir(), 'tcrn-helper-ci-replay-'));
   const checkout = join(temporary, 'checkout');
   const commands = [];
-  let stderrBytes = 0;
   try {
     const sourceStatus = await exec('git', ['status', '--porcelain=v1'], { cwd:resolvedRoot, maxBuffer:64 * 1024 });
     if (sourceStatus.stdout !== '') fail('CI_REPLAY_SOURCE_DIRTY');
@@ -115,7 +115,7 @@ export async function replay({ output, replayRoot = process.cwd(), exec = execFi
     const checkoutCommit = (await exec('git', ['rev-parse', 'HEAD^{commit}'], { cwd:checkout, maxBuffer:64 * 1024 })).stdout.trim();
     const checkoutTree = (await exec('git', ['rev-parse', 'HEAD^{tree}'], { cwd:checkout, maxBuffer:64 * 1024 })).stdout.trim();
     if (checkoutCommit !== sourceCommit || checkoutTree !== sourceTree) fail('CI_REPLAY_CHECKOUT_IDENTITY_INVALID');
-    for (const command of sequence) stderrBytes += await runCommand({ checkout, command, commands, exec });
+    for (const command of sequence) await runCommand({ checkout, command, commands, exec });
     const artifactHashes = {};
     for (const name of artifactNames) artifactHashes[name] = sha256(await readFile(join(checkout, 'artifacts', name)));
     const committedDigests = {};
@@ -124,8 +124,8 @@ export async function replay({ output, replayRoot = process.cwd(), exec = execFi
     assertArtifactSet(await readdir(join(checkout, 'artifacts')));
     const status = await exec('git', ['status', '--porcelain=v1'], { cwd:checkout, maxBuffer:64 * 1024 });
     const governedResidue = await residues(checkout);
-    if (stderrBytes !== 0 || status.stdout !== '' || governedResidue.length !== 0 || canonicalJson(commands.map(value => value.command)) !== canonicalJson(sequence.map(value => value.command))) fail('CI_REPLAY_DIRTY_OR_RESIDUE');
-    const receipt = { artifactHashes, checkoutCommit, checkoutTree, commands, committedDigests, declaredSequence:sequence.map(value => value.command), finalClean:true, governedResidue, reasonCode:'CI_REPLAY_VALIDATED', schemaVersion:'tcrn.workflow.helper.ci-replay.v2', sourceCommit, sourceTree, stderrBytes };
+    if (status.stdout !== '' || governedResidue.length !== 0 || canonicalJson(commands.map(value => value.command)) !== canonicalJson(sequence.map(value => value.command))) fail('CI_REPLAY_DIRTY_OR_RESIDUE');
+    const receipt = { artifactHashes, checkoutCommit, checkoutTree, commands, committedDigests, declaredSequence:sequence.map(value => value.command), finalClean:true, governedResidue, reasonCode:'CI_REPLAY_VALIDATED', schemaVersion:'tcrn.workflow.helper.ci-replay.v2', sourceCommit, sourceTree, stderrBytes:0 };
     await atomicWrite(output, canonicalJson(receipt));
     return receipt;
   } finally {

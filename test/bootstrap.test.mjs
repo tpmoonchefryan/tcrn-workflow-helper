@@ -27,9 +27,16 @@ test('release signing binds an owner-only descriptor-stable key parent and immut
   assert.ok(source.indexOf("sha256(publicKeyPem) !== 'a320188bfc64797931de408f6064e0830d431fb4ebf73322f73219cc91a2ed90'") < source.indexOf('const archiveBytes = await readFile(archivePath)'));
   assert.ok(source.indexOf('const archiveBytes = await readFile(archivePath)') < source.indexOf('await atomicPrivateWrite(manifestPath'));
 });
-const signingArguments = (key, root) => [join(process.cwd(), 'scripts/sign-release.mjs'), '--private-key', key, '--archive', join(process.cwd(), 'artifacts/skill-archive.json'), '--provenance', acceptedProvenancePath, '--manifest', join(root, 'manifest.json'), '--policy', join(root, 'policy.json')];
-async function assertSigningPrewriteRejection(root, args) {
-  await assert.rejects(() => execFile(process.execPath, args, { cwd:process.cwd() }), error => error.code === 1);
+// --expires-at is supplied here so these cases still fail on the thing they name -- a
+// rogue key, a permissive parent -- rather than tripping on CLI arity and passing for a
+// reason that has nothing to do with what they assert.
+const signingArguments = (key, root) => [join(process.cwd(), 'scripts/sign-release.mjs'), '--private-key', key, '--archive', join(process.cwd(), 'artifacts/skill-archive.json'), '--provenance', acceptedProvenancePath, '--manifest', join(root, 'manifest.json'), '--policy', join(root, 'policy.json'), '--expires-at', '2030-01-01T00:00:00Z'];
+async function assertSigningPrewriteRejection(root, args, expectedReason = 'SIGNING_KEY_INVALID') {
+  // Asserting the reason, not merely a non-zero exit: every one of these cases is about
+  // key custody, and an exit code alone cannot tell a rejected key apart from a
+  // malformed command line -- which is exactly how a change to the CLI contract could
+  // leave these green while testing nothing they claim to test.
+  await assert.rejects(() => execFile(process.execPath, args, { cwd:process.cwd() }), error => error.code === 1 && String(error.stderr).includes(expectedReason));
   await absent(join(root, 'manifest.json')); await absent(join(root, 'policy.json'));
   assert.equal((await readdir(root)).filter(name => name.includes('.stage-')).length, 0);
 }
