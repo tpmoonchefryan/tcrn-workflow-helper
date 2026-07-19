@@ -60,6 +60,8 @@ const bootstrapText = bootstrapBytes.toString("utf8");
 // 2. The out-of-band anchor. This is the only value a user can check independently, so
 //    every document that publishes it must publish the current one and no stale one.
 const anchorDocuments = ["README.md", "README.zh-CN.md", "README.ja.md", "README.ko.md", "README.fr.md", "SECURITY.md"];
+const punctuation = /[\p{P}\p{S}]/u;
+const whitespace = /\s/u;
 for (const document of anchorDocuments) {
   const body = await text(document);
   const published = [...body.matchAll(/\b([a-f0-9]{64})\b/gu)].map((match) => match[1]);
@@ -68,6 +70,25 @@ for (const document of anchorDocuments) {
   // comparing against the wrong line is told the download was tampered with.
   const foreign = published.filter((digest) => digest !== bootstrapDigest && /trusted-bootstrap|shasum/u.test(body.slice(Math.max(0, body.indexOf(digest) - 400), body.indexOf(digest))));
   if (foreign.length > 0) fail("PUSH_GATE_ANCHOR_STALE", `${document}: ${foreign[0]}`);
+
+  // These six are the only documents this repository publishes, and until now the gate
+  // read them for one 64-character digest and nothing else. A closing `**` must be
+  // right-flanking: not preceded by whitespace, and -- when preceded by punctuation --
+  // followed by whitespace or punctuation. CJK prose trips that constantly, because
+  // `**一句话。**下一句` puts an ideographic full stop before the delimiter and a letter
+  // after it; the span never closes and the reader gets four asterisks. Six such spans
+  // were published here. Latin text rarely trips it, so the English original never
+  // showed the fault.
+  body.split("\n").forEach((line, index) => {
+    for (const match of line.matchAll(/\*\*([^*]+)\*\*/gu)) {
+      const closeAt = match.index + match[0].length - 2;
+      const before = line[closeAt - 1];
+      const after = line[closeAt + 2];
+      if (before === undefined || whitespace.test(before) || !punctuation.test(before)) continue;
+      if (after === undefined || whitespace.test(after) || punctuation.test(after)) continue;
+      fail("PUSH_GATE_EMPHASIS_UNCLOSED", `${document}:${index + 1}: ${match[0].slice(0, 40)}`);
+    }
+  });
 }
 
 function pinned(name) {
