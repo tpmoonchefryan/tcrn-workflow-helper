@@ -38,7 +38,7 @@ L'amorceur est la seule chose que vous ayez à croire ; contrôlez-le donc avant
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# 19a6e6138401fcc3277a1a7222016ae5f222fb7992b8109e38e2121bc043b15d
+# 4b704bdbc9c2020be04fa6c3d307913bf864d5fbea2d08eb0a29a9f0a3d68611
 ```
 
 Ce condensat est publié ici, dans `SECURITY.md` et dans les notes de version GitHub. S'il ne correspond pas, arrêtez-vous.
