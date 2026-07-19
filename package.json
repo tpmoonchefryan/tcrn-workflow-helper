@@ -13,6 +13,7 @@
     "test:lock-stress": "TCRN_LOCK_STRESS_REPEATS=20 node --test --test-name-pattern='distinct-PID' test/bootstrap.test.mjs",
     "checksums": "node scripts/generate-checksums.mjs",
     "ci:replay": "node scripts/prove-ci-replay.mjs --output artifacts/ci-replay-readback.json",
+    "push-gate": "node scripts/push-gate.mjs",
     "verify:ci-workflow": "node scripts/verify-ci-workflow.mjs",
     "format": "node scripts/format.mjs",
     "lint": "node scripts/lint.mjs",
