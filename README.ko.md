@@ -38,7 +38,7 @@ Helper는 TCRN Workflow에 대한 그 답입니다. 단일 파일, 의존성 제
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# 0904ee654af8b4c590917cb7dfcb0156f9b4c3247ea3b1f799621cecd9bdc233
+# 1651b88d82522dfc48febc5de26a226de6ed13930b2fb1f218f38bb50d34e8a1
 ```
 
 이 다이제스트는 이 문서와 `SECURITY.md`, 그리고 GitHub 릴리스 노트에 게시되어 있습니다. 값이 맞지 않으면 거기서 멈추세요.
