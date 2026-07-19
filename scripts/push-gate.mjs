@@ -108,6 +108,46 @@ function pinned(name) {
 const identityVersion = /version: '(v[^']+)'/u.exec(bootstrapText)?.[1] ?? null;
 if (identityVersion === null) fail("PUSH_GATE_IDENTITY_UNREADABLE", "version");
 
+// 2b. The Skill payload states the pinned identity, and nothing checked that it agreed
+//     with the identity actually compiled in. It did not: the trust contract published
+//     rc.5's version, commit, tree AND tag object while IDENTITY had moved to rc.6, so the
+//     one document whose job is to tell an operator what to compare against was telling
+//     them to compare against the wrong release. Four wrong fields, not a stale version
+//     string -- a reader following it computes four mismatches and concludes the download
+//     was tampered with.
+//
+//     The rule is deliberately not "no old version may appear under skill/". reason-codes
+//     says two families were "new in 0.1.0-rc.5", which is a true statement about when
+//     those codes appeared and would become false if rewritten. Banning the string would
+//     have forced a correct sentence to be replaced by an incorrect one. So this checks
+//     the two places that assert the CURRENT pin, and derives every expected value from
+//     IDENTITY rather than from a list that would drift on its own.
+const identityField = (name) => new RegExp(`${name}:\\s*'([^']+)'`, "u").exec(bootstrapText)?.[1] ?? null;
+const identity = {
+  version: identityVersion,
+  commit: identityField("commit"),
+  tree: identityField("tree"),
+  tagObject: identityField("tagObject"),
+};
+
+const skillManifest = await text("skill/tcrn-workflow-helper/SKILL.md");
+const supports = /Supports TCRN Workflow `([^`]+)`/u.exec(skillManifest)?.[1] ?? null;
+if (supports === null) fail("PUSH_GATE_SKILL_SUPPORT_UNSTATED", "SKILL.md does not state the supported release");
+else if (supports !== identity.version) fail("PUSH_GATE_SKILL_SUPPORT_STALE", `SKILL.md says ${supports}, IDENTITY says ${String(identity.version)}`);
+
+const trustContract = await text("skill/tcrn-workflow-helper/references/trust-contract.md");
+for (const [field, value] of Object.entries(identity)) {
+  if (value === null) fail("PUSH_GATE_IDENTITY_UNREADABLE", field);
+  else if (!trustContract.includes(value)) fail("PUSH_GATE_TRUST_CONTRACT_IDENTITY_MISSING", `${field}: ${value}`);
+}
+// A git object id in the trust contract that is not one of the pinned three is the shape
+// the defect actually took: the old commit, tree and tag object sat there looking
+// authoritative. Any object id in this document must be one the bootstrap pins.
+const pinnedObjectIds = new Set([identity.commit, identity.tree, identity.tagObject].filter((value) => value !== null));
+for (const match of trustContract.matchAll(/\b[a-f0-9]{40}\b/gu)) {
+  if (!pinnedObjectIds.has(match[0])) fail("PUSH_GATE_TRUST_CONTRACT_FOREIGN_OBJECT_ID", match[0]);
+}
+
 // 3. The defect this gate exists for. IDENTITY names the release; the provenance
 //    document describes the build of that release. validateProvenance compares them at
 //    runtime, so a disagreement is not cosmetic -- it fails every lifecycle test.

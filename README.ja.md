@@ -26,7 +26,7 @@
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# 1651b88d82522dfc48febc5de26a226de6ed13930b2fb1f218f38bb50d34e8a1
+# 960639d3cf5d1aff272ac45ca6bee53953098ec01d862ed00861562e26cd00cd
 ```
 
 この digest はここ、`SECURITY.md`、そして GitHub のリリースノートで公開されています。**計算した値が一致しなければ、そこで止めてください**——何も実行せず、「とりあえず試す」こともしないでください。一致しないことこそ、この仕組みが働いている証拠です。

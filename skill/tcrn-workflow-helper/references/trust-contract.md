@@ -9,10 +9,10 @@ non-canonical scalar encodings fail closed.
 ## Required identity
 
 The accepted Workflow release is repository
-`https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v0.1.0-rc.5`,
-commit `e9629dd4510ea428851eadc01a2fb7e8dcae6d5d`, tree
-`6272dda6ac2164429afad391c07e70ae47c4e3cc`, and tag object
-`08bcc0527dd0090b6b36328b05b0a48cd89beccc`.
+`https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v0.1.0-rc.6`,
+commit `d3d07df7c3649bbcb9deb1e58e1d6c8f7fdb378a`, tree
+`6f50e15b4388663ee80045f07164cd2187a9a450`, and tag object
+`fc763ae31ddebd6a32adb949196b3ddc315ff221`.
 
 ## Out-of-band trust anchor (root of trust)
 
@@ -111,7 +111,7 @@ special-file rejection):
 
 **Bound to the pinned Workflow release's hermetic proofs** (the three
 Claude-Code-new families are implemented and proven in the Workflow repository
-at exactly the pinned rc.5 identity above, by its `verify:p6b` suite —
+at exactly the pinned identity above, by its `verify:p6b` suite —
 fragment reversibility, forbidden-path, fallback, and cross-host parity
 cases): `.claude/settings.json` hook-fragment merge/remove byte-reversibility;
 user-vs-project precedence with user-level `~/.claude` never written; and

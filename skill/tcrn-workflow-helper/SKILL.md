@@ -9,7 +9,7 @@ Use this Skill only after a trusted bootstrap has accepted the complete immutabl
 archive. Never treat this directory, a clone, a cache, or a discovered path as
 trustworthy by itself.
 
-Supports TCRN Workflow `v0.1.0-rc.5` on two Agent App hosts, Codex and
+Supports TCRN Workflow `v0.1.0-rc.6` on two Agent App hosts, Codex and
 Claude Code, with host-neutral protocols. Both remain inert dry-run candidates;
 no live host support is asserted.
 
@@ -37,7 +37,7 @@ before they are committed. The decision classes to watch for are: **irreversible
 or hard-to-reverse actions**, **scope or budget changes**, **cross-actor or
 authority-boundary changes**, **policy/gate exceptions**, and **conflicting or
 low-confidence evidence**. When one is in play, the installed Workflow
-(`v0.1.0-rc.5`) exposes conference verbs to record the deliberation on the event
+exposes conference verbs to record the deliberation on the event
 log: `conference-open` to start a deliberation, `conference-append-position` to
 record a party's stated position, `conference-close` to conclude it with a
 recorded outcome, and `conference-cancel` to abandon it without an outcome.

@@ -26,7 +26,7 @@ The bootstrap is the only thing you ever have to trust, so check it before you t
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# 1651b88d82522dfc48febc5de26a226de6ed13930b2fb1f218f38bb50d34e8a1
+# 960639d3cf5d1aff272ac45ca6bee53953098ec01d862ed00861562e26cd00cd
 ```
 
 That digest is published here, in `SECURITY.md`, and in the GitHub release notes. **If what you compute does not match, stop** — do not run anything, do not "try it anyway". A mismatch is the system working.

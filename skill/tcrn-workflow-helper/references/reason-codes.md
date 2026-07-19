@@ -83,7 +83,7 @@ Format: `CODE` — what happened / security stop? / what to do.
 
 ## Governed workspace surface (product codes, new in `0.1.0-rc.5`)
 
-These are emitted by the installed **TCRN Workflow** (`0.1.0-rc.5`) engine, not by
+These are emitted by the installed **TCRN Workflow** engine, not by
 the helper bootstrap, but the agent will surface them to the operator. Each is a
 fail-closed governance stop; none is a defect.
 

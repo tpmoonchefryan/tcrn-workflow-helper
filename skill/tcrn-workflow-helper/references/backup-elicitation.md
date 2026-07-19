@@ -2,7 +2,7 @@
 
 The helper agent may guide the operator through taking and restoring a hermetic
 snapshot of the workspace control tree. This flow teaches the operator to drive
-the installed **TCRN Workflow** (`0.1.0-rc.5`) snapshot verbs — it never carries
+the installed **TCRN Workflow** snapshot verbs — it never carries
 workspace data itself, and it never runs a backup automatically.
 
 All paths below are workspace-relative placeholders. `<root>` is the Workspace
@@ -13,16 +13,16 @@ are first-class — always double-quote them.
 
 - The `snapshot-manifest` verb, which writes the deterministic canonical-JSON
   receipt (sorted per-file sha256 + head event hash + embedded validate result),
-  is provided by TCRN Workflow `0.1.0-rc.5`.
+  is provided by the pinned TCRN Workflow release.
 - The `snapshot-verify` verb, which proves a copy or a restored tree is
   byte-identical to the manifest and emits `SNAPSHOT_VERIFIED`, is provided by
-  TCRN Workflow `0.1.0-rc.5`.
+  the pinned TCRN Workflow release.
 - The `backup.cadence` and `backup.destination` conversational (Tier-2) settings
   keys, read only when this flow composes an explicit snapshot invocation, are
-  provided by TCRN Workflow `0.1.0-rc.5`.
+  provided by the pinned TCRN Workflow release.
 - The quiesce/settle preconditions (`recover`, `validate`, the lease as the
-  quiesce proof) that a provable snapshot depends on are provided by TCRN
-  Workflow `0.1.0-rc.5`.
+  quiesce proof) that a provable snapshot depends on are provided by the pinned
+  TCRN Workflow release.
 
 ## Two doctrines to state before starting
 
