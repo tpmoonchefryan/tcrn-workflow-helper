@@ -8,7 +8,7 @@ import os from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 import { pathToFileURL } from 'node:url';
-import { IDENTITY, canonicalJson, installArchive as installArchiveImplementation, resolveWorkflowRoot, uninstallArchive, validateArchive, validateTrust, verifyInstalledCopy } from '../bootstrap/trusted-bootstrap.mjs';
+import { IDENTITY, assertManagedStatePath, atomicPrivateOverwrite, canonicalJson, installArchive as installArchiveImplementation, resolveWorkflowRoot, uninstallArchive, validateArchive, validateTrust, verifyInstalledCopy } from '../bootstrap/trusted-bootstrap.mjs';
 
 const execFile = promisify(execFileCallback); const sha = value => createHash('sha256').update(value).digest('hex');
 const acceptedProvenancePath = join(process.cwd(), 'manifests/complete-skill-archive.provenance.json');
@@ -519,4 +519,59 @@ test('the CLI verify-installed-copy refuses a marker path whose ancestor symlink
     const args = [value.bootstrapPath, 'verify-installed-copy', '--installed-dir', copy.dir, '--provenance', value.provenancePath, '--state', value.statePath, '--marker', sneakyMarker, '--now', '2026-07-14T14:00:00Z'];
     await assert.rejects(() => execFile(process.execPath, args, { cwd:process.cwd() }), error => JSON.parse(error.stderr).reasonCode === 'LIVE_LOCATION_FORBIDDEN');
   } finally { await rm(value.root, { recursive:true, force:true }); await rm(copy.root, { recursive:true, force:true }); }
+});
+
+// CQ-13 item (1) regression. assertManagedStatePath used to validate EARLY and the write
+// happened LATER against the same path STRING, with O_NOFOLLOW covering only the final
+// component -- so swapping an ANCESTOR directory for a symlink inside that window landed
+// the write physically inside a live host tree. These tests hold the check and the write
+// apart and mutate the tree in between, which is exactly the race.
+test('a managed-state ancestor swapped between the check and the write is rejected, and nothing lands in the live tree', async () => {
+  const root = await mkdtemp(join(await realpath(os.tmpdir()), 'tcrn-helper-test-toctou-'));
+  try {
+    const outer = join(root, 'outer'); const inner = join(outer, 'inner');
+    await mkdir(inner, { recursive:true, mode:0o700 });
+    const statePath = join(inner, 'state.json');
+    // The early check passes: at this instant every ancestor is a real directory.
+    const binding = await assertManagedStatePath(statePath);
+    // The attacker now swaps an ancestor (not the final component) for a symlink into a
+    // live host location. The requested path stays lexically clean.
+    const live = join(root, '.claude'); await mkdir(join(live, 'inner'), { recursive:true, mode:0o700 });
+    await rm(outer, { recursive:true, force:true });
+    await symlink(live, outer);
+    await assert.rejects(() => atomicPrivateOverwrite(statePath, canonicalJson({ schemaVersion:'tcrn.workflow.helper.state.v1', verifiedArchiveSha256:null }), binding), error => error.reasonCode === 'STATE_PATH_INVALID' || error.reasonCode === 'LIVE_LOCATION_FORBIDDEN');
+    // The hard constraint: NOTHING was written under the live tree, not even a stage file.
+    assert.deepEqual(await readdir(join(live, 'inner')), []);
+  } finally { await rm(root, { recursive:true, force:true }); }
+});
+test('a managed-state ancestor swapped for a benign directory is rejected on inode identity, not on name matching', async () => {
+  const root = await mkdtemp(join(await realpath(os.tmpdir()), 'tcrn-helper-test-toctou-'));
+  try {
+    const outer = join(root, 'outer'); const inner = join(outer, 'inner');
+    await mkdir(inner, { recursive:true, mode:0o700 });
+    const statePath = join(inner, 'state.json');
+    const binding = await assertManagedStatePath(statePath);
+    // Nothing live-looking anywhere: a plain directory swapped for a plain directory.
+    // The lexical and realpath guards both pass, so only the pinned inode identity can
+    // catch this -- which is what makes the check and the write the SAME file.
+    const decoy = join(root, 'decoy'); await mkdir(join(decoy, 'inner'), { recursive:true, mode:0o700 });
+    await rm(outer, { recursive:true, force:true });
+    await symlink(decoy, outer);
+    await assert.rejects(() => atomicPrivateOverwrite(statePath, canonicalJson({ schemaVersion:'tcrn.workflow.helper.state.v1', verifiedArchiveSha256:null }), binding), error => error.reasonCode === 'STATE_PATH_INVALID');
+    assert.deepEqual(await readdir(join(decoy, 'inner')), []);
+  } finally { await rm(root, { recursive:true, force:true }); }
+});
+test('an unswapped managed-state path still writes through the bound check', async () => {
+  const root = await mkdtemp(join(await realpath(os.tmpdir()), 'tcrn-helper-test-toctou-'));
+  try {
+    const inner = join(root, 'outer', 'inner'); await mkdir(inner, { recursive:true, mode:0o700 });
+    const statePath = join(inner, 'state.json');
+    const binding = await assertManagedStatePath(statePath);
+    const bytes = canonicalJson({ schemaVersion:'tcrn.workflow.helper.state.v1', verifiedArchiveSha256:null });
+    await atomicPrivateOverwrite(statePath, bytes, binding);
+    assert.equal(await readFile(statePath, 'utf8'), bytes);
+    assert.equal((await lstat(statePath)).mode & 0o777, 0o600);
+    // no stage residue
+    assert.deepEqual(await readdir(inner), ['state.json']);
+  } finally { await rm(root, { recursive:true, force:true }); }
 });

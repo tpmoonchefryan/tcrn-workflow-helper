@@ -134,7 +134,32 @@ async function reconstructArchiveFromDirectory(installedDir) {
   entries.sort((one, two) => one.path < two.path ? -1 : one.path > two.path ? 1 : 0);
   return { schemaVersion:ARCHIVE_SCHEMA, entries };
 }
-async function assertManagedStatePath(path) {
+// Walks EVERY component of an already-physical (realpath'd) directory path and proves
+// each one is a real directory, not a symlink. O_NOFOLLOW on the final component says
+// nothing about ancestors, so this is what actually rules out an ancestor swap; it
+// returns the leaf's inode identity so the write point can prove it is the same inode
+// the check ran against, not merely the same path string.
+async function physicalDirectoryChainIdentity(physicalDirectory) {
+  let current = sep;
+  let info = await lstat(current).catch(() => fail('STATE_PATH_INVALID'));
+  for (const component of physicalDirectory.split(sep).filter(Boolean)) {
+    if (liveHostLocationComponent(component)) fail('LIVE_LOCATION_FORBIDDEN');
+    current = resolve(current, component);
+    info = await lstat(current).catch(() => fail('STATE_PATH_INVALID'));
+    if (!info.isDirectory() || info.isSymbolicLink()) fail('STATE_PATH_INVALID');
+  }
+  if (current !== physicalDirectory) fail('STATE_PATH_INVALID');
+  return { dev:info.dev, ino:info.ino };
+}
+// Returns a BINDING, not just a verdict. The binding pins the physical parent directory
+// and its inode identity so `atomicPrivateOverwrite` can re-verify at the write point
+// that it is writing into the very directory this check validated. Callers must thread
+// the binding through to the write; validating a path and later writing to that same
+// path is precisely the TOCTOU this closes.
+// Exported so the TOCTOU regression test can hold the check and the write apart and
+// mutate the tree in between -- the exact window an attacker races. Production callers
+// always pair them; nothing else consumes these.
+export async function assertManagedStatePath(path) {
   if (typeof path !== 'string' || !path) fail('STATE_PATH_INVALID');
   const resolved = resolve(path);
   // Lexical guard catches a literal .claude/.codex component in the requested path...
@@ -143,12 +168,40 @@ async function assertManagedStatePath(path) {
   // bypass that would otherwise let the floor/marker write land physically inside a live host tree.
   const physicalParent = await realpath(dirname(resolved)).catch(() => fail('STATE_PATH_INVALID'));
   if (physicalParent.split(sep).filter(Boolean).some(liveHostLocationComponent)) fail('LIVE_LOCATION_FORBIDDEN');
+  const parentIdentity = await physicalDirectoryChainIdentity(physicalParent);
+  return { name:basename(resolved), parentIdentity, physicalParent, physicalPath:resolve(physicalParent, basename(resolved)), requestedPath:resolved };
 }
-async function atomicPrivateOverwrite(path, bytes) {
-  const stage = `${resolve(path)}.stage-${process.pid}`;
+// Re-runs the managed-state check AT THE WRITE POINT against the pinned binding, then
+// writes to the PHYSICAL path (which by construction contains no symlinked component).
+// Without the binding a caller could only re-check the same path string, which an
+// attacker is free to re-point; the dev/ino comparison is what makes the check and the
+// write reference the same file.
+async function assertBoundManagedStatePath(path, binding) {
+  const resolved = resolve(path);
+  if (binding.requestedPath !== resolved) fail('STATE_PATH_INVALID');
+  if (resolved.split(sep).filter(Boolean).some(liveHostLocationComponent)) fail('LIVE_LOCATION_FORBIDDEN');
+  const physicalParent = await realpath(dirname(resolved)).catch(() => fail('STATE_PATH_INVALID'));
+  if (physicalParent !== binding.physicalParent) fail('STATE_PATH_INVALID');
+  const identity = await physicalDirectoryChainIdentity(physicalParent);
+  if (identity.dev !== binding.parentIdentity.dev || identity.ino !== binding.parentIdentity.ino) fail('STATE_PATH_INVALID');
+}
+export async function atomicPrivateOverwrite(path, bytes, binding = null) {
+  const managed = binding ?? await assertManagedStatePath(path);
+  await assertBoundManagedStatePath(path, managed);
+  const stage = `${managed.physicalPath}.stage-${process.pid}`;
   const handle = await open(stage, constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW, 0o600);
-  try { await handle.writeFile(bytes); await handle.sync(); } finally { await handle.close(); }
-  try { await rename(stage, resolve(path)); } catch (error) { await unlink(stage).catch(() => {}); throw error; }
+  try {
+    // The stage file must have materialised on the pinned device, inside the pinned
+    // parent inode -- proof the create landed where the check ran, not in a tree that
+    // was swapped underneath us between the check and the open.
+    const staged = await handle.stat();
+    if (staged.dev !== managed.parentIdentity.dev) fail('STATE_PATH_INVALID');
+    await handle.writeFile(bytes); await handle.sync();
+  } catch (error) { await unlink(stage).catch(() => {}); throw error; } finally { await handle.close(); }
+  try {
+    await assertBoundManagedStatePath(path, managed);
+    await rename(stage, managed.physicalPath);
+  } catch (error) { await unlink(stage).catch(() => {}); throw error; }
 }
 // Attests exactly this: the bytes on disk at installedDir reconstruct, under this
 // bootstrap's canonicalization rules, to precisely the archive whose SHA-256 is
@@ -158,14 +211,14 @@ export async function verifyInstalledCopy({ installedDir, provenancePath, stateP
   // State and any marker are written to the managed state root, never inside a
   // skill/live directory (verify never mutates the copied skill dir, which stays
   // read-only).
-  await assertManagedStatePath(statePath);
+  const managedState = await assertManagedStatePath(statePath);
   const archive = await reconstructArchiveFromDirectory(installedDir);
   const validated = validateArchive(archive);
   if (validated.archiveSha256 !== expectedArchiveSha256) fail('IDENTITY_MISMATCH');
   await validateProvenance(provenancePath, expectedProvenanceSha256);
   const state = await readState(statePath);
   if (state.value.verifiedArchiveSha256 !== validated.archiveSha256) {
-    await atomicPrivateOverwrite(statePath, canonicalJson({ schemaVersion:STATE_SCHEMA, verifiedArchiveSha256:validated.archiveSha256 }));
+    await atomicPrivateOverwrite(statePath, canonicalJson({ schemaVersion:STATE_SCHEMA, verifiedArchiveSha256:validated.archiveSha256 }), managedState);
   }
   return { reasonCode:'INSTALLED_COPY_VALIDATED', archiveSha256:validated.archiveSha256, version:IDENTITY.version };
 }
@@ -656,5 +709,5 @@ function exactCliOptions(command, value) { const contracts = { install:{ allowed
 // `now` survives in one place only -- the marker's verifiedAt below -- which keeps this
 // helper and TIME_INVALID real rather than vestigial.
 function cliNow(value) { if (value === undefined) return Date.now(); if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(value)) fail('TIME_INVALID'); const parsed = Date.parse(value); if (!Number.isFinite(parsed) || new Date(parsed).toISOString() !== (value.includes('.') ? value : `${value.slice(0, -1)}.000Z`)) fail('TIME_INVALID'); return parsed; }
-async function main() { const [command, ...rest] = process.argv.slice(2); const value = values(rest); exactCliOptions(command, value); if (command === 'validate') console.log(canonicalJson(await validateTrust({ archivePath:value.archive, provenancePath:value.provenance, statePath:value.state }))); else if (command === 'verify-installed-copy') { const now = cliNow(value.now); if (value.marker) await assertManagedStatePath(value.marker); const receipt = await verifyInstalledCopy({ installedDir:value['installed-dir'], provenancePath:value.provenance, statePath:value.state }); const marker = { ...receipt, schemaVersion:INSTALLED_COPY_MARKER_SCHEMA, verifiedAt:new Date(now).toISOString() }; if (value.marker) await atomicPrivateOverwrite(value.marker, canonicalJson(marker)); console.log(canonicalJson(receipt)); } else if (command === 'resolve') console.log(canonicalJson(await resolveWorkflowRoot({ explicitPath:value.root ?? null, candidates:value.candidates ? value.candidates.split(',') : [] }))); else if (command === 'plan-network') { approved(value.approved === 'true'); const operation = value.operation ?? 'clone'; if (!['clone', 'update'].includes(operation)) fail('INVOCATION_INVALID'); console.log(canonicalJson({ reasonCode:'NETWORK_PLAN_APPROVED', operation, networkMutationPerformed:false })); } else if (['install', 'update', 'reinstall'].includes(command)) console.log(canonicalJson(await installArchive({ testRoot:value['test-root'], archivePath:value.archive, provenancePath:value.provenance, statePath:value.state, approved:value.approved === 'true', operation:command, faultAt:value.fault ?? null }))); else if (command === 'uninstall') console.log(canonicalJson(await uninstallArchive({ testRoot:value['test-root'], statePath:value.state, approved:value.approved === 'true', faultAt:value.fault ?? null }))); else fail('INVOCATION_INVALID'); }
+async function main() { const [command, ...rest] = process.argv.slice(2); const value = values(rest); exactCliOptions(command, value); if (command === 'validate') console.log(canonicalJson(await validateTrust({ archivePath:value.archive, provenancePath:value.provenance, statePath:value.state }))); else if (command === 'verify-installed-copy') { const now = cliNow(value.now); const markerBinding = value.marker ? await assertManagedStatePath(value.marker) : null; const receipt = await verifyInstalledCopy({ installedDir:value['installed-dir'], provenancePath:value.provenance, statePath:value.state }); const marker = { ...receipt, schemaVersion:INSTALLED_COPY_MARKER_SCHEMA, verifiedAt:new Date(now).toISOString() }; if (markerBinding) await atomicPrivateOverwrite(value.marker, canonicalJson(marker), markerBinding); console.log(canonicalJson(receipt)); } else if (command === 'resolve') console.log(canonicalJson(await resolveWorkflowRoot({ explicitPath:value.root ?? null, candidates:value.candidates ? value.candidates.split(',') : [] }))); else if (command === 'plan-network') { approved(value.approved === 'true'); const operation = value.operation ?? 'clone'; if (!['clone', 'update'].includes(operation)) fail('INVOCATION_INVALID'); console.log(canonicalJson({ reasonCode:'NETWORK_PLAN_APPROVED', operation, networkMutationPerformed:false })); } else if (['install', 'update', 'reinstall'].includes(command)) console.log(canonicalJson(await installArchive({ testRoot:value['test-root'], archivePath:value.archive, provenancePath:value.provenance, statePath:value.state, approved:value.approved === 'true', operation:command, faultAt:value.fault ?? null }))); else if (command === 'uninstall') console.log(canonicalJson(await uninstallArchive({ testRoot:value['test-root'], statePath:value.state, approved:value.approved === 'true', faultAt:value.fault ?? null }))); else fail('INVOCATION_INVALID'); }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main().catch(error => { console.error(canonicalJson({ ok:false, reasonCode:error.reasonCode ?? 'INTERNAL_ERROR' })); process.exitCode = 1; });
