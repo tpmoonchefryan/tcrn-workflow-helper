@@ -6,9 +6,9 @@
 
 English · [简体中文](./README.zh-CN.md) · [日本語](./README.ja.md) · [한국어](./README.ko.md) · [Français](./README.fr.md)
 
-![status](https://img.shields.io/badge/status-0.1.0--candidate.4-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
+![status](https://img.shields.io/badge/status-0.1.0--candidate.5-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
 
-![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.1.0--rc.5-blue)
+![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.1.0--rc.6-blue)
 
 [Why](#why-this-project-exists) · [Who it is for](#who-this-is-for) · [Verify this first](#verify-this-first) · [What it enforces](#what-it-enforces) · [Install](#install) · [License](#license)
 
@@ -38,7 +38,7 @@ The bootstrap is the only thing you have to trust, so check it before you trust 
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# 7fa9f51fa024bb38db299f3604a33d071a2fe17e9dc45bc17fe80edc86aea3aa
+# 98888c2c6959479f5867ebe62505ebd63391c84edc9400109f84d21ba37932f0
 ```
 
 That digest is published here, in `SECURITY.md`, and in the GitHub release notes. If it does not match, stop.

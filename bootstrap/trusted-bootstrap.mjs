@@ -6,9 +6,9 @@ import { basename, dirname, isAbsolute, relative, resolve, sep } from 'node:path
 import { fileURLToPath } from 'node:url';
 
 export const IDENTITY = Object.freeze({
-  repository: 'https://github.com/tpmoonchefryan/tcrn-workflow.git', version: 'v0.1.0-rc.5',
-  commit: 'e9629dd4510ea428851eadc01a2fb7e8dcae6d5d', tree: '6272dda6ac2164429afad391c07e70ae47c4e3cc',
-  tagObject: '08bcc0527dd0090b6b36328b05b0a48cd89beccc',
+  repository: 'https://github.com/tpmoonchefryan/tcrn-workflow.git', version: 'v0.1.0-rc.6',
+  commit: 'c14f8cf1a3eeddceca4432e3ef0db090f21e348c', tree: '35d4847418fe7ab5d3ff99bba97da995850c8714',
+  tagObject: 'f4960d784778504b4d0730548dacc6ec4a2852de',
 });
 // The accepted release bytes are pinned HERE, in the runtime the user verifies
 // out-of-band against its published SHA-256 -- not in a document that ships beside
