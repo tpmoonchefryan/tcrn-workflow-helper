@@ -1,10 +1,18 @@
-**English** | [简体中文](./README.zh-CN.md) | [日本語](./README.ja.md) | [한국어](./README.ko.md) | [Français](./README.fr.md)
+<div align="center">
 
 # TCRN Workflow Helper
 
-**A dependency-free trusted bootstrap and dual-host Agent Skill that refuses to run any TCRN Workflow release whose bytes do not match the digests pinned into the bootstrap you verified out-of-band.**
+**One file you check by hand, once. After that it refuses every byte that is not the release you were promised.**
 
-`Status: 0.1.0-candidate.4 (pre-release candidate)` · `License: Apache-2.0` · `Node ≥ 24` · `Dependencies: zero` · `Supports: TCRN Workflow v0.1.0-rc.5`
+English · [简体中文](./README.zh-CN.md) · [日本語](./README.ja.md) · [한국어](./README.ko.md) · [Français](./README.fr.md)
+
+![status](https://img.shields.io/badge/status-0.1.0--candidate.4-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
+
+![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.1.0--rc.5-blue)
+
+[Why](#why-this-project-exists) · [Who it is for](#who-this-is-for) · [Verify this first](#verify-this-first) · [What it enforces](#what-it-enforces) · [Install](#install) · [License](#license)
+
+</div>
 
 ---
 
@@ -18,7 +26,15 @@ Installing an agent skill or workflow from a repository is a supply-chain decisi
 
 The helper is the answer for TCRN Workflow: a single-file, zero-dependency bootstrap that validates **the complete release bytes and identity before any Workflow code executes**, on either supported Agent App host (Codex or Claude Code). If any check fails, it stops with a stable reason code. There is no `--force`.
 
-**Verify this first.** The bootstrap is the only thing you have to trust, so check it before you trust anything it tells you:
+## Who this is for
+
+**A good fit if you** are about to run someone else's agent workflow on a machine that matters and want more than a green checkmark from the thing you are installing. Also if you publish such a workflow and want users to have a real reason to trust a release, without you running key infrastructure.
+
+**Probably not for you if** you are installing a workflow you wrote yourself on a machine only you touch — you already know where the bytes came from, and this adds a step for a question you have already answered.
+
+## Verify this first
+
+The bootstrap is the only thing you have to trust, so check it before you trust anything it tells you:
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
