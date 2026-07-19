@@ -575,3 +575,53 @@ test('an unswapped managed-state path still writes through the bound check', asy
     assert.deepEqual(await readdir(inner), ['state.json']);
   } finally { await rm(root, { recursive:true, force:true }); }
 });
+// R2-NEW-8: every ordering that reaches a digest compares by code unit. localeCompare
+// asks the host's ICU, and this Skill's own layout is the counterexample: `SKILL.md` sorts
+// FIRST by code unit and LAST under the default collation. A tree digest built in that
+// order is written into the transaction journal and re-derived on resume, so a host with
+// different ICU -- a small-icu Node, another ICU version -- re-derives a different digest
+// for bytes that never changed and refuses its own recovery as TRANSACTION_CONFLICT.
+test('the workspace tree digest is code-unit ordered, not collator ordered', async () => {
+  const root = await mkdtemp(join(await realpath(os.tmpdir()), 'tcrn-helper-test-order-'));
+  try {
+    // These names are chosen so the two orderings disagree; the shipped Skill has exactly
+    // this shape, which is why the defect was reachable in production and not in theory.
+    const workspace = join(root, 'workspace');
+    await mkdir(join(workspace, 'agents'), { recursive:true, mode:0o700 });
+    await mkdir(join(workspace, 'references'), { recursive:true, mode:0o700 });
+    await writeFile(join(workspace, 'SKILL.md'), 'skill', { mode:0o600 });
+    await writeFile(join(workspace, 'agents', 'openai.yaml'), 'agents', { mode:0o600 });
+    await writeFile(join(workspace, 'references', 'reason-codes.md'), 'reasons', { mode:0o600 });
+
+    // An independent reimplementation of the tree hash with the ordering written out
+    // explicitly. It is the ordering, not the format, that this pins: swap the comparator
+    // below for localeCompare and the two digests part company.
+    const expected = async (compare) => {
+      const hash = createHash('sha256');
+      const walk = async (directory, prefix) => {
+        for (const entry of (await readdir(directory, { withFileTypes:true })).sort((one, two) => compare(one.name, two.name))) {
+          const name = `${prefix}${entry.name}`;
+          if (entry.isDirectory()) { hash.update(`D\0${name}\0`); await walk(join(directory, entry.name), `${name}/`); }
+          else { const bytes = await readFile(join(directory, entry.name)); hash.update(`F\0${name}\0${bytes.length}\0`); hash.update(bytes); }
+        }
+      };
+      await walk(workspace, '');
+      return hash.digest('hex');
+    };
+    const byteOrdered = await expected((one, two) => one < two ? -1 : one > two ? 1 : 0);
+    const collatorOrdered = await expected((one, two) => one.localeCompare(two));
+    // Direction check: without this the assertion below would pass for either comparator.
+    assert.notEqual(byteOrdered, collatorOrdered, 'the chosen names must make the orderings disagree');
+
+    const receipt = await uninstallArchive({ testRoot:root, statePath:join(root, 'state.json'), approved:true });
+    assert.equal(receipt.reasonCode, 'UNINSTALL_COMPLETED');
+    assert.equal(receipt.workspaceSha256, byteOrdered, 'the tree digest must not depend on the host collator');
+  } finally { await rm(root, { recursive:true, force:true }); }
+});
+// The rule the test above can only sample at one shape, stated once over the whole module:
+// no ordering in the shipped bootstrap may consult the host collator at all.
+test('the shipped bootstrap contains no collator-dependent ordering', async () => {
+  const source = await readFile(join(process.cwd(), 'bootstrap/trusted-bootstrap.mjs'), 'utf8');
+  const offending = source.split('\n').map((line, index) => [index + 1, line]).filter(([, line]) => line.includes('localeCompare') && !line.trimStart().startsWith('//'));
+  assert.deepEqual(offending, [], 'localeCompare must not appear outside the comment that explains its absence');
+});

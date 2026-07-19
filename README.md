@@ -38,7 +38,7 @@ The bootstrap is the only thing you have to trust, so check it before you trust 
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# 4b704bdbc9c2020be04fa6c3d307913bf864d5fbea2d08eb0a29a9f0a3d68611
+# 0904ee654af8b4c590917cb7dfcb0156f9b4c3247ea3b1f799621cecd9bdc233
 ```
 
 That digest is published here, in `SECURITY.md`, and in the GitHub release notes. If it does not match, stop.

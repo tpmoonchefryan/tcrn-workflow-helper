@@ -28,6 +28,17 @@ const ACTIVE_TRANSACTION_IDS = new Set(); const ACTIVE_RECEIPT_STAGES = new Map(
 export class BootstrapError extends Error { constructor(reasonCode, message = reasonCode) { super(message); this.reasonCode = reasonCode; } }
 const fail = (code, message = code) => { throw new BootstrapError(code, message); };
 const sha256 = value => createHash('sha256').update(value).digest('hex');
+// Any ordering that feeds a digest, a journal, or a delete sequence compares by code unit
+// here, never with localeCompare. localeCompare answers whatever the host's ICU says: this
+// Skill ships `SKILL.md` beside `agents/`, and the default collation puts `SKILL.md` LAST
+// while code-unit order puts it FIRST. The tree digest that ordering produces is written
+// into the transaction journal and re-derived on resume, so a Node built with small-icu --
+// or merely a different ICU version, or a different LANG -- re-derives a different digest
+// for bytes that never changed and fails the recovery as TRANSACTION_CONFLICT. That is an
+// install bricked by a locale. It is also why validateArchive already pins entries in
+// strict code-unit ascending order: this comparator is the same rule, applied to the paths
+// that reach the hash instead of only the ones that reach the archive.
+const byteOrder = (one, two) => one < two ? -1 : one > two ? 1 : 0;
 export const canonicalJson = value => `${JSON.stringify(sort(value))}\n`;
 function sort(value) { if (Array.isArray(value)) return value.map(sort); if (value && typeof value === 'object') return Object.fromEntries(Object.keys(value).sort().map(key => [key, sort(value[key])])); return value; }
 function exact(value, keys, code) { if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).sort().join(',') !== [...keys].sort().join(',')) fail(code); }
@@ -121,7 +132,7 @@ async function reconstructArchiveFromDirectory(installedDir) {
   const entries = []; let total = 0;
   async function walk(directory, prefix) {
     const listing = await readdir(directory, { withFileTypes:true });
-    for (const entry of listing.sort((one, two) => one.name.localeCompare(two.name))) {
+    for (const entry of listing.sort((one, two) => byteOrder(one.name, two.name))) {
       const full = resolve(directory, entry.name); const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
       if (entry.isSymbolicLink() || (!entry.isFile() && !entry.isDirectory())) fail('ARCHIVE_ENTRY_INVALID');
       if (entry.isDirectory()) { await walk(full, rel); continue; }
@@ -201,6 +212,13 @@ export async function atomicPrivateOverwrite(path, bytes, binding = null) {
   try {
     await assertBoundManagedStatePath(path, managed);
     await rename(stage, managed.physicalPath);
+    // handle.sync() above made the CONTENT durable; it says nothing about the directory
+    // entry the rename created. Without this the rename can be lost by a crash while the
+    // caller has already been told the write succeeded -- a floor advance that survives
+    // the process but not the power, which is the one failure mode a monotonic floor must
+    // not have. Every other rename in this file goes through renameDurable for exactly
+    // this reason; this one was the exception.
+    await syncPath(managed.physicalParent);
   } catch (error) { await unlink(stage).catch(() => {}); throw error; }
 }
 // Attests exactly this: the bytes on disk at installedDir reconstruct, under this
@@ -259,9 +277,9 @@ async function testRoot(root) {
   if (physical !== requested || !ownedPrivateDirectory(info)) fail('TEST_ROOT_REQUIRED'); return requested;
 }
 async function authorizedStatePath(base, requested) { if (typeof requested !== 'string') fail('STATE_PATH_INVALID'); const physicalParent = await realpath(dirname(resolve(requested))).catch(() => fail('STATE_PATH_INVALID')); const physical = resolve(physicalParent, basename(requested)); if (physical !== resolve(base, 'state.json')) fail('STATE_PATH_INVALID'); const root = await lstat(base); if (!root.isDirectory() || root.isSymbolicLink()) fail('TEST_ROOT_REQUIRED'); return physical; }
-async function treeDigest(root) { const hash = createHash('sha256'); async function walk(directory, prefix = '') { let entries; try { entries = await readdir(directory, { withFileTypes:true }); } catch (error) { if (error?.code === 'ENOENT') return; throw error; } for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) { const path = resolve(directory, entry.name); const name = `${prefix}${entry.name}`; if (entry.isSymbolicLink()) fail('WORKSPACE_INVALID'); if (entry.isDirectory()) { hash.update(`D\0${name}\0`); await walk(path, `${name}/`); } else if (entry.isFile()) { const bytes = await boundedBytes(path, MAX_BYTES, 'WORKSPACE_INVALID'); hash.update(`F\0${name}\0${bytes.length}\0`); hash.update(bytes); } else fail('WORKSPACE_INVALID'); } } await walk(root); return hash.digest('hex'); }
-async function boundTree(root) { const hash = createHash('sha256'); const nodes = []; let total = 0; async function walk(directory, prefix = '') { const directoryInfo = await lstat(directory).catch(() => fail('TRANSACTION_CONFLICT')); if (!directoryInfo.isDirectory() || directoryInfo.isSymbolicLink() || (typeof process.getuid === 'function' && directoryInfo.uid !== process.getuid()) || (directoryInfo.mode & 0o077) !== 0) fail('TRANSACTION_CONFLICT'); nodes.push({ fingerprint:statFingerprint(directoryInfo), kind:'directory', path:directory }); const entries = await readdir(directory, { withFileTypes:true }).catch(() => fail('TRANSACTION_CONFLICT')); for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) { const path = resolve(directory, entry.name); const name = `${prefix}${entry.name}`; if (entry.isDirectory()) { hash.update(`D\0${name}\0`); await walk(path, `${name}/`); continue; } if (!entry.isFile() || entry.isSymbolicLink()) fail('TRANSACTION_CONFLICT'); const bytes = await boundedBytes(path, MAX_BYTES - total, 'TRANSACTION_CONFLICT'); total += bytes.length; const info = await lstat(path).catch(() => fail('TRANSACTION_CONFLICT')); hash.update(`F\0${name}\0${bytes.length}\0`); hash.update(bytes); nodes.push({ bytes, fingerprint:statFingerprint(info), kind:'file', path }); } } await walk(root); return { digest:hash.digest('hex'), nodes }; }
-function durableTreeNodes(root, manifest) { return manifest.nodes.filter(node => node.path !== root).map(node => ({ identity:node.fingerprint, kind:node.kind, path:relative(root, node.path).split(sep).join('/'), sha256:node.kind === 'file' ? sha256(node.bytes) : null })).sort((one, two) => one.path.localeCompare(two.path)); }
+async function treeDigest(root) { const hash = createHash('sha256'); async function walk(directory, prefix = '') { let entries; try { entries = await readdir(directory, { withFileTypes:true }); } catch (error) { if (error?.code === 'ENOENT') return; throw error; } for (const entry of entries.sort((a, b) => byteOrder(a.name, b.name))) { const path = resolve(directory, entry.name); const name = `${prefix}${entry.name}`; if (entry.isSymbolicLink()) fail('WORKSPACE_INVALID'); if (entry.isDirectory()) { hash.update(`D\0${name}\0`); await walk(path, `${name}/`); } else if (entry.isFile()) { const bytes = await boundedBytes(path, MAX_BYTES, 'WORKSPACE_INVALID'); hash.update(`F\0${name}\0${bytes.length}\0`); hash.update(bytes); } else fail('WORKSPACE_INVALID'); } } await walk(root); return hash.digest('hex'); }
+async function boundTree(root) { const hash = createHash('sha256'); const nodes = []; let total = 0; async function walk(directory, prefix = '') { const directoryInfo = await lstat(directory).catch(() => fail('TRANSACTION_CONFLICT')); if (!directoryInfo.isDirectory() || directoryInfo.isSymbolicLink() || (typeof process.getuid === 'function' && directoryInfo.uid !== process.getuid()) || (directoryInfo.mode & 0o077) !== 0) fail('TRANSACTION_CONFLICT'); nodes.push({ fingerprint:statFingerprint(directoryInfo), kind:'directory', path:directory }); const entries = await readdir(directory, { withFileTypes:true }).catch(() => fail('TRANSACTION_CONFLICT')); for (const entry of entries.sort((a, b) => byteOrder(a.name, b.name))) { const path = resolve(directory, entry.name); const name = `${prefix}${entry.name}`; if (entry.isDirectory()) { hash.update(`D\0${name}\0`); await walk(path, `${name}/`); continue; } if (!entry.isFile() || entry.isSymbolicLink()) fail('TRANSACTION_CONFLICT'); const bytes = await boundedBytes(path, MAX_BYTES - total, 'TRANSACTION_CONFLICT'); total += bytes.length; const info = await lstat(path).catch(() => fail('TRANSACTION_CONFLICT')); hash.update(`F\0${name}\0${bytes.length}\0`); hash.update(bytes); nodes.push({ bytes, fingerprint:statFingerprint(info), kind:'file', path }); } } await walk(root); return { digest:hash.digest('hex'), nodes }; }
+function durableTreeNodes(root, manifest) { return manifest.nodes.filter(node => node.path !== root).map(node => ({ identity:node.fingerprint, kind:node.kind, path:relative(root, node.path).split(sep).join('/'), sha256:node.kind === 'file' ? sha256(node.bytes) : null })).sort((one, two) => byteOrder(one.path, two.path)); }
 function sameMovedRootIdentity(before, after) { return before?.dev === after?.dev && before?.ino === after?.ino && before?.gid === after?.gid && before?.uid === after?.uid && before?.mode === after?.mode && before?.nlink === after?.nlink; }
 function sameStableObjectIdentity(before, after) { return before?.dev === after?.dev && before?.ino === after?.ino && before?.gid === after?.gid && before?.uid === after?.uid && before?.mode === after?.mode; }
 function sameMovedTreeBinding(expected, actual) { return expected?.present === true && actual?.present === true && expected.sha256 === actual.sha256 && sameMovedRootIdentity(expected.identity, actual.identity) && canonicalJson(expected.tree) === canonicalJson(actual.tree); }
@@ -281,20 +299,20 @@ async function removeBoundTree(root, expectedBinding, { allowEmpty = false, faul
       if (!expected || expected.kind !== actual.kind || expected.sha256 !== actual.sha256 || !sameStableObjectIdentity(expected.identity, actual.identity)) fail('TRANSACTION_CONFLICT');
     }
     const fileOrder = expectedBinding.tree.filter(node => node.kind === 'file').map(node => node.path).sort().reverse();
-    const directoryOrder = expectedBinding.tree.filter(node => node.kind === 'directory').map(node => node.path).sort((one, two) => two.split('/').length - one.split('/').length || two.localeCompare(one));
+    const directoryOrder = expectedBinding.tree.filter(node => node.kind === 'directory').map(node => node.path).sort((one, two) => two.split('/').length - one.split('/').length || byteOrder(two, one));
     const deletionOrder = [...fileOrder, ...directoryOrder, '.'];
     const remaining = new Set(actualTree.map(node => node.path).concat('.'));
     const firstRemaining = deletionOrder.findIndex(path => remaining.has(path));
     if (firstRemaining < 0 || canonicalJson(deletionOrder.slice(firstRemaining)) !== canonicalJson(deletionOrder.filter(path => remaining.has(path)))) fail('TRANSACTION_CONFLICT');
   }
-  const files = manifest.nodes.filter(node => node.kind === 'file').sort((one, two) => relative(root, two.path).localeCompare(relative(root, one.path)));
+  const files = manifest.nodes.filter(node => node.kind === 'file').sort((one, two) => byteOrder(relative(root, two.path), relative(root, one.path)));
   for (const node of files) {
     const info = await lstat(node.path).catch(() => fail('TRANSACTION_CONFLICT'));
     if (!sameFingerprint(node.fingerprint, statFingerprint(info)) || !(await boundedBytes(node.path, MAX_BYTES, 'TRANSACTION_CONFLICT')).equals(node.bytes)) fail('TRANSACTION_CONFLICT');
     inject(faultAt, `before-${point}-file-unlink`); await unlink(node.path); inject(faultAt, `after-${point}-file-unlink`);
     inject(faultAt, `before-${point}-file-parent-fsync`); await syncPath(dirname(node.path)); inject(faultAt, `after-${point}-file-parent-fsync`);
   }
-  const directories = manifest.nodes.filter(node => node.kind === 'directory').sort((one, two) => relative(root, two.path).split(sep).length - relative(root, one.path).split(sep).length || relative(root, two.path).localeCompare(relative(root, one.path)));
+  const directories = manifest.nodes.filter(node => node.kind === 'directory').sort((one, two) => relative(root, two.path).split(sep).length - relative(root, one.path).split(sep).length || byteOrder(relative(root, two.path), relative(root, one.path)));
   for (const node of directories) {
     const info = await lstat(node.path).catch(() => fail('TRANSACTION_CONFLICT'));
     if (!sameDirectoryIdentity(directoryIdentity(info), directoryIdentity(node.fingerprint)) || (await readdir(node.path)).length !== 0) fail('TRANSACTION_CONFLICT');
@@ -302,7 +320,7 @@ async function removeBoundTree(root, expectedBinding, { allowEmpty = false, faul
     inject(faultAt, `before-${point}-directory-parent-fsync`); await syncPath(dirname(node.path)); inject(faultAt, `after-${point}-directory-parent-fsync`);
   }
 }
-function archiveTreeDigest(documentValue) { const hash = createHash('sha256'); const entries = validateArchive(documentValue).entries; const directories = new Set(); for (const entry of entries) { const parts = entry.path.split('/'); for (let index = 1; index < parts.length; index += 1) directories.add(parts.slice(0, index).join('/')); } const nodes = [...directories].map(path => ({ path, type:'directory' })).concat(entries.map(entry => ({ ...entry, type:'file' }))).sort((one, two) => one.path.localeCompare(two.path)); for (const node of nodes) { if (node.type === 'directory') hash.update(`D\0${node.path}\0`); else { const bytes = decodedBase64(node, MAX_BYTES); hash.update(`F\0${node.path}\0${bytes.length}\0`); hash.update(bytes); } } return hash.digest('hex'); }
+function archiveTreeDigest(documentValue) { const hash = createHash('sha256'); const entries = validateArchive(documentValue).entries; const directories = new Set(); for (const entry of entries) { const parts = entry.path.split('/'); for (let index = 1; index < parts.length; index += 1) directories.add(parts.slice(0, index).join('/')); } const nodes = [...directories].map(path => ({ path, type:'directory' })).concat(entries.map(entry => ({ ...entry, type:'file' }))).sort((one, two) => byteOrder(one.path, two.path)); for (const node of nodes) { if (node.type === 'directory') hash.update(`D\0${node.path}\0`); else { const bytes = decodedBase64(node, MAX_BYTES); hash.update(`F\0${node.path}\0${bytes.length}\0`); hash.update(bytes); } } return hash.digest('hex'); }
 async function installedBinding(path) { const info = await lstat(path).catch(error => error?.code === 'ENOENT' ? null : Promise.reject(error)); if (!info) return contentBinding(false, null); if (!info.isDirectory() || info.isSymbolicLink() || (typeof process.getuid === 'function' && info.uid !== process.getuid()) || (info.mode & 0o077) !== 0) fail('TRANSACTION_CONFLICT'); const manifest = await boundTree(path); return { identity:statFingerprint(info), present:true, sha256:manifest.digest, tree:durableTreeNodes(path, manifest) }; }
 async function stateBinding(path) { const state = await readState(path); const identity = state.fingerprint === null ? null : statFingerprint(await lstat(path)); return { ...contentBinding(state.fingerprint !== null, state.fingerprint), identity }; }
 async function removeBoundState(path, binding, faultAt = null, point = 'state-stage-cleanup') { const actual = await stateBinding(path); if (!sameFingerprint(actual, binding)) fail('TRANSACTION_CONFLICT'); inject(faultAt, `before-${point}`); await unlink(path); inject(faultAt, `after-${point}`); await syncPath(dirname(path)); }
