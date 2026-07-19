@@ -27,7 +27,8 @@ independently obtained bootstrap runtime, gates every later step on a
 machine-checkable marker (never on this prose), and uses managed default paths so
 a non-technical user types nothing. Explain every fail-closed stop using
 `references/reason-codes.md`. When the user later needs work items or knowledge,
-teach on-demand queries per `references/on-demand-context.md` — this Skill never
+teach on-demand queries per `references/on-demand-context.md`, and route the
+governed feature itself per `references/workflow-operations.md` — this Skill never
 injects work/knowledge data into context.
 
 ## Deliberation Triggers (advisory)
@@ -101,3 +102,7 @@ checksum, provenance, root, or archive checks. Read
 - `references/backup-elicitation.md` defines the snapshot backup runbook and
   live-sync warning (external backup destination, `backup.cadence` /
   `backup.destination` settings), for the pinned release's snapshot surface.
+- `references/workflow-operations.md` routes a governed situation to the feature
+  that answers it (work graph, gates, conferences, knowledge, recovery,
+  snapshots), states the three things every mutation must supply, and names the
+  one-way doors an agent must disclose before proposing them.

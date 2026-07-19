@@ -18,6 +18,7 @@ const ALLOWED = [
   'references/reason-codes.md',
   'references/settings-elicitation.md',
   'references/trust-contract.md',
+  'references/workflow-operations.md',
   'scripts/create-skill-archive.mjs',
 ].sort();
 
