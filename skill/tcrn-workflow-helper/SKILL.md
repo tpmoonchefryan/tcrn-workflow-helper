@@ -1,6 +1,6 @@
 ---
 name: tcrn-workflow-helper
-description: Trusted setup and operating guidance for TCRN Workflow. Use when Codex or Claude Code must discover, inspect, or test-only install, update, reinstall, uninstall, or invoke TCRN Workflow while enforcing release identity, pinned release-byte digests, offline-safe validation, and explicit approval. Use it also while working in a project that carries an installed governed workspace: when a discussion converges on a direction, a decision with consequences is made, work completes, or a choice warrants deliberation, it routes that moment to the verb family that records it. It offers; it never records without the user's explicit yes.
+description: Trusted setup and operating guidance for TCRN Workflow. Use when Codex or Claude Code must discover, inspect, or test-only install, update, reinstall, uninstall, or invoke TCRN Workflow while enforcing release identity, pinned release-byte digests, offline-safe validation, and explicit approval. Use it also while working in a project that carries an installed governed workspace — when a discussion converges on a direction, a decision with consequences is made, work completes, or a choice warrants deliberation, it routes that moment to the verb family that records it. It offers; it never records without the user's explicit yes.
 ---
 
 # TCRN Workflow Helper

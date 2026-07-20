@@ -9,7 +9,7 @@ independent of whatever you are about to install, and check it:
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# fa7606e775a2dad1445f96f66a06f3d63dfd3d632712f165736d4fbfe5f15f98
+# 784a79aa9bd83c7e6e58981d38b82da8ae03879f040165e526edb5137526f977
 ```
 
 The same digest is published in `README.md` and in the GitHub release notes for
