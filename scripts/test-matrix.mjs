@@ -56,14 +56,20 @@ async function run(label, args, env = {}) {
     });
     // The push-gate's zero-tolerance warning scan reads THIS process's output.
     // Child output is aggregated here, so the scan must happen here too --
-    // swallowing a child warning would weaken the existing check.
-    const warned = /\bwarning\b|\bWARN\b/u.exec(`${stdout}\n${stderr}`);
-    if (warned) throw new Error(`${label}: warning emitted: ${warned[0]}`);
+    // swallowing a child warning would weaken the existing check. It matches
+    // Node's genuine runtime-warning prefix, not the bare word: test fixtures
+    // legitimately contain the word "warning" (ci-replay's stderr-nonzero case
+    // fakes exactly that), and a scan blunt enough to fire on fixture text
+    // spent a debugging round masquerading as a flake before this comment.
+    const warned = /\(node:\d+\)[^\n]*Warning/u.exec(`${stdout}\n${stderr}`);
+    if (warned) throw new Error(`${label}: runtime warning emitted: ${warned[0].slice(0, 200)}`);
     return { label, ...summary(stdout, stderr, label) };
   } catch (error) {
     process.stderr.write(String(error.stdout ?? ''));
     process.stderr.write(String(error.stderr ?? ''));
-    throw new Error(`${label}: test process failed`);
+    // A child that dies with empty output leaves the forwards above blank, so
+    // the error object itself is the only witness -- say what it knows.
+    throw new Error(`${label}: test process failed (${error.message}; code=${error.code ?? 'none'} signal=${error.signal ?? 'none'})`);
   }
 }
 

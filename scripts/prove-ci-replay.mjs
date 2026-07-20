@@ -89,13 +89,25 @@ export async function runCommand({ checkout, command, commands, exec = execFile 
     const stdout = error.stdout ?? '';
     const stderr = error.stderr ?? '';
     commands.push({ command:command.command, elapsedMilliseconds:Date.now() - started, exitStatus:Number.isInteger(error.code) ? error.code : 1, expectedTerminal:command.expectedTerminal, stderrBytes:Buffer.byteLength(stderr), stdoutSha256:sha256(stdout), terminalReason:terminalReason(stdout) ?? terminalReason(stderr) });
+    // Diagnostics only -- the judgement above is already recorded. Without this,
+    // a replay failure on a CI runner reports its reason code and discards the
+    // one thing needed to fix it: what the failing command actually said.
+    process.stderr.write(`ci-replay: ${command.command} exited ${Number.isInteger(error.code) ? error.code : 'signal'} after ${Date.now() - started}ms\n`);
+    if (stdout !== '') process.stderr.write(`ci-replay stdout tail:\n${stdout.slice(-2000)}\n`);
+    if (stderr !== '') process.stderr.write(`ci-replay stderr tail:\n${stderr.slice(-2000)}\n`);
     fail('CI_REPLAY_COMMAND_FAILED');
   }
   const commandStderrBytes = Buffer.byteLength(result.stderr);
   const observedTerminal = terminalReason(result.stdout);
   commands.push({ command:command.command, elapsedMilliseconds:Date.now() - started, exitStatus:0, expectedTerminal:command.expectedTerminal, stderrBytes:commandStderrBytes, stdoutSha256:sha256(result.stdout), terminalReason:observedTerminal });
-  if (commandStderrBytes !== 0) fail('CI_REPLAY_STDERR_NONZERO');
-  if (command.expectedTerminal !== null && observedTerminal !== command.expectedTerminal) fail('CI_REPLAY_TERMINAL_INVALID');
+  if (commandStderrBytes !== 0) {
+    process.stderr.write(`ci-replay: ${command.command} wrote ${commandStderrBytes} stderr bytes:\n${result.stderr.slice(-2000)}\n`);
+    fail('CI_REPLAY_STDERR_NONZERO');
+  }
+  if (command.expectedTerminal !== null && observedTerminal !== command.expectedTerminal) {
+    process.stderr.write(`ci-replay: ${command.command} terminal ${JSON.stringify(observedTerminal)} != expected ${JSON.stringify(command.expectedTerminal)}\n`);
+    fail('CI_REPLAY_TERMINAL_INVALID');
+  }
   // Nothing to return: a non-zero stderr already failed above, so the only value this
   // could ever have carried was zero.
 }
