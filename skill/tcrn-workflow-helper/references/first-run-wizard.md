@@ -98,8 +98,11 @@ tampered or look-alike copy could simply rewrite these steps. Therefore:
 7. **Set the backup floor** — the moment after initialization, while the
    Workspace is still empty, is the cheapest time to set backups up. Walk
    `backup-elicitation.md`: record a snapshot baseline, elicit
-   `backup.destination` and `backup.cadence` (cadence is advisory — there is
-   no scheduler; the agent proposes, the user decides), and state the restore
+   `backup.destination`, `backup.cadence` (cadence is advisory — there is
+   no scheduler; the agent proposes, the user decides) and
+   `backup.retention` (how many snapshots the destination keeps — default
+   five; rotation deletes oldest-first, runs only after a new snapshot
+   verifies, and always names what it deleted), and state the restore
    boundary before it matters: restore is same-path-only, and the control
    tree restores whole or not at all.
 8. **Ready to use** — tell the user Workflow is verified and where it lives.

@@ -50,23 +50,37 @@ are first-class — always double-quote them.
    pnpm --silent exec tcrn-workflow snapshot-manifest --workspace "<root>" --at "<instant>" > "<receipt>"
    ```
 
-4. **Copy the tree** with OS tools to a destination **outside** `<root>`:
+4. **Copy the tree** with OS tools into a fresh per-snapshot directory under
+   the destination, named `<partition>-<utc-instant>` so snapshots accumulate
+   side by side instead of overwriting, and place the receipt beside the tree:
 
    ```
-   cp -R "<root>/.tcrn-workflow" "<destinationParent>/.tcrn-workflow"          # macOS/Linux
-   robocopy "<root>\.tcrn-workflow" "<destinationParent>\.tcrn-workflow" /E    # Windows
+   mkdir -p "<destination>/<partition>-<utc-instant>"
+   cp -R "<root>/.tcrn-workflow" "<destination>/<partition>-<utc-instant>/.tcrn-workflow"
+   cp "<receipt>" "<destination>/<partition>-<utc-instant>/snapshot-manifest.json"
    ```
 
 5. **Prove the copy:**
 
    ```
-   pnpm --silent exec tcrn-workflow snapshot-verify --root "<destinationParent>" --manifest "<receipt>"
+   pnpm --silent exec tcrn-workflow snapshot-verify --root "<destination>/<partition>-<utc-instant>" --manifest "<receipt>"
    ```
 
-   `SNAPSHOT_VERIFIED` means the copy is byte-identical. Any other result
-   (`SNAPSHOT_MISMATCH`, `SNAPSHOT_RESIDUE_PRESENT`, `SNAPSHOT_MANIFEST_INVALID`,
+   The `--root` is the directory that CONTAINS `.tcrn-workflow`, never
+   `.tcrn-workflow` itself. `SNAPSHOT_VERIFIED` means the copy is
+   byte-identical. Any other result (`SNAPSHOT_MISMATCH`,
+   `SNAPSHOT_RESIDUE_PRESENT`, `SNAPSHOT_MANIFEST_INVALID`,
    `SNAPSHOT_PATH_INVALID`, `SNAPSHOT_INPUT_INVALID`): do not keep the copy — see
    `references/reason-codes.md`.
+
+6. **Rotate.** Only after step 5's `SNAPSHOT_VERIFIED`, apply
+   `backup.retention`: list the per-snapshot directories under the destination
+   that match this flow's `<partition>-<utc-instant>` naming, and while more
+   than the retention count remain, delete the oldest. Three rails are
+   absolute: never delete anything before the new copy has verified; never
+   touch any path that is not a matching per-snapshot directory under the
+   destination; and name every deleted snapshot in the same breath as the
+   backup receipt — rotation that reports nothing is deletion, not rotation.
 
 ## RESTORE runbook
 
@@ -84,6 +98,11 @@ are first-class — always double-quote them.
   `{gate-close, session-end, manual}` (default `gate-close`). It is **advisory
   only**: there is no engine scheduler, so cadence informs *when the agent
   proposes* a backup, never an automatic trigger.
+- `backup.retention` — a Tier-2 conversational preference of this flow: how
+  many verified snapshots the destination keeps (default `5`; a positive
+  integer, or `unlimited`). Rotation is a runbook step, never a scheduler: it
+  runs only inside the SNAPSHOT flow, immediately after a new snapshot proves
+  `SNAPSHOT_VERIFIED`, oldest first, reporting every deletion by name.
 - `backup.destination` — a Tier-2 conversational preference with **no default**:
   always elicit an explicit absolute path. Recommend a destination that is
   **OUTSIDE both** the workspace control directory `.tcrn-workflow`
