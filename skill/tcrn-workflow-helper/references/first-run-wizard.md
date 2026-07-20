@@ -63,13 +63,32 @@ tampered or look-alike copy could simply rewrite these steps. Therefore:
    code. Offer `pnpm verify:p1` afterwards — twenty offline gates re-proving
    the checkout on their own machine is the best trust demonstration a first
    run can give.
-6. **Create the Workspace** — reuse the elicitation pattern: ask which project
-   this Workspace serves, recommend a path placed with that project (one
-   Workspace per project or initiative — an organisation-wide chain is the
-   shape the scale ceiling punishes; the Workflow README's Known limits
-   carries the numbers), show the resolved five-root layout, and run `init`
-   only after an explicit yes. The agent supplies every path; the user types
-   nothing. Before the knowledge store's first initialization, explain
+6. **Create the Workspace** — this step is an elicitation, not a default:
+   never choose a location the user has not seen as a question.
+   **Observe first**: look at the directory the user works in. A single
+   project gets a single Workspace placed with it. A platform root — one
+   directory containing several sub-projects (each with its own `.git` or
+   manifest) — gets the partitioned layout below, and the agent presents
+   what it detected as data before recommending anything. **Then ask two
+   questions, with options**: what should this Workspace govern (one
+   sub-project, or the cross-project work that spans them), and where
+   should it live. Only after both answers show the resolved five-root
+   layout, and run `init` only after an explicit yes. The agent fills every
+   path; the user types nothing — but the user chooses.
+
+   The platform layout keeps every chain in one place, so no sub-project
+   repository is ever touched by governance bytes:
+   `<platform>/.tcrn-workspace/` holds `release-trust/` (shared across
+   partitions), `cross-project/` (decisions and work spanning
+   sub-projects), and one `<sub-project>/` partition per project — created
+   lazily, on that project's first need, through this step. Each partition
+   is an independent single-writer domain: its own chain, its own scale
+   budget, its own lease; all may share one framework checkout and the one
+   `release-trust/` root. State one consequence before the first `init`:
+   partition names become frozen paths (restore is same-path-only), so
+   choose names that will not be renamed.
+
+   Before the knowledge store's first initialization, explain
    `KNOWLEDGE_DISPOSABLE_ACK_REQUIRED` in one line — the store is a derived
    index, never the source of record, and saying so is required per
    invocation — so the user's first encounter is an explanation, not a

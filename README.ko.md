@@ -8,7 +8,7 @@
 
 [English](./README.md) · [简体中文](./README.zh-CN.md) · [日本語](./README.ja.md) · 한국어 · [Français](./README.fr.md)
 
-![status](https://img.shields.io/badge/status-0.1.0--candidate.11-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
+![status](https://img.shields.io/badge/status-0.1.0--candidate.12-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
 
 ![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.1.0-blue)
 
@@ -26,7 +26,7 @@
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# c2bd36583a18372b23c59a88dc75822accb3983679aa09cf1cfcb47cf475dcff
+# 725583f425e677328df63226c1b9cb5e4023524f4ed6712685a8e7e77ce4331f
 ```
 
 이 다이제스트는 여기, `SECURITY.md`, 그리고 GitHub 릴리스 노트에 공개되어 있습니다. **계산한 값이 맞지 않으면 멈추십시오** — 아무것도 실행하지 말고, "그래도 한번 해보자"도 하지 마십시오. 불일치는 이 장치가 제대로 작동하고 있다는 뜻입니다.
@@ -161,7 +161,7 @@ helper의 역할은 그대로입니다 — 돌기 전에 릴리스를 증명하�
 
 ## 상태, 정직하게
 
-- `0.1.0-candidate.11`는 **프리릴리스 후보**이며 정확히 TCRN Workflow `v0.1.0`을 지원합니다.
+- `0.1.0-candidate.12`는 **프리릴리스 후보**이며 정확히 TCRN Workflow `v0.1.0`을 지원합니다.
 - 설치와 제거는 두 호스트 모두 **테스트 루트 전용**이며, 라이브 Codex 또는 Claude Code 호스트 지원은 주장하지 않습니다.
 - **직접 만든 Ed25519 서명 체인은 2026-07-19에 제거되었습니다**. 그것은 한 번도 닻을 내린 적이 없었습니다: 의존하던 다이제스트와 키 지문이 사용자가 독립적으로 얻을 수 있는 어디에도 공개되지 않아, 이 저장소 밖의 누구에게도 아무것도 증명하지 못했습니다. 그것을 대신하는 것은 더 단순하고 정직합니다: *실제로 공개된* 부트스트랩 다이제스트, 그 부트스트랩에 컴파일된 수용 릴리스 다이제스트, GitHub 불변 릴리스, 그리고 재현 빌드 사슬.
 - Claude Code 고유의 세 가지 동작(settings 조각 가역성, 사용자 대 프로젝트 우선순위, CLAUDE.md 폴백)은 이 저장소가 아니라 **고정된 Workflow 릴리스**에서 구현되고 증명되었습니다 — 정확한 증거 대응은 `skill/tcrn-workflow-helper/references/trust-contract.md`를 참조하십시오.

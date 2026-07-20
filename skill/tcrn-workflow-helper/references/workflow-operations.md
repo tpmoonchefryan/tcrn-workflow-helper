@@ -29,6 +29,19 @@ to serve as an inventory.
 | Recover a workspace that refuses writes | `lease-inspect`, then `recover` | Diagnose before acting. Never delete lease files by hand — that is a fail-closed corruption path. |
 | Protect the workspace before a risky change | `snapshot-manifest` / `snapshot-verify` | See `backup-elicitation.md`. Cadence is advisory: there is no scheduler, so the agent proposes, the user decides. |
 
+## Which Workspace answers which moment
+
+Discovery is a path convention, not a registry: walk up from the working
+directory to the nearest `.tcrn-workspace/`. Inside a platform layout
+(`<platform>/.tcrn-workspace/<partition>/`), route by scope: work that
+concerns exactly one sub-project belongs to that sub-project's partition;
+work that spans two or more, or governs the platform itself — releases,
+architecture rulings, cross-cutting decisions — belongs to `cross-project/`.
+When a record could defensibly live in either, prefer the narrower partition
+and say so in the offer; the user's yes decides. A partition that does not
+exist yet is created through the first-run wizard's Workspace step — lazily,
+on first need, never silently.
+
 ## Before any mutation: three things the engine will insist on
 
 Every mutating verb requires an explicit workspace path, a strict RFC 3339
