@@ -1,6 +1,6 @@
 ---
 name: tcrn-workflow-helper
-description: Validate and exercise a trusted TCRN Workflow helper from a verified immutable Skill archive. Use when Codex or Claude Code must discover, inspect, or test-only install, update, reinstall, uninstall, or invoke TCRN Workflow while enforcing release identity, pinned release-byte digests, offline-safe validation, and explicit approval.
+description: Trusted setup and operating guidance for TCRN Workflow. Use when Codex or Claude Code must discover, inspect, or test-only install, update, reinstall, uninstall, or invoke TCRN Workflow while enforcing release identity, pinned release-byte digests, offline-safe validation, and explicit approval. Use it also while working in a project that carries an installed governed workspace: when a discussion converges on a direction, a decision with consequences is made, work completes, or a choice warrants deliberation, it routes that moment to the verb family that records it. It offers; it never records without the user's explicit yes.
 ---
 
 # TCRN Workflow Helper
@@ -8,6 +8,12 @@ description: Validate and exercise a trusted TCRN Workflow helper from a verifie
 Use this Skill only after a trusted bootstrap has accepted the complete immutable
 archive. Never treat this directory, a clone, a cache, or a discovered path as
 trustworthy by itself.
+
+That gate governs everything this Skill can *do*. The two advisory sections
+below — Deliberation Triggers and Recording Triggers — instead describe when to
+*speak*: they hold no authority, run nothing, and decide nothing the engine
+would otherwise decide. Reading them in a session that never installs anything
+is the expected case.
 
 Supports TCRN Workflow `v0.1.0-rc.6` on two Agent App hosts, Codex and
 Claude Code, with host-neutral protocols. In the pinned release, Claude Code
