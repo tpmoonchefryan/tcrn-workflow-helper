@@ -10,8 +10,11 @@ archive. Never treat this directory, a clone, a cache, or a discovered path as
 trustworthy by itself.
 
 Supports TCRN Workflow `v0.1.0-rc.6` on two Agent App hosts, Codex and
-Claude Code, with host-neutral protocols. Both remain inert dry-run candidates;
-no live host support is asserted.
+Claude Code, with host-neutral protocols. In the pinned release, Claude Code
+activation is live and has been observed against a real host, though it has no
+operator command path yet; Codex has read-only tooling and no installer. This
+helper drives neither: its own mutating commands are test-root-only and nothing
+here touches a live host binary.
 
 This Skill's prose (SKILL.md + references) may be distributed into a live host
 skills folder by a standard installer, but a distributed copy has **no authority
@@ -50,6 +53,35 @@ open a conference at the right moment. Machine-checkable gate enforcement
 (gate-v1) is the mechanism that will make triggering reliable; until it ships,
 treat these triggers as a checklist a human or reviewer applies, not as an
 automated guarantee.
+
+## Recording Triggers (advisory)
+
+The judgment of *when* to suggest recording belongs to the driving agent — no
+enumerated trigger list covers real conversations. The one generative signal:
+**the conversation has produced something with consequences that the event log
+does not yet hold** — a decision made, a direction converged, work completed, a
+handoff implied. On noticing that gap, offer once to record it, naming what
+would be recorded and through which verb (route per
+`references/workflow-operations.md`; never improvise a recording path).
+
+The timing is yours; the discipline around an offer is not:
+
+- **Offer; never record without an explicit yes.** A suggestion names the
+  record and the verb. Only the user's explicit approval runs it.
+- **Declined means dropped.** Do not re-raise a declined offer; at most one
+  aggregate reminder at a natural closing point for what is still unrecorded.
+- **Relay what queries reveal.** When on-demand reads surface stale work items,
+  unclosed gates, or an idle deliberation, say so in one line. The Workflow has
+  no voice of its own; between queries it is silent by design.
+
+Illustrative, not exhaustive: a discussion converges on a direction (offer
+`work-create` for the matching Initiative or Story); the user chooses between
+real alternatives (offer a conference to record the decision and the rejected
+positions); a deliverable lands (offer the completing `work-transition`). Like
+Deliberation Triggers, prose signals are best-effort by design: timing quality
+scales with the driving agent's capability (the pinned release's README,
+"Driver assumptions"), and nothing here promises an offer fires at the right
+moment.
 
 ## Trust Gate
 

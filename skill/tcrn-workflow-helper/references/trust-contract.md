@@ -74,10 +74,11 @@ remain test-root-only and never write to a live host Skill location.
 ## Host matrix
 
 This candidate supports two Agent App hosts, Codex and Claude Code, over one
-host-neutral protocol surface. Both hosts remain inert dry-run candidates; no
-live host support is asserted. Each case family below names where its evidence
-actually lives; nothing in this candidate involves a live `claude` or Codex
-App binary.
+host-neutral protocol surface. In the pinned Workflow release, Claude Code
+activation is live and has been observed against a real host; Codex remains
+read-only with no installer. Neither is exercised here: each case family below
+names where its evidence actually lives, and nothing in this candidate involves
+a live `claude` or Codex App binary.
 
 **Proven by this candidate's own test suite** (`npm test`, offline by
 construction: neither the bootstrap nor the suite opens an internet socket —
