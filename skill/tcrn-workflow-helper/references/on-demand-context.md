@@ -27,6 +27,16 @@ authority policy to that set, returning the admitted metadata-first references
 (never bodies). Relevance is decided *before* `context-route`, by the listing
 and candidate verbs — never by the router itself.
 
+One current-state fact belongs here rather than in a footnote: in the pinned
+release, `context-route` is one of the twelve governed verbs that require an
+out-of-band authority the shipped CLI cannot accept — invoked from a shell it
+stops at `CONTEXT_AUTHORITY_REQUIRED` ("Out-of-band context authority is
+required"). Selection and reading (steps 1, 3 and 4 below) are unaffected.
+Until the authority-supply program lands, the budget discipline is carried by
+the per-verb windows and by this document — apply the same freshness and
+budget restraint yourself, and never treat the router's refusal as a check to
+work around.
+
 ## The metadata-first query commands to teach (the real pipeline)
 
 - `knowledge-list` — lists knowledge records by metadata (never opens bodies).
@@ -50,7 +60,10 @@ and candidate verbs — never by the router itself.
    stays metadata-first (no bodies).
 2. Construct a `context-route` request from that candidate set; let the router
    enforce freshness, budget, and authority. Treat what it admits as the
-   governed working set — it filtered on policy, not on relevance.
+   governed working set — it filtered on policy, not on relevance. (From
+   today's shell this step stops at `CONTEXT_AUTHORITY_REQUIRED` — see above;
+   keep the candidate set metadata-first, apply the freshness and budget
+   restraint yourself, and continue with step 3.)
 3. Read a body (`knowledge-body`) only for a specific admitted record the task
    actually needs, and only when asked — one at a time, within budget.
 4. Never bulk-load work items or knowledge bodies "just in case", and never let

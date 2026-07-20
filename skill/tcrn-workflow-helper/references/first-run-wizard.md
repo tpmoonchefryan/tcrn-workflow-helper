@@ -31,8 +31,9 @@ tampered or look-alike copy could simply rewrite these steps. Therefore:
 ## Managed defaults (so the user never types a path)
 
 - State root: `~/.tcrn-workflow/` (holds fetched release assets, the Workflow
-  clone, the Workspace, and `state.json`). **Never** placed inside a skills/live
-  directory.
+  clone, `state.json`, and any Workspace the user does not tie to a project —
+  the recommended shape is one Workspace **per project**, placed with that
+  project; see step 6). **Never** placed inside a skills/live directory.
 - The agent creates the state root on first run and uses it for every `--state`,
   `--archive`, `--test-root`, and clone destination.
 
@@ -53,10 +54,56 @@ tampered or look-alike copy could simply rewrite these steps. Therefore:
    state root, then run `resolve` to confirm the checkout's remote and identity.
    Explain any `ROOT_*` stop plainly. (The helper does not perform the clone
    itself in this candidate; it verifies the result.)
-5. **Ready to use** — tell the user Workflow is verified and where it lives.
+5. **Install the pinned toolchain and build** — a fresh checkout runs nothing:
+   the CLI imports from `dist/build/`, so this step is not optional. Confirm
+   Node `24.16.0` and pnpm `11.3.0`, then — with the user's approval for the
+   dependency fetch — run `pnpm install --frozen-lockfile --ignore-scripts`
+   and `pnpm build` in the checkout. Tell the user plainly: dependency
+   lifecycle scripts stay disabled, so installing executes no third-party
+   code. Offer `pnpm verify:p1` afterwards — twenty offline gates re-proving
+   the checkout on their own machine is the best trust demonstration a first
+   run can give.
+6. **Create the Workspace** — reuse the elicitation pattern: ask which project
+   this Workspace serves, recommend a path placed with that project (one
+   Workspace per project or initiative — an organisation-wide chain is the
+   shape the scale ceiling punishes; the Workflow README's Known limits
+   carries the numbers), show the resolved five-root layout, and run `init`
+   only after an explicit yes. The agent supplies every path; the user types
+   nothing. Before the knowledge store's first initialization, explain
+   `KNOWLEDGE_DISPOSABLE_ACK_REQUIRED` in one line — the store is a derived
+   index, never the source of record, and saying so is required per
+   invocation — so the user's first encounter is an explanation, not a
+   refusal. Add the one concurrency sentence: one writer per Workspace;
+   parallelism means more Workspaces, not more writers. Never place a
+   Workspace inside a skill or live directory.
+7. **Set the backup floor** — the moment after initialization, while the
+   Workspace is still empty, is the cheapest time to set backups up. Walk
+   `backup-elicitation.md`: record a snapshot baseline, elicit
+   `backup.destination` and `backup.cadence` (cadence is advisory — there is
+   no scheduler; the agent proposes, the user decides), and state the restore
+   boundary before it matters: restore is same-path-only, and the control
+   tree restores whole or not at all.
+8. **Ready to use** — tell the user Workflow is verified and where it lives.
    To work with tasks/knowledge, teach on-demand queries per
    `on-demand-context.md`; **never** pull work-item or knowledge bodies into the
    conversation preemptively.
+
+## After setup — expectations to state plainly
+
+- **No automatic session context.** Host-hook activation has no operator
+  command path in the pinned release, so sessions receive no injected
+  authority summary; this Skill's description is the only ambient surface.
+  The capability itself is real and receipted — the operator path is a later
+  release.
+- **Upgrades.** A new release means a new independently published bootstrap
+  digest: verify the new anchor, re-verify the placed copy, check out the new
+  tag. A framework upgrade never touches Workspace bytes.
+- **Leaving.** Removal is symmetric: delete the placed Skill copy and the
+  state root. Workspaces are the user's data and are never deleted by any
+  helper or Workflow step.
+- **The envelope.** Partition per project, one writer per Workspace, and a
+  chain that slows perceptibly in the low thousands of events — the Workflow
+  README's Known limits section carries the numbers.
 
 ## Rules the agent must not break
 
