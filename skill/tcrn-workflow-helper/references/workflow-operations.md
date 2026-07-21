@@ -54,18 +54,30 @@ by dozens of records, so it is worth stating the order that keeps it governed:
    carry each agent's position verbatim under its own actor, and close with
    the structure that prevailed. The rejected shapes are the part nobody can
    reconstruct later.
-2. **Show the whole tree, then write it.** One confirmation covers the batch
+2. **Agree the external keys before the first write.** The engine derives a
+   record's id from its external key, so the key *is* the identity: unique
+   within the workspace, refused on reuse, and frozen once written. Human
+   numbering belongs here — `INIT-001`, `EPIC-003`, `STORY-014`, `SUB-042` —
+   with the driving agent allocating the next number from the highest that
+   `work-list` shows (one writer, so no contention). Two rules earn their
+   keep: **never encode the hierarchy in the key** (`INIT-001-E02-S05` becomes
+   a lie the first time a Story moves, and the key cannot be corrected —
+   parentage belongs to `--parent-id`, which can), and **settle the scheme
+   before the first record**, because a convention adopted later leaves a
+   permanent seam in the history it cannot reach back into. Each partition is
+   its own chain and therefore its own numbering space.
+3. **Show the whole tree, then write it.** One confirmation covers the batch
    (see Recording Triggers); the writes still happen one at a time, each with
    its own expected version, because a single writer holds the lease and the
    chain records every record separately regardless.
-3. **Create parents before children.** `--parent-id` must name an existing
+4. **Create parents before children.** `--parent-id` must name an existing
    record: Initiative, then Epics, then Stories, then Subtasks. Capture each
    new id from `record.id` in the receipt as you go.
-4. **Attach gates where "done" is contested**, not everywhere. A gate is worth
+5. **Attach gates where "done" is contested**, not everywhere. A gate is worth
    creating exactly when someone could otherwise declare the work finished
    without the condition being met — a pending gate refuses the transition at
    the command and again on replay.
-5. **Distil once at the close**, and remember the knowledge store rebases to
+6. **Distil once at the close**, and remember the knowledge store rebases to
    the chain head before it can take candidates.
 
 ## Before any mutation: three things the engine will insist on

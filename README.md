@@ -8,7 +8,7 @@
 
 English · [简体中文](./README.zh-CN.md) · [日本語](./README.ja.md) · [한국어](./README.ko.md) · [Français](./README.fr.md)
 
-![status](https://img.shields.io/badge/status-0.1.0--candidate.14-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
+![status](https://img.shields.io/badge/status-0.1.0--candidate.15-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
 
 ![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.1.0-blue)
 
@@ -26,7 +26,7 @@ The bootstrap is the only thing you ever have to trust, so check it before you t
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# 2c22d7f788e34f7a55424b9c73e2a2b7d339f0758c350f5149391b2a6dc446d4
+# fb5d62564b33d45671313ab4e1ba8806fb3e214e9c04575e308d9d897c140262
 ```
 
 That digest is published here, in `SECURITY.md`, and in the GitHub release notes. **If what you compute does not match, stop** — do not run anything, do not "try it anyway". A mismatch is the system working.
@@ -161,7 +161,7 @@ Prose triggering of these deliberations is advisory and unreliable-by-design pen
 
 ## Status, honestly
 
-- `0.1.0-candidate.14` is a **pre-release candidate** supporting exactly TCRN Workflow `v0.1.0`.
+- `0.1.0-candidate.15` is a **pre-release candidate** supporting exactly TCRN Workflow `v0.1.0`.
 - Installation and removal are **test-root-only** on both hosts; no live Codex or Claude Code host support is asserted.
 - **The self-built Ed25519 signing chain was removed on 2026-07-19.** It was never anchored: the digest and key fingerprint it depended on were published nowhere a user could independently obtain them, so the chain proved nothing to anyone outside this repository. What replaces it is simpler and honest: a bootstrap digest that is *actually published* in independent places, accepted release digests compiled into that bootstrap, GitHub immutable releases, and the reproducible-build chain.
 - The three Claude-Code-specific behaviors (settings-fragment reversibility, user-vs-project precedence, CLAUDE.md fallback) are implemented and proven **in the pinned Workflow release**, not in this repository — see `skill/tcrn-workflow-helper/references/trust-contract.md` for the exact evidence map.
