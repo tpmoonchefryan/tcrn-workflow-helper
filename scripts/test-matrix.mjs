@@ -24,6 +24,7 @@
 
 import assert from 'node:assert/strict';
 import { execFile as execFileCallback } from 'node:child_process';
+import { availableParallelism } from 'node:os';
 import { readdir } from 'node:fs/promises';
 import { promisify } from 'node:util';
 
@@ -78,14 +79,26 @@ const bootstrapFile = 'test/bootstrap.test.mjs';
 assert(files.includes(bootstrapFile), 'bootstrap.test.mjs missing from the test set');
 const serialFiles = files.filter(name => name !== bootstrapFile);
 
-// Phase A — everything tmp-rooted, concurrently: the four matrix shards plus
-// bootstrap's remaining tests (its fixtures never leave mkdtemp roots).
-const bootstrapRest = run('bootstrap-rest', ['--test', '--test-skip-pattern', pattern, bootstrapFile]);
-const shards = OPERATIONS.map(operation =>
-  run(`shard:${operation}`, ['--test', '--test-name-pattern', pattern, bootstrapFile], { TCRN_MATRIX_OPERATION: operation }));
-const phaseA = await Promise.all([bootstrapRest, ...shards]);
+// Phase A — the matrix shards, and never more of them at once than the machine
+// has cores to spare. Each shard spawns child processes that take real SIGKILLs
+// at named injection points, so oversubscribing the box moves where those
+// signals land: running five of these at once on a four-core CI runner made a
+// tamper-detection test miss its expected rejection roughly two runs in five,
+// while the same commit stayed green on an eight-core laptop every time. One
+// core is left for everything else deliberately.
+const lanes = Math.max(1, Math.min(OPERATIONS.length, availableParallelism() - 1));
+const queue = [...OPERATIONS];
+const phaseA = [];
+await Promise.all(Array.from({ length: lanes }, async () => {
+  for (let operation = queue.shift(); operation !== undefined; operation = queue.shift()) {
+    phaseA.push(await run(`shard:${operation}`, ['--test', '--test-name-pattern', pattern, bootstrapFile], { TCRN_MATRIX_OPERATION: operation }));
+  }
+}));
 
-// Phase B — the artifact-coupled files, one at a time.
+// Phase B — bootstrap's remaining tests, then the artifact-coupled files, all
+// alone. bootstrap-rest sits here rather than beside the shards for the reason
+// above: its fault-injection tests are the ones that noticed the contention.
+const restResult = await run('bootstrap-rest', ['--test', '--test-concurrency=1', '--test-skip-pattern', pattern, bootstrapFile]);
 const serial = await run('serial', ['--test', '--test-concurrency=1', ...serialFiles]);
 
 // Drift is proven by the shards, not by the skip side: --test-skip-pattern
@@ -96,7 +109,8 @@ const serial = await run('serial', ['--test', '--test-concurrency=1', ...serialF
 // caught below — while the rest pass would then run it serially: slower,
 // never less covered.
 const failures = [];
-const [restResult, ...shardResults] = phaseA;
+const shardResults = phaseA;
+if (shardResults.length !== OPERATIONS.length) failures.push(`ran ${shardResults.length} shards, expected ${OPERATIONS.length}`);
 if (restResult.fail !== 0) failures.push(`bootstrap-rest reported ${restResult.fail} failures`);
 for (const shard of shardResults) {
   if (shard.fail !== 0) failures.push(`${shard.label} reported ${shard.fail} failures`);
