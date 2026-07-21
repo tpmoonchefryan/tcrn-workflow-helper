@@ -44,6 +44,18 @@ are first-class — always double-quote them.
    pnpm --silent exec tcrn-workflow validate --workspace "<root>"
    ```
 
+   If the chain advanced since the knowledge store was last aligned — any
+   `conference-close --distill`, or any lockstep operation — `snapshot-manifest`
+   in the next step fails `KNOWLEDGE_HIGH_WATER_MISMATCH`. Realign first:
+
+   ```
+   pnpm --silent exec tcrn-workflow knowledge-rebase --workspace "<root>" --expected-version "<marker>" --at "<instant>"
+   ```
+
+   The `<marker>` is the store's own version, not the chain's; if you do not
+   know it, attempt with `0` and the `KNOWLEDGE_CAS_MISMATCH <yours>:<actual>`
+   refusal tells you the real one.
+
 3. **Write the receipt** (save stdout verbatim):
 
    ```
