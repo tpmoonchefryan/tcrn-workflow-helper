@@ -17,6 +17,15 @@ the catalog is what the engine actually enforces.
 The verbs named below are named because a routing decision hinges on them, not
 to serve as an inventory.
 
+**Probe with reads, never with writes.** The catalog marks every verb `mutates`
+or not — that flag, plus the read-only verbs, is the entire discovery surface.
+Firing a verb "to see what it does" is not discovery: a mutating verb aimed at
+a live chain performs its mutation even when the intent was exploratory, and
+terminal transitions do not come back (a probing call has pushed a live Story
+into `cancelled`, which append-only history preserves forever). When a mutating
+verb's behaviour genuinely has to be exercised to be understood, exercise it in
+a scratch workspace created for that purpose and discarded after.
+
 ## Which feature answers which situation
 
 | The user is trying to | Reach for | Because |
@@ -27,7 +36,7 @@ to serve as an inventory.
 | Remember something durably, with provenance | `knowledge-*` | Metadata-first reads, explicit body access, promotion under CAS. See `on-demand-context.md` before fetching anything. |
 | Know the current state before deciding | `status`, the `*-list` verbs | `status` reads authority and never returns a stale-view code; list verbs are budgeted windows over materialized views. |
 | Recover a workspace that refuses writes | `lease-inspect`, then `recover` | Diagnose before acting. Never delete lease files by hand — that is a fail-closed corruption path. |
-| Protect the workspace before a risky change | `snapshot-manifest` / `snapshot-verify` | See `backup-elicitation.md`. Cadence is advisory: there is no scheduler, so the agent proposes, the user decides. |
+| Protect the workspace before a risky change | `snapshot-manifest` / `snapshot-verify` | See `backup-elicitation.md`. Cadence is advisory — the agent proposes, the user decides — and it names a concrete moment: under `gate-close`, the proposal belongs in the same breath as reporting a gate `satisfied`. |
 
 ## Which Workspace answers which moment
 
@@ -105,11 +114,27 @@ by dozens of records, so it is worth stating the order that keeps it governed:
 6. **Attach gates where "done" is contested**, not everywhere. A gate is worth
    creating exactly when someone could otherwise declare the work finished
    without the condition being met — a pending gate refuses the transition at
-   the command and again on replay.
+   the command and again on replay. Closing one is evidence-bound: the
+   transition to `satisfied` must cite `--minutes-locator
+   conference-minutes:<id>` resolving to closed minutes anchored to the gate's
+   work item, or the engine refuses (`WORKSPACE_GATE_EVIDENCE_UNRESOLVED`).
+   The order is therefore conference first, gate second — hold the ruling
+   conference, close it, then transition the gate citing its minutes; the
+   locator persists into the gate's extensions so replay re-resolves the
+   identical evidence. When the gate's outcome class names an authority (owner
+   intent, say), those minutes are where that authority's position must
+   appear, carried verbatim under their actor id.
 7. **Distil once at the close**, and remember the knowledge store rebases to
    the chain head before it can take candidates — a distill on a chain that
    advanced since the store was last aligned fails `KNOWLEDGE_HIGH_WATER_MISMATCH`
    until you `knowledge-rebase` it forward.
+
+One practice ties the two trees together: when chain-authorized work lands in a
+repository — the implementing commit, the tag, the release notes — carry the
+record's external key in the message (`feat!: visual language v2
+(ACME-DS-INIT-001)`). The git history then indexes into the governance record
+without a lookup table, and an auditor holding either artifact can find the
+other.
 
 ## Before any mutation: three things the engine will insist on
 

@@ -109,7 +109,11 @@ are first-class — always double-quote them.
 - `backup.cadence` — a Tier-2 conversational preference from the closed enum
   `{gate-close, session-end, manual}` (default `gate-close`). It is **advisory
   only**: there is no engine scheduler, so cadence informs *when the agent
-  proposes* a backup, never an automatic trigger.
+  proposes* a backup, never an automatic trigger. Advisory does not mean
+  silent: `gate-close` names a concrete moment, and reporting a gate
+  `satisfied` without proposing the snapshot in the same breath is a missed
+  backup, not a kept preference. A cadence the user chose earns its keep only
+  by surfacing at its moment.
 - `backup.retention` — a Tier-2 conversational preference of this flow: how
   many verified snapshots the destination keeps (default `5`; a positive
   integer, or `unlimited`). Rotation is a runbook step, never a scheduler: it

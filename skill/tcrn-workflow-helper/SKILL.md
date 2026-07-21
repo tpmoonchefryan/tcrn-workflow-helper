@@ -101,7 +101,10 @@ The timing is yours; the discipline around an offer is not:
 Illustrative, not exhaustive: a discussion converges on a direction (offer
 `work-create` for the matching Initiative or Story); the user chooses between
 real alternatives (offer a conference to record the decision and the rejected
-positions); a deliverable lands (offer the completing `work-transition`). Like
+positions); a deliverable lands (offer the completing `work-transition`); a
+gate closes `satisfied` while `backup.cadence` is `gate-close` (propose the
+snapshot in the same breath as reporting the closure — a cadence that never
+surfaces after a closure is a missed backup, not a kept preference). Like
 Deliberation Triggers, prose signals are best-effort by design: timing quality
 scales with the driving agent's capability (the pinned release's README,
 "Driver assumptions"), and nothing here promises an offer fires at the right
