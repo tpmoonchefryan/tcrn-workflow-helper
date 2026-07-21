@@ -42,6 +42,32 @@ and say so in the offer; the user's yes decides. A partition that does not
 exist yet is created through the first-run wizard's Workspace step — lazily,
 on first need, never silently.
 
+## Decomposing an Initiative
+
+The common shape is one instruction — "break this Initiative down" — followed
+by dozens of records, so it is worth stating the order that keeps it governed:
+
+1. **Deliberate before deciding the shape.** Decomposition picks one structure
+   over defensible alternatives, and fanning the question out to two or more
+   agents makes it the deterministic conference trigger described in the
+   Skill's Deliberation Triggers. Anchor the conference to the Initiative,
+   carry each agent's position verbatim under its own actor, and close with
+   the structure that prevailed. The rejected shapes are the part nobody can
+   reconstruct later.
+2. **Show the whole tree, then write it.** One confirmation covers the batch
+   (see Recording Triggers); the writes still happen one at a time, each with
+   its own expected version, because a single writer holds the lease and the
+   chain records every record separately regardless.
+3. **Create parents before children.** `--parent-id` must name an existing
+   record: Initiative, then Epics, then Stories, then Subtasks. Capture each
+   new id from `record.id` in the receipt as you go.
+4. **Attach gates where "done" is contested**, not everywhere. A gate is worth
+   creating exactly when someone could otherwise declare the work finished
+   without the condition being met — a pending gate refuses the transition at
+   the command and again on replay.
+5. **Distil once at the close**, and remember the knowledge store rebases to
+   the chain head before it can take candidates.
+
 ## Before any mutation: three things the engine will insist on
 
 Every mutating verb requires an explicit workspace path, a strict RFC 3339

@@ -52,7 +52,19 @@ log: `conference-open` to start a deliberation, `conference-append-position` to
 record a party's stated position, `conference-close` to conclude it with a
 recorded outcome, and `conference-cancel` to abandon it without an outcome.
 
-This section is **advisory only**. Deciding when to deliberate from prose
+One trigger is not a prose signal at all, and so does not inherit the
+unreliability below: **fanning work out to two or more agents on the same
+contested question.** The orchestrator knows it has done that at the moment it
+dispatches, so this one fires deterministically. Open the conference, carry
+each agent's position verbatim under its own `agent:` actor id, and let the
+close record which position prevailed and which were rejected. A position
+written down by an orchestrator and one written by its author carry the same
+weight, because neither is cryptographically bound to its actor — the actor
+field is an attribution claim, not proof of identity. Faithful transcription
+is therefore the whole of the guarantee, which is why positions are carried
+verbatim rather than summarised.
+
+This section is otherwise **advisory only**. Deciding when to deliberate from prose
 signals is **unreliable-by-design** pending gate-v1: prose cannot be trusted to
 fire consistently on these classes, and nothing here promises the agent will
 open a conference at the right moment. Machine-checkable gate enforcement
@@ -74,6 +86,12 @@ The timing is yours; the discipline around an offer is not:
 
 - **Offer; never record without an explicit yes.** A suggestion names the
   record and the verb. Only the user's explicit approval runs it.
+- **A scoped instruction is one yes for its whole batch.** "Decompose this
+  Initiative" authorises the records that decomposing it produces; asking
+  again for each of forty is the discipline defeating itself. Show the whole
+  tree once, before any of it lands, and let a single confirmation cover it.
+  What the rule protects is unchanged: the yes still precedes every write and
+  still sees what it approves.
 - **Declined means dropped.** Do not re-raise a declined offer; at most one
   aggregate reminder at a natural closing point for what is still unrecorded.
 - **Relay what queries reveal.** When on-demand reads surface stale work items,
