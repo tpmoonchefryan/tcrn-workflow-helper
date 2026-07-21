@@ -68,7 +68,20 @@ by dozens of records, so it is worth stating the order that keeps it governed:
    Skill's Deliberation Triggers. Anchor the conference to the Initiative,
    carry each agent's position verbatim under its own actor, and close with
    the structure that prevailed. The rejected shapes are the part nobody can
-   reconstruct later.
+   reconstruct later. Two shapes of that append bite in practice:
+   - **A long position will not fit in one record.** The engine caps a single
+     position at 2,048 UTF-8 **bytes** and rejects the append with
+     `CONFERENCE_BUDGET_EXCEEDED` rather than truncating — a few hundred
+     words of CJK is already over. Split on paragraph boundaries into
+     sequential positions under the *same* actor id, keyed `POS-<AGENT>-1`,
+     `POS-<AGENT>-2` with `1/2`, `2/2` marked in each body. The parts must
+     concatenate back to the whole; continuation carries the full text and
+     never licenses a summary.
+   - **`--evidence-ids` takes protocol ids, not prose.** Every entry must
+     match the `type:value` id grammar, and anything else fails the append
+     as schema-invalid. The flag is required, so when the deliberation has
+     no evidence record on this chain yet, pass the empty sentinel `-`
+     rather than inventing a plausible-looking id.
 2. **Agree the external keys before the first write.** The engine derives a
    record's id from its external key **and its kind alone** — the workspace is
    not in the derivation, so the same `(kind, key)` pair produces the *same

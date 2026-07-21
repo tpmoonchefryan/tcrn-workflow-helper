@@ -64,6 +64,18 @@ field is an attribution claim, not proof of identity. Faithful transcription
 is therefore the whole of the guarantee, which is why positions are carried
 verbatim rather than summarised.
 
+A single position nevertheless has an **engine byte budget** — 2,048 bytes of
+UTF-8 at the pinned release — and the engine rejects an oversized one outright
+with `CONFERENCE_BUDGET_EXCEEDED` naming `position`; it does not truncate. The
+budget is counted in bytes, not characters, so non-Latin text reaches it far
+sooner than its length suggests (CJK runs about three bytes per character,
+putting the ceiling near 680 characters). When a position does not fit, split
+it on paragraph boundaries and record the parts as **sequential positions under
+the same `actorId`**, distinct external keys (`POS-<AGENT>-1`, `POS-<AGENT>-2`)
+and a `1/2`, `2/2` marker in each body so the reading order survives; the parts
+concatenate back to the original text. Continuation exists to carry the whole
+position, and is never a licence to summarise one into the budget.
+
 This section is otherwise **advisory only**. Deciding when to deliberate from prose
 signals is **unreliable-by-design** pending gate-v1: prose cannot be trusted to
 fire consistently on these classes, and nothing here promises the agent will
