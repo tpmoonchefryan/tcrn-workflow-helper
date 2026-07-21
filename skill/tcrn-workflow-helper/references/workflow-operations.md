@@ -81,7 +81,22 @@ by dozens of records, so it is worth stating the order that keeps it governed:
      match the `type:value` id grammar, and anything else fails the append
      as schema-invalid. The flag is required, so when the deliberation has
      no evidence record on this chain yet, pass the empty sentinel `-`
-     rather than inventing a plausible-looking id.
+     rather than inventing a plausible-looking id — **and fold the citation
+     you meant to attach into the position text itself.** A reference dropped
+     with the field is gone; a live decomposition lost two of its three
+     citations exactly this way.
+   - **A key written in minutes is a reference to a real record.** Keys are
+     flat per partition, so `STORY-001` in a minutes body points at whatever
+     record holds that key — not at "the first story of this epic". Convert
+     epic-relative numbering to real keys at writing time, and check any
+     cited minutes key against the record it names: one immutable minutes
+     misdirected its readers to seven unrelated records, and another cited
+     the wrong minutes entirely. Both corrections are permanent appends.
+   - **`unresolvedIssues` are immutable text, and the engine never closes
+     them.** Settlement arrives as a *later* minutes record; the old text
+     stands forever. Never report open items from a bare read of the
+     extensions view — follow the chain to the latest settling minutes first
+     (a live audit found twelve apparent open items where two were real).
 2. **Agree the external keys before the first write.** The engine derives a
    record's id from its external key **and its kind alone** — the workspace is
    not in the derivation, so the same `(kind, key)` pair produces the *same
@@ -136,7 +151,17 @@ by dozens of records, so it is worth stating the order that keeps it governed:
    locator persists into the gate's extensions so replay re-resolves the
    identical evidence. When the gate's outcome class names an authority (owner
    intent, say), those minutes are where that authority's position must
-   appear, carried verbatim under their actor id.
+   appear, carried verbatim under their actor id. From Workflow `v0.2.0`,
+   `owner_intent_required` costs more than minutes: the transition must also
+   carry `--identity-authority <path>` and `--identity-authority-digest
+   <sha256>` naming an out-of-band roster, plus `--actor` naming someone that
+   roster permits for this outcome class — otherwise the engine refuses
+   (`WORKSPACE_GATE_IDENTITY_REQUIRED` / `WORKSPACE_GATE_IDENTITY_REFUSED`).
+   The roster is a pins-track authority: its digest is published out of band
+   the same way the bootstrap anchor is, and the deployment's copy lives
+   outside the control tree. What this buys is authorization, not
+   authentication — the engine can refuse an unpermitted identity, not prove
+   who typed the command.
 7. **Distil once at the close**, and remember the knowledge store rebases to
    the chain head before it can take candidates — a distill on a chain that
    advanced since the store was last aligned fails `KNOWLEDGE_HIGH_WATER_MISMATCH`

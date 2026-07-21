@@ -15,7 +15,7 @@ below — Deliberation Triggers and Recording Triggers — instead describe when
 would otherwise decide. Reading them in a session that never installs anything
 is the expected case.
 
-Supports TCRN Workflow `v0.1.0` on two Agent App hosts, Codex and
+Supports TCRN Workflow `v0.2.0` on two Agent App hosts, Codex and
 Claude Code, with host-neutral protocols. In the pinned release, Claude Code
 activation is live and has been observed against a real host, though it has no
 operator command path yet; Codex has read-only tooling and no installer. This
@@ -77,12 +77,13 @@ concatenate back to the original text. Continuation exists to carry the whole
 position, and is never a licence to summarise one into the budget.
 
 This section is otherwise **advisory only**. Deciding when to deliberate from prose
-signals is **unreliable-by-design** pending gate-v1: prose cannot be trusted to
-fire consistently on these classes, and nothing here promises the agent will
-open a conference at the right moment. Machine-checkable gate enforcement
-(gate-v1) is the mechanism that will make triggering reliable; until it ships,
-treat these triggers as a checklist a human or reviewer applies, not as an
-automated guarantee.
+signals is **unreliable-by-design**: prose cannot be trusted to fire
+consistently on these classes, and nothing here promises the agent will open a
+conference at the right moment. The pinned release ships gate identity — an
+`owner_intent_required` gate refuses to close without an out-of-band roster and
+a named actor it permits (see `references/workflow-operations.md`) — so the
+*closing* of a contested gate is now machine-checked. The *timing* of
+deliberation is not, and stays a checklist a human or reviewer applies.
 
 ## Recording Triggers (advisory)
 
