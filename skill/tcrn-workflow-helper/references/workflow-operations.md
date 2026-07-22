@@ -240,6 +240,43 @@ succeeds.
   it is not repaired by hand — restore the whole tree from a verified snapshot,
   the same as any other corruption.
 
+## Keeping the placed Skill current: distribution is signalled, not written
+
+The Skill you are reading was placed into a live host location — a skills folder
+the host loads automatically. Nothing in the Workflow put it there, and nothing
+in the Workflow may: the trusted bootstrap refuses every mutating install into a
+`.claude`/`.codex` path (`LIVE_LOCATION_FORBIDDEN`), on purpose. The boundary is
+that the Workflow never writes a live host location. Placement is done by the
+agent, at the user's direction and with the user's approval — the user's own
+host, the user's own yes.
+
+That leaves one job: making sure the placed copy has not fallen behind the
+release it should match. The adapter already announces a governed session (its
+SessionStart summary reaches the model's context); that announcement is the
+signal to run the check, not a substitute for it.
+
+- **Each governed session, verify the placed copy against its pin.** Run the
+  bootstrap's `verify-installed-copy` against the installed Skill directory.
+  `INSTALLED_COPY_VALIDATED` means the placement matches the pinned release and
+  there is nothing to do. `IDENTITY_MISMATCH` means the placed bytes are not the
+  pinned release — stale, edited, or partial — and the Skill in front of you may
+  not be the one that was vouched for.
+- **On a mismatch, offer a governed re-placement — never a silent overwrite.**
+  Name what you found and what you would do: fetch the current release's
+  archive, verify it against the out-of-band anchor the same way a first install
+  does, extract it, and replace the placed directory. The user's yes precedes
+  the write, exactly as it did the first time.
+- **The re-placement is verified before and after, and it leaves a receipt.**
+  The bytes are checked against the published anchor before they land, and
+  `verify-installed-copy` is run again after so the new placement proves
+  `INSTALLED_COPY_VALIDATED`. Report both, so "updated" is a checked claim and
+  not an assertion.
+
+What this does not do is make the Skill install or update itself. It cannot: the
+`install`/`update`/`reinstall`/`uninstall` verbs stay test-root-only in this
+release. Distribution here is the agent doing, under approval, what the bootstrap
+verifies — the currency check is the Workflow's part, the write is the user's.
+
 ## Changing settings: use the existing protocol, do not invent one
 
 `settings-elicitation.md` is the flow — observe, recommend with cited evidence,
