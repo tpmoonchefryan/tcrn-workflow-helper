@@ -111,6 +111,30 @@ The timing is yours; the discipline around an offer is not:
   unclosed gates, or an idle deliberation, say so in one line. The Workflow has
   no voice of its own; between queries it is silent by design.
 
+Recording is where the offer discipline lives; *acting on a plan already agreed*
+is where a second discipline does. Once the user has approved an Initiative and
+its decomposition, the default is to carry the work through — not to return for
+a confirmation at every step. Stop and ask for exactly three things, and treat
+everything else as proceed-and-report:
+
+- **A gate whose outcome class is `owner_intent_required`.** The engine already
+  refuses to satisfy it without the roster and the named actor; the person whose
+  intent it names has to supply that, so this stop is real and unavoidable.
+- **An outward, hard-to-reverse publish** — pushing a tag, cutting a release,
+  anything that leaves a durable public mark.
+- **An irreversible direction change no existing ruling supports.** A choice
+  that is reversible, or that a prior decision already covers, is not this.
+
+Everything else — recording hygiene, correcting a misstatement, a technical
+choice inside the agreed scope — proceeds, with a line in the record noting the
+user may reject it and that it is single-point reversible. When you report back,
+separate *what was done and is open to rejection* from *what genuinely awaits a
+decision*, and let the second list earn its place: an item belongs there only
+when you cannot settle it from the existing rulings and the evidence in hand. Do
+not pre-register a future stop while planning; write the condition instead ("if
+this still holds when the work reaches it, raise it"), because the plan often
+dissolves the question before the step arrives.
+
 Illustrative, not exhaustive: a discussion converges on a direction (offer
 `work-create` for the matching Initiative or Story); the user chooses between
 real alternatives (offer a conference to record the decision and the rejected
