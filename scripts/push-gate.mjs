@@ -135,6 +135,29 @@ const supports = /Supports TCRN Workflow `([^`]+)`/u.exec(skillManifest)?.[1] ??
 if (supports === null) fail("PUSH_GATE_SKILL_SUPPORT_UNSTATED", "SKILL.md does not state the supported release");
 else if (supports !== identity.version) fail("PUSH_GATE_SKILL_SUPPORT_STALE", `SKILL.md says ${supports}, IDENTITY says ${String(identity.version)}`);
 
+// 2c. The five READMEs carry a "Status, honestly" line asserting two facts that must both
+//     be current: the helper's own version, and the Workflow release it pins. Both are
+//     prose the anchor loop never read, and both went stale at candidate.22 -- the re-pin
+//     advanced the gated SKILL.md support line to v0.3.1 but left this line reading
+//     candidate.21 / v0.1.0, because nothing derived it from a source of truth. A reader
+//     who trusts "supporting exactly" is told the wrong release is pinned. Same rule as
+//     2b: check the line that asserts the CURRENT facts, derive the expected values (the
+//     helper version from package.json, the Workflow pin from IDENTITY), and never ban a
+//     version string globally -- reason-codes' true "new in 0.1.0-rc.5" must stay true, so
+//     the check is scoped to this one line, located by the helper-version-shaped token it
+//     alone carries (so a stale number reads as stale, not as a missing line).
+const helperVersion = JSON.parse(await text("package.json")).version ?? null;
+if (typeof helperVersion !== "string") fail("PUSH_GATE_HELPER_VERSION_UNREADABLE", "package.json version");
+const statusDocuments = ["README.md", "README.zh-CN.md", "README.ja.md", "README.ko.md", "README.fr.md"];
+for (const document of statusDocuments) {
+  const statusLine = (await text(document)).split("\n").find((line) => /`0\.\d+\.\d+[^`]*`/u.test(line) && /`v\d+\.\d+[^`]*`/u.test(line));
+  if (statusLine === undefined) { fail("PUSH_GATE_STATUS_LINE_MISSING", document); continue; }
+  const statedVersion = /`(0\.\d+\.\d+[^`]*)`/u.exec(statusLine)?.[1] ?? null;
+  if (typeof helperVersion === "string" && statedVersion !== helperVersion) fail("PUSH_GATE_STATUS_VERSION_STALE", `${document}: says ${String(statedVersion)}, package.json ${String(helperVersion)}`);
+  const statedSupport = /`(v\d+\.\d+[^`]*)`/u.exec(statusLine)?.[1] ?? null;
+  if (statedSupport !== identity.version) fail("PUSH_GATE_STATUS_SUPPORT_STALE", `${document}: supports ${String(statedSupport)}, IDENTITY ${String(identity.version)}`);
+}
+
 const trustContract = await text("skill/tcrn-workflow-helper/references/trust-contract.md");
 for (const [field, value] of Object.entries(identity)) {
   if (value === null) fail("PUSH_GATE_IDENTITY_UNREADABLE", field);
