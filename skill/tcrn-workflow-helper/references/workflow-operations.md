@@ -14,6 +14,16 @@ availability. **Enumerate capability from that output, never from prose** — th
 document included. Anything here that disagrees with the catalog is wrong, and
 the catalog is what the engine actually enforces.
 
+One thing the catalog does *not* carry is the set of legal values a flag
+accepts. It marks `--kind` as a string, but not *which* strings — and those are
+not open-ended. In Workflow `v0.3.1` the create path admits only the four
+planning kinds (Initiative, Epic, Story, Subtask) and refuses the rest with
+`CLI_ARGUMENT_MALFORMED`, even though the protocol's shape check recognises more
+kinds than the create path will open. So a thing the planning kinds do not name
+— a defect met and deferred, say — lands as a Story under the pinned release; a
+distinct kind for it is a change to the create whitelist read from the protocol
+source, not a value some flag already reaches.
+
 The verbs named below are named because a routing decision hinges on them, not
 to serve as an inventory.
 
@@ -163,10 +173,45 @@ by dozens of records, so it is worth stating the order that keeps it governed:
    outside the control tree. What this buys is authorization, not
    authentication — the engine can refuse an unpermitted identity, not prove
    who typed the command.
-7. **Distil once at the close**, and remember the knowledge store rebases to
-   the chain head before it can take candidates — a distill on a chain that
-   advanced since the store was last aligned fails `KNOWLEDGE_HIGH_WATER_MISMATCH`
-   until you `knowledge-rebase` it forward.
+7. **Close with a decision ledger — tally what will gate delivery, so the
+   executor is not discovering each stop by colliding with it.** A tree that
+   names every record but not its decision points forces whoever runs it to
+   meet each interruption mid-flight, one at a time. Instead, finish the
+   decomposition by sorting every choice that could gate delivery into three
+   lanes and recording the tally in the kickoff minutes:
+   - **Owner-now** — a gate whose outcome class needs the user's intent, a
+     direction no existing ruling supports, or an outward publish. Surface
+     these *together, up front*: one sitting clears them and the run then
+     proceeds without returning.
+   - **Conditional** — a choice that hangs on a premise the work will test.
+     Write it as "if ⟨premise holds⟩ then ⟨ruling / raise to the user⟩, else it
+     dissolves." It is not a hard stop and does not pre-register one; when
+     execution confirms the premise it promotes to owner-now — but the user was
+     already warned it might come.
+   - **Agent** — backed by a ruling already in hand, self-resolved,
+     proceed-and-report.
+   The ledger buys *fewer* interruptions, not more: the decision boundary is
+   known at plan time instead of discovered at run time, and the two-lane
+   report at the end (done-and-rejectable vs genuinely-awaiting) falls out of
+   it. A live decomposition proved the cost of skipping it — it asserted a kind
+   was always safe to create parentless on the strength of a fail-open it never
+   checked; that assumption was a *conditional*, and reading the source refuted
+   it mid-run. Logged as one, the reversal would have been a warned branch, not
+   a surprise.
+8. **Distil only what will be queried again — the store is a curated surface,
+   not a mirror of the chain.** The knowledge store is bounded on purpose (a cap
+   on records *and* on aggregate bytes, the same budget discipline as the
+   SessionStart summary and the query ceiling); the event chain is the unbounded
+   audit log. So before distilling a closed conference, ask whether the fact
+   will be *retrieved and reused* later — if it will, distil it; if the minutes
+   on the chain already hold what an auditor needs, the chain is enough and the
+   store stays lean. Two mechanics bite: the store **rebases to the chain head**
+   before it can take candidates, so a distill on a chain that advanced since
+   the store was last aligned fails `KNOWLEDGE_HIGH_WATER_MISMATCH` until you
+   `knowledge-rebase` it forward; and **retiring a record frees a record slot but
+   not aggregate bytes** — the byte cap counts the physical total, retired units
+   included, so it is a hard ceiling you curate against, not one retirement
+   clears.
 
 One practice ties the two trees together: when chain-authorized work lands in a
 repository — the implementing commit, the tag, the release notes — carry the

@@ -141,7 +141,10 @@ real alternatives (offer a conference to record the decision and the rejected
 positions); a deliverable lands (offer the completing `work-transition`); a
 gate closes `satisfied` while `backup.cadence` is `gate-close` (propose the
 snapshot in the same breath as reporting the closure — a cadence that never
-surfaces after a closure is a missed backup, not a kept preference). Like
+surfaces after a closure is a missed backup, not a kept preference); a defect is
+found but *deferred* rather than fixed on the spot (offer a record for it so the
+chain carries the known-but-unfixed state — one fixed in the same sitting is a
+closed loop and needs none). Like
 Deliberation Triggers, prose signals are best-effort by design: timing quality
 scales with the driving agent's capability (the pinned release's README,
 "Driver assumptions"), and nothing here promises an offer fires at the right
