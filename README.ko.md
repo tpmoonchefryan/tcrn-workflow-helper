@@ -88,6 +88,17 @@ node bootstrap/trusted-bootstrap.mjs install --test-root <dir>/tcrn-helper-test-
 
 성공하면 정규 JSON 영수증 하나가 나옵니다(`TRUST_VALIDATED`, `ROOT_RESOLVED`, `NETWORK_PLAN_APPROVED`, `INSTALL_COMPLETED`, `UNINSTALL_COMPLETED`). 실패하면 안정적인 reason code 하나가 나옵니다. 그 사이는 없습니다.
 
+## 일상적으로 사용하기
+
+위의 명령들은 신뢰 장치입니다. 일상에서는 당신이 직접 실행할 일이 거의 없습니다 — 실행하는 것은 에이전트이고, 이 저장소의 진짜 제품은 에이전트에게 건네지는 규율입니다.
+
+1. **한 번 배치합니다.** 에이전트(또는 표준 skills 설치기)가 `skill/tcrn-workflow-helper/`를 호스트의 skills 폴더에 넣게 하십시오 — Claude Code라면 `~/.claude/skills` 또는 프로젝트의 `.claude/skills`. 배치는 그저 파일일 뿐이며, 거기서 어떤 코드도 실행되지 않습니다.
+2. **한 번 신뢰합니다.** 내려받은 `trusted-bootstrap.mjs`를 위에 공개된 SHA-256과 대조한 뒤, 배치된 사본을 읽기 전용으로 검사하게 하십시오: `verify-installed-copy`는 `INSTALLED_COPY_VALIDATED`를 내거나, 정확히 무엇이 잘못됐는지 지목합니다. 이후 모든 세션이 이 읽기 전용 검사를 다시 실행하므로, 오래되거나 수정된 사본은 무언가를 안내하기 전에 붙잡힙니다.
+3. **설정은 대화로 합니다.** 에이전트에게 TCRN Workflow 설정을 부탁하십시오. Skill의 최초 실행 마법사가 나머지를 — 당신에게도 — 쉬운 말로 안내합니다: 승인된 단 하나의 Workflow 체크아웃 해석(`ROOT_RESOLVED`), 워크스페이스 생성, 백업 목적지와 주기 선택. 경로를 직접 입력할 일은 없습니다.
+4. **그다음은 그냥 일합니다.** Skill은 에이전트에게 어떤 작업의 순간이 기록될 가치가 있는지 — 결정, 분해, 완료된 산출물, 다툼이 있는 "완료" — 그리고 어떤 동사가 그것을 기록하는지 가르칩니다. 관통하는 단단한 규칙은 하나: 에이전트는 제안할 뿐이며, 당신의 명시적 동의 없이는 아무것도 기록되지 않습니다. 바탕의 루프를 직접 보고 싶다면, Workflow 저장소의 `docs/tutorial/governed-loop.md`에 증명으로 고정된 튜토리얼이 있습니다.
+
+당신의 것으로 남는 것: 모든 결정. 엔진의 것으로 남는 것: 그 강제. 검증 가능한 것으로 남는 것: 그 전부.
+
 ## 신뢰 사슬은 어떻게 맞물리는가
 
 ```mermaid

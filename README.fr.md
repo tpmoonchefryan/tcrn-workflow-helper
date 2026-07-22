@@ -88,6 +88,17 @@ node bootstrap/trusted-bootstrap.mjs install --test-root <dir>/tcrn-helper-test-
 
 En cas de succès, un seul reçu JSON canonique est émis (`TRUST_VALIDATED`, `ROOT_RESOLVED`, `NETWORK_PLAN_APPROVED`, `INSTALL_COMPLETED`, `UNINSTALL_COMPLETED`). En cas d'échec, un seul reason code stable. Rien entre les deux.
 
+## L'utiliser au quotidien
+
+Les commandes ci-dessus sont la machinerie de confiance. Au quotidien, vous ne les lancez presque jamais vous-même — votre agent s'en charge, et le vrai produit de ce dépôt est la discipline qu'il remet à votre agent.
+
+1. **Placer une fois.** Faites placer `skill/tcrn-workflow-helper/` par votre agent (ou tout installateur de skills standard) dans le dossier de skills de votre hôte — pour Claude Code, `~/.claude/skills` ou le `.claude/skills` d'un projet. Le placement n'est que des fichiers ; aucun code ne s'exécute depuis là.
+2. **Faire confiance une fois.** Vérifiez votre téléchargement de `trusted-bootstrap.mjs` contre le SHA-256 publié ci-dessus, puis laissez-le inspecter la copie placée en lecture seule : `verify-installed-copy` répond `INSTALLED_COPY_VALIDATED` ou nomme exactement ce qui ne va pas. Chaque session ultérieure rejoue ce seul contrôle en lecture seule, si bien qu'une copie périmée ou modifiée est attrapée avant de guider quoi que ce soit.
+3. **Configurer par la conversation.** Demandez à votre agent de mettre en place TCRN Workflow. L'assistant de première exécution de la Skill le guide — et vous avec — pour le reste, en langage clair : résolution de l'unique checkout Workflow approuvé (`ROOT_RESOLVED`), création de l'espace de travail, choix de la destination et du rythme de sauvegarde. Vous ne tapez aucun chemin.
+4. **Puis travaillez, simplement.** La Skill apprend à votre agent quels moments de travail méritent un enregistrement — une décision, une décomposition, un livrable achevé, un « terminé » contesté — et quel verbe l'enregistre. Une seule règle dure traverse tout : il propose, et rien ne s'écrit sans votre oui explicite. Pour voir la boucle sous-jacente de vos propres yeux, le dépôt Workflow embarque un tutoriel épinglé par la preuve dans `docs/tutorial/governed-loop.md`.
+
+Ce qui reste à vous : chaque décision. Ce qui reste au moteur : leur application. Ce qui reste vérifiable : tout cela.
+
 ## Comment la chaîne de confiance s'assemble
 
 ```mermaid

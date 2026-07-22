@@ -88,6 +88,17 @@ node bootstrap/trusted-bootstrap.mjs install --test-root <dir>/tcrn-helper-test-
 
 成功会产出一份规范化 JSON 收据（`TRUST_VALIDATED`、`ROOT_RESOLVED`、`NETWORK_PLAN_APPROVED`、`INSTALL_COMPLETED`、`UNINSTALL_COMPLETED`）。失败会产出一个稳定的 reason code。中间没有第三种情况。
 
+## 日常怎么用
+
+上面的命令是信任机械。日常里你基本不亲自跑它们——你的 agent 跑，而这个仓库真正的产品，是它交到 agent 手上的那套纪律。
+
+1. **放置一次。** 让你的 agent（或任何标准的 skills 安装器）把 `skill/tcrn-workflow-helper/` 放进宿主的 skills 目录——Claude Code 是 `~/.claude/skills` 或项目的 `.claude/skills`。放置只是文件；不会有任何代码从中运行。
+2. **信任一次。** 把你下载的 `trusted-bootstrap.mjs` 与上方公布的 SHA-256 核对，然后让它只读地检查已放置的副本：`verify-installed-copy` 要么给出 `INSTALLED_COPY_VALIDATED`，要么点名说出哪里不对。之后每个会话都重跑这一个只读检查，陈旧或被改动的副本在指导任何事之前就会被抓住。
+3. **通过对话完成设置。** 让 agent 去设置 TCRN Workflow。Skill 的首次运行向导会用平实语言带着它——也带着你——走完其余步骤：解析唯一被认可的 Workflow 检出（`ROOT_RESOLVED`）、创建工作区、选定备份目的地与节奏。你不需要敲任何路径。
+4. **然后正常工作。** Skill 教你的 agent 判断什么样的工作时刻值得一条记录——一个决定、一次分解、一件完成的交付、一个有争议的「完成」——以及用哪个动词记录。一条硬规则贯穿始终：它只提议，没有你的明确同意什么都不会写入。想亲眼看一遍底层闭环，Workflow 仓库在 `docs/tutorial/governed-loop.md` 带有一份被证明钉住的教程。
+
+属于你的：每一个决定。属于引擎的：强制执行它们。可以查验的：以上全部。
+
 ## 信任链是怎么拼起来的
 
 ```mermaid

@@ -88,6 +88,17 @@ node bootstrap/trusted-bootstrap.mjs install --test-root <dir>/tcrn-helper-test-
 
 Success emits one canonical JSON receipt (`TRUST_VALIDATED`, `ROOT_RESOLVED`, `NETWORK_PLAN_APPROVED`, `INSTALL_COMPLETED`, `UNINSTALL_COMPLETED`). Failure emits one stable reason code. Nothing in between.
 
+## Using it day to day
+
+The commands above are the trust machinery. Day to day, you mostly do not run them — your agent does, and this repository's real product is the discipline it hands your agent.
+
+1. **Place once.** Have your agent (or any standard skills installer) put `skill/tcrn-workflow-helper/` into your host's skills folder — for Claude Code, `~/.claude/skills` or a project's `.claude/skills`. Placement is just files; no code runs from it.
+2. **Trust once.** Verify your download of `trusted-bootstrap.mjs` against the SHA-256 published above, then let it check the placed copy read-only: `verify-installed-copy` either says `INSTALLED_COPY_VALIDATED` or names exactly what is wrong. Each later session re-runs this one read-only check, so a stale or edited copy is caught before it guides anything.
+3. **Set up through conversation.** Ask your agent to set up TCRN Workflow. The Skill's first-run wizard walks it — and you — through the rest with plain-language explanations: resolving one approved Workflow checkout (`ROOT_RESOLVED`), creating the workspace, choosing a backup destination and cadence. You type no paths.
+4. **Then just work.** The Skill teaches your agent when a working moment deserves a record — a decision, a decomposition, a completed deliverable, a contested "done" — and which verb records it. The one hard rule: it offers, and nothing is written without your explicit yes. To see the underlying loop with your own eyes, the Workflow repository ships a proof-backed tutorial at `docs/tutorial/governed-loop.md`.
+
+What stays yours: every decision. What stays the engine's: enforcing them. What stays checkable: all of it.
+
 ## How the trust chain fits together
 
 ```mermaid
