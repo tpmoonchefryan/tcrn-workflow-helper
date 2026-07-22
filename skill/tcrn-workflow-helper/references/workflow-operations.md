@@ -208,10 +208,12 @@ by dozens of records, so it is worth stating the order that keeps it governed:
    store stays lean. Two mechanics bite: the store **rebases to the chain head**
    before it can take candidates, so a distill on a chain that advanced since
    the store was last aligned fails `KNOWLEDGE_HIGH_WATER_MISMATCH` until you
-   `knowledge-rebase` it forward; and **retiring a record frees a record slot but
-   not aggregate bytes** — the byte cap counts the physical total, retired units
-   included, so it is a hard ceiling you curate against, not one retirement
-   clears.
+   `knowledge-rebase` it forward. From Workflow `v0.3.2`, **retiring a record
+   reclaims its body**: a retired body is already unreadable, so retire deletes
+   it and frees those bytes rather than only a live-record slot — the retired
+   metadata stays as an audit stub. The same release stops the aggregate cap
+   from double-charging the derived index, so a curated library of real cards
+   has room the mirror-era store never did.
 
 One practice ties the two trees together: when chain-authorized work lands in a
 repository — the implementing commit, the tag, the release notes — carry the
@@ -219,6 +221,43 @@ record's external key in the message (`feat!: visual language v2
 (ACME-DS-INIT-001)`). The git history then indexes into the governance record
 without a lookup table, and an auditor holding either artifact can find the
 other.
+
+## The knowledge store is a card catalogue, not a second copy of the chain
+
+The event chain is the bookshelf: unbounded, write-through, retrieved by key.
+The knowledge store is the card catalogue in front of it — bounded, searchable,
+and *curated*. A card is not filed because something happened; it is filed
+because a fact will be **retrieved and reused later**. That is the whole test
+for `knowledge-create`: a trap you proved, a baseline you measured, a norm the
+Owner ruled — file it as a `guide`, `fact`, or `reference` with human tags and a
+`source-reference` back to the evidence or the ruling. A conference decision the
+chain already holds is not a card; distilling every closed conference just
+copies the shelf onto the cards and fills a bounded surface with what the
+unbounded one already has.
+
+Filing a card is not the end — a fresh card is a **candidate**, and a candidate
+is deliberately not trusted. Only a `promoted`, `active`, `fresh` card surfaces
+in a default query; everything else is invisible until asked for by name. So the
+lifecycle that makes knowledge *reachable* is three verbs, not one:
+
+- `knowledge-create` files the candidate (with full provenance, so it can later
+  be promoted).
+- `knowledge-promote` is the curator's stamp — propose it when the card has
+  earned reuse, and let the Owner reject. Until it lands, the card is filed but
+  unfound.
+- `knowledge-reverify` re-endorses a promoted card so it stays `fresh`; a card
+  past its `stale-days` silently drops out of default retrieval. Freshness is an
+  act, not an age — re-verify the cards a closing Initiative touched, so the
+  catalogue does not quietly empty itself over time.
+
+And a catalogue only earns its keep if it is **read at the right moment** — the
+store is silent between queries, so retrieval is something you do, not something
+that arrives. Query it *as the matching work begins*: decomposing an Initiative,
+ask for the `guide` cards on decomposition and on this platform's traps before
+proposing the shape; meeting a defect, query the defect-class cards for a known
+cause; starting a task with a history (visual regression, a flaky gate), query
+its tag. A card that is never queried at the moment it would have helped is the
+same as one never filed.
 
 ## Scope on the record (from Workflow `v0.3.1`)
 
