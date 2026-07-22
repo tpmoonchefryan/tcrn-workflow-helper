@@ -37,6 +37,7 @@ a scratch workspace created for that purpose and discarded after.
 | Know the current state before deciding | `status`, the `*-list` verbs | `status` reads authority and never returns a stale-view code; list verbs are budgeted windows over materialized views. |
 | Recover a workspace that refuses writes | `lease-inspect`, then `recover` | Diagnose before acting. Never delete lease files by hand — that is a fail-closed corruption path. |
 | Protect the workspace before a risky change | `snapshot-manifest` / `snapshot-verify` | See `backup-elicitation.md`. Cadence is advisory — the agent proposes, the user decides — and it names a concrete moment: under `gate-close`, the proposal belongs in the same breath as reporting a gate `satisfied`. |
+| Carry a work item's authoritative scope on the record | `work-annotate` | An external key is a compressed label; what it stands for lives in decomposition positions a later reader may never open. Writing the scope and its deciding minutes onto the record closes that gap — see "Scope on the record" below. |
 
 ## Which Workspace answers which moment
 
@@ -173,6 +174,33 @@ record's external key in the message (`feat!: visual language v2
 (ACME-DS-INIT-001)`). The git history then indexes into the governance record
 without a lookup table, and an auditor holding either artifact can find the
 other.
+
+## Scope on the record (from Workflow `v0.3.1`)
+
+A work record is an external key, a kind, a status, and a place in the graph —
+its *meaning* lives only in the conference that decided it. That gap has a
+recorded failure: an executor read an Epic's key label instead of the
+decomposition positions and delivered against the wrong scope. `work-annotate`
+closes it by writing two non-binding advisory fields onto the record itself:
+
+- `--scope` — one authoritative scope/intent line, readable off the record.
+- `--decided-by` — a comma-separated list of `minutes:` ids naming the
+  deliberation that ruled the scope, so the reader can walk back to the
+  positions without a search.
+
+Both land as `required:false` extensions (`advisory:scope`,
+`advisory:decided-by`); `work-show` surfaces them under `advisory`. They are
+deliberately non-binding — an annotation never changes status, never satisfies
+or blocks a gate, and never affects `done`. Offer one after a decomposition
+lands (each created item, scope plus the decomposition minutes) and when a
+kickoff or correction re-rules what an item means; the same batch-consent that
+covered the decomposition covers its annotations.
+
+One boundary is worth saying before the first annotation, not after: the
+engine appends a new `work.annotated` operation, so a chain that uses it needs
+Workflow `v0.3.1` or later everywhere that chain is read — a binary that
+predates the operation refuses the whole chain, by design. Workspaces that
+never annotate are byte-identical to before.
 
 ## Before any mutation: three things the engine will insist on
 
