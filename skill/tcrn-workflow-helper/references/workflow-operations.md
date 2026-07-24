@@ -423,6 +423,48 @@ Three that are routinely misread:
   transient. Retrying is futile; the gate has to be satisfied through its own
   verb first.
 
+## Background resources: reclaim what the session spawns (from Workflow `v0.3.2`)
+
+A governed session that spawns a **background load** — a CPU-stress loop, a dev
+server, a headless browser, a watcher, any long-running detached task — owns it
+for the session and must reclaim it at teardown. This is not a chain concern and
+no gate enforces it, but it is where a session does real harm outside the event
+log: a detached child outlives the shell that led its process group, reparents to
+init, and runs forever. It writes no log and raises no error — it just burns the
+host. (The originating incident: five CPU-stress groups whose shell leaders
+exited left 35 orphans at roughly seven cores for about five hours.) The
+test-controller's child policy refuses detached escapes only *inside a test
+process tree*; a background task an agent starts in a real session is outside
+that net, which is the gap this discipline closes.
+
+The discipline, three stages:
+
+- **Spawn — reclaim in the same breath.** Never start a background load without
+  its teardown written into the same command or flow: `trap 'kill 0' EXIT`, or
+  capture the PID/PGID and `kill` it explicitly. A load whose cleanup lives in a
+  separate step that may never run is a leak waiting to happen.
+- **Register — record the group, not the pid.** At spawn, register the load's
+  process **group** id with `scripts/spawn-guard.mjs register --pgid … --pattern
+  … --purpose …`. The registry is JSONL in the workspace transient zone, outside
+  the control tree — it never touches the chain and never blocks a write. Register
+  the pgid, not a child pid: pids are reused and orphans outlive their leader, but
+  the group is the stable handle discovered live from the kernel.
+- **Detect — verify empty at teardown.** After reclaiming, run `spawn-guard.mjs
+  detect` (exit 0 clean, exit 3 residue present) or, by hand, `pgrep -x <cmd>` /
+  `ps -o pid=,pgid= -ax | awk '$2==PGID'` and confirm it is empty. When something
+  is already burning, `ps aux -r` finds the high-CPU orphans (ppid 1, in groups),
+  and `lsof -p <pid>` attributes the leaked stderr to the session that spawned it.
+
+The full convention, its diagnosis recipe, and the incident sample live in the
+knowledge card `CARD-BACKGROUND-RESOURCE-GOVERNANCE` — query it (see the card
+catalogue section) when a task will spawn background work. Automatic session-end
+detection is **not** wired live on any host: Claude Code's Stop hook is a
+signed-ladder-step decision and Codex's is trust-gated, so the honest state is
+that the detector is invokable on demand and its automatic firing is Owner-gated
+(the installed Workflow's `docs/architecture/background-resource-governance.md`
+carries the wiring recipe). Offer to record a defect via the incident kind if a
+leak is found and *deferred* rather than reclaimed on the spot.
+
 ## What this guidance does not cover
 
 - **Your product's files.** The workflow governs its own event chain, not the

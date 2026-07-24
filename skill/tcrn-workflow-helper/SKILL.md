@@ -15,7 +15,7 @@ below — Deliberation Triggers and Recording Triggers — instead describe when
 would otherwise decide. Reading them in a session that never installs anything
 is the expected case.
 
-Supports TCRN Workflow `v0.3.2` on two Agent App hosts, Codex and
+Supports TCRN Workflow `v0.4.0` on two Agent App hosts, Codex and
 Claude Code, with host-neutral protocols. In the pinned release, Claude Code
 activation is live and has been observed against a real host, though it has no
 operator command path yet; Codex has read-only tooling and no installer. This
@@ -56,13 +56,19 @@ One trigger is not a prose signal at all, and so does not inherit the
 unreliability below: **fanning work out to two or more agents on the same
 contested question.** The orchestrator knows it has done that at the moment it
 dispatches, so this one fires deterministically. Open the conference, carry
-each agent's position verbatim under its own `agent:` actor id, and let the
-close record which position prevailed and which were rejected. A position
-written down by an orchestrator and one written by its author carry the same
-weight, because neither is cryptographically bound to its actor — the actor
-field is an attribution claim, not proof of identity. Faithful transcription
-is therefore the whole of the guarantee, which is why positions are carried
-verbatim rather than summarised.
+each agent's position verbatim under its own actor id, and let the close record
+which position prevailed and which were rejected. Sign a position with the
+**persona role** it argues from — `profile:tcrn-<role>-v1` (the mandate the
+position speaks for), not the model name that executed it (`agent:sonnet` is the
+wrong id) — and keep two levels of signing distinct: the *event* actor is who
+executed the write, the *position* `actorId` is the persona. Disclose the
+execution form in the position's first line (subagent fan-out vs main-thread
+synthesis) so a later reader knows how it was produced. A position written down
+by an orchestrator and one written by its author carry the same weight, because
+neither is cryptographically bound to its actor — the actor field is an
+attribution claim, not proof of identity. Faithful transcription is therefore
+the whole of the guarantee, which is why positions are carried verbatim rather
+than summarised.
 
 A single position nevertheless has an **engine byte budget** — 2,048 bytes of
 UTF-8 at the pinned release — and the engine rejects an oversized one outright
