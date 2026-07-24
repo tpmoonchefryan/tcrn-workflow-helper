@@ -48,6 +48,7 @@ a scratch workspace created for that purpose and discarded after.
 | Recover a workspace that refuses writes | `lease-inspect`, then `recover` | Diagnose before acting. Never delete lease files by hand — that is a fail-closed corruption path. |
 | Protect the workspace before a risky change | `snapshot-manifest` / `snapshot-verify` | See `backup-elicitation.md`. Cadence is advisory — the agent proposes, the user decides — and it names a concrete moment: under `gate-close`, the proposal belongs in the same breath as reporting a gate `satisfied`. |
 | Carry a work item's authoritative scope on the record | `work-annotate` | An external key is a compressed label; what it stands for lives in decomposition positions a later reader may never open. Writing the scope and its deciding minutes onto the record closes that gap — see "Scope on the record" below. |
+| Batch Initiatives into a release train and ship them together | `work-create --kind Release` + `work-annotate --sprint` | A sprint is a delivery batch, not a work-tree node. The Release record is the train; members attach by the member-side `advisory:sprint` tag — see "Sprint delivery batches" below. |
 
 ## Which Workspace answers which moment
 
@@ -78,8 +79,14 @@ by dozens of records, so it is worth stating the order that keeps it governed:
    agents makes it the deterministic conference trigger described in the
    Skill's Deliberation Triggers. Anchor the conference to the Initiative,
    carry each agent's position verbatim under its own actor, and close with
-   the structure that prevailed. The rejected shapes are the part nobody can
-   reconstruct later. Two shapes of that append bite in practice:
+   the structure that prevailed. Sign each position with the **persona role**
+   it argues from (`profile:tcrn-<role>-v1` — the mandate, e.g. Minerva for
+   architecture vs Verity for evidence), not the model that executed it, and
+   disclose the execution form in the position's first line (dispatched
+   subagent vs main-thread synthesis) — so a later reader sees which mandates
+   were in tension and how each position was produced. The rejected shapes are
+   the part nobody can reconstruct later. Two shapes of that append bite in
+   practice:
    - **A long position will not fit in one record.** The engine caps a single
      position at 2,048 UTF-8 **bytes** and rejects the append with
      `CONFERENCE_BUDGET_EXCEEDED` rather than truncating — a few hundred
@@ -464,6 +471,55 @@ that the detector is invokable on demand and its automatic firing is Owner-gated
 (the installed Workflow's `docs/architecture/background-resource-governance.md`
 carries the wiring recipe). Offer to record a defect via the incident kind if a
 leak is found and *deferred* rather than reclaimed on the spot.
+
+## Sprint delivery batches (release trains) (from Workflow `v0.5.0`)
+
+A **sprint** here is not a work-tree layer — it is a *delivery batch*, a named
+release train. It is orthogonal to the Initiative → Epic → Story tree: that tree
+is the scope axis, the sprint is the timebox axis, and the two must not entangle.
+Structurally they cannot: the engine enforces both Initiative and Release
+parentless, so a sprint can never be a parent (or child) of a work item. Members
+join a sprint the way a conference records membership — a **member-side
+annotation**, not parentage.
+
+The shape, three moves:
+
+- **The train is a `Release` record.** `work-create --kind Release --parent-id -`
+  makes a parentless batch container (its status reuses `planned`/`active`/`done`;
+  closing it is the batch's publish moment). Put it in the platform's
+  `cross-project` partition — a release train is a platform-level event, even when
+  its members live in sub-project partitions.
+- **Members attach with `work-annotate --sprint`.** The value is a *qualified*
+  reference to the train — `workspace:<id>#work:<releaseId>` on the CLI, stored as
+  a `required:false` `advisory:sprint` extension. Because it is qualified, a member
+  in one partition can ride a train in another (a sub-project Initiative on the
+  platform's release train). It is advisory: it never changes status, never
+  gates `done`, and is not checked for referential existence — the same
+  non-binding contract as `advisory:scope`.
+- **Read the manifest with `work-list --sprint <ref>`.** It returns that train's
+  members in the workspace queried; a train spanning partitions is read by asking
+  each partition (there are few, and the set is bounded). `work-show` surfaces a
+  record's `advisory.sprint`.
+
+Two disciplines the batch exists to serve:
+
+- **The publish stop batches to the train.** The delivery-cadence convention
+  (`CARD-DELIVERY-CADENCE`, as amended for sprints) reads: an Initiative that has
+  been *enrolled* in a sprint defers its outward-publish stop to the sprint's
+  close, so a batch ships behind one authorization instead of one per Initiative.
+  An Initiative *not* enrolled keeps the per-Initiative single-closeout stop — the
+  express lane, so a hotfix never waits for the train.
+- **Timeboxing is advisory, not enforced.** The engine has no clock (deterministic
+  replay), so a sprint never expires on its own; `close` is an explicit act. Under
+  no clients yet, batches are formed freely at the Owner's pace; a future fixed
+  cadence is a convention change (a re-pin of the cadence card), and a
+  deployment-authorization gate on the sprint's close is the natural place to
+  record a client-facing release — none of which needs an engine change.
+
+Query `CARD-SPRINT-RELEASE-TRAIN` when a batch is being planned; it carries the
+two-phase model, the express-lane clause, and the backward-compatibility note
+(a chain that uses `advisory:sprint` needs Workflow `v0.5.0`+ to replay, the same
+contract as every advisory key).
 
 ## What this guidance does not cover
 

@@ -26,7 +26,7 @@ The bootstrap is the only thing you ever have to trust, so check it before you t
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# 9b5eeb6ebeaecba4b15c62ef96883b98f94953ce2025a2a4f122694edba1b416
+# 86855ec4a3737362e8206b0478723ed0263e99af172809a9f1319961ff9ea6ad
 ```
 
 That digest is published here, in `SECURITY.md`, and in the GitHub release notes. **If what you compute does not match, stop** — do not run anything, do not "try it anyway". A mismatch is the system working.
@@ -172,7 +172,7 @@ Prose triggering of these deliberations is advisory and unreliable-by-design pen
 
 ## Status, honestly
 
-- `0.1.0-candidate.25` is a **pre-release candidate** supporting exactly TCRN Workflow `v0.4.0`.
+- `0.1.0-candidate.26` is a **pre-release candidate** supporting exactly TCRN Workflow `v0.5.0`.
 - Installation and removal are **test-root-only** on both hosts; no live Codex or Claude Code host support is asserted.
 - **The self-built Ed25519 signing chain was removed on 2026-07-19.** It was never anchored: the digest and key fingerprint it depended on were published nowhere a user could independently obtain them, so the chain proved nothing to anyone outside this repository. What replaces it is simpler and honest: a bootstrap digest that is *actually published* in independent places, accepted release digests compiled into that bootstrap, GitHub immutable releases, and the reproducible-build chain.
 - The three Claude-Code-specific behaviors (settings-fragment reversibility, user-vs-project precedence, CLAUDE.md fallback) are implemented and proven **in the pinned Workflow release**, not in this repository — see `skill/tcrn-workflow-helper/references/trust-contract.md` for the exact evidence map.
