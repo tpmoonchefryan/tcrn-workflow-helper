@@ -13,6 +13,7 @@ const ALLOWED = [
   'SKILL.md',
   'agents/openai.yaml',
   'references/backup-elicitation.md',
+  'references/driver-capability-profile.md',
   'references/first-run-wizard.md',
   'references/on-demand-context.md',
   'references/reason-codes.md',

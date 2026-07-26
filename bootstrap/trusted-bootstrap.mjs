@@ -13,7 +13,7 @@ export const IDENTITY = Object.freeze({
 // The accepted release bytes are pinned HERE, in the runtime the user verifies
 // out-of-band against its published SHA-256 -- not in a document that ships beside
 // the download and could be rewritten by whoever rewrote the download.
-export const EXPECTED_ARCHIVE_SHA256 = '0b3c10f908a9f0c96a83251197dc3f04a3bba719a3bf98a45c01ff4d24e96259';
+export const EXPECTED_ARCHIVE_SHA256 = '9e4e296af527658e920ab052b5cc89cf18e078c62378542dba1159db050a3aee';
 export const EXPECTED_PROVENANCE_SHA256 = '6207b1d21de3545fd4eef25cb9128937a0cb0545fb3513a8a3d8848feffb40cc';
 const ARCHIVE_SCHEMA = 'tcrn.workflow.helper.archive.v1';
 const STATE_SCHEMA = 'tcrn.workflow.helper.state.v1';

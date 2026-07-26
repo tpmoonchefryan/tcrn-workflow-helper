@@ -74,6 +74,34 @@ step stays there.
 The common shape is one instruction — "break this Initiative down" — followed
 by dozens of records, so it is worth stating the order that keeps it governed:
 
+0. **Settle the direction before the shape.** Before asking *how to break this
+   down*, ask whether the Initiative contains a **direction choice** — replace the
+   old thing, keep both, or run three tracks at once. Decompose a direction that is
+   still open and the executor meets it mid-flight, when the cheap answer has
+   already been half-built; in a product system the worst form of that is a
+   migration stopped in the middle.
+   It is a direction choice when it is hard to reverse (a schema, a public API
+   contract, a data model, a platform choice), when it is visible to external
+   consumers or tenants, or when it forecloses an alternative architecture. Ordinary
+   refactoring inside an agreed architecture is not.
+   Settling one produces three things, all recorded:
+   - the alternatives considered and **the ones rejected** — the rejected shape is
+     the part nobody can reconstruct later;
+   - for each track kept, a **named beneficiary** (who needs it), who carries its
+     operating cost, and the condition under which it sunsets or is reviewed. A
+     track with no named beneficiary is hoarding, not a track: "keep both because
+     choosing is hard" is the thing this step exists to catch;
+   - the **seam** between tracks — flag, adapter, version gate, migration path.
+   Two failure modes, in opposite directions, and the record must guard both: an
+   agent's instinct is to *replace* (the old path vanishes with its users still on
+   it), and an organisation's instinct is to *accumulate* (nothing is ever sunset).
+   That is why a kept track carries a sunset condition and a deleted one carries the
+   reason it no longer applies.
+   Settling the direction does **not** mean deciding everything up front. When the
+   answer depends on something only a trial can tell you, the legitimate output is
+   "run a bounded experiment, then close the direction" — write that down as the
+   decision, with the bound. What must not survive into execution is an *unnamed*
+   direction question.
 1. **Deliberate before deciding the shape.** Decomposition picks one structure
    over defensible alternatives, and fanning the question out to two or more
    agents makes it the deterministic conference trigger described in the
@@ -184,8 +212,14 @@ by dozens of records, so it is worth stating the order that keeps it governed:
    executor is not discovering each stop by colliding with it.** A tree that
    names every record but not its decision points forces whoever runs it to
    meet each interruption mid-flight, one at a time. Instead, finish the
-   decomposition by sorting every choice that could gate delivery into three
+   decomposition by sorting every choice that could gate delivery into four
    lanes and recording the tally in the kickoff minutes:
+   - **Direction** — a replace-or-coexist or how-many-tracks choice, per step 0. It
+     is listed first because it is answered first: it changes what the other lanes
+     contain. A direction item is closed here with its rejected alternatives, a
+     named beneficiary and sunset condition per kept track, and the seam between
+     tracks — or, when only a trial can answer it, with the bounded experiment that
+     will close it.
    - **Owner-now** — a gate whose outcome class needs the user's intent, a
      direction no existing ruling supports, or an outward publish. Surface
      these *together, up front*: one sitting clears them and the run then
@@ -228,6 +262,45 @@ record's external key in the message (`feat!: visual language v2
 (ACME-DS-INIT-001)`). The git history then indexes into the governance record
 without a lookup table, and an auditor holding either artifact can find the
 other.
+
+## Before building it, look for it
+
+A Story that says "build X" is also, silently, a decision not to adopt an X that
+already exists. Make that decision on purpose, in three rings, outward:
+
+1. **What this deployment already has** — an implementation in this repository, a
+   precedent on the chain, a card in the knowledge store. This ring is the cheapest
+   and the most trusted, and it is the one that gets skipped: a live programme once
+   came close to rebuilding an activation path that reading the source showed was
+   already built.
+2. **Tools and dependencies already wired in** — the capability is present but the
+   host in front of you cannot reach it. The recorded failure here is a code-index
+   server configured for one host only, which left the other host's sessions doing
+   the same work by hand for weeks without anyone noticing the gap.
+3. **Outside code** — the largest gain, and the only ring with an admission fee.
+
+Ring three's fee is four checks, and none of them is optional:
+
+- **Licence compatibility** with the target repository, with the judgement recorded.
+- **Supply-chain trust** — a pinned version, verifiable provenance, evidence the
+  project is alive, and a security-advisory history. Adoption enrols it in upgrade
+  and advisory tracking; that is part of the cost, not an afterthought.
+- **Package-name verification, against hallucination.** Attackers register names a
+  language model is likely to invent. Verify the *repository identity* — the
+  organisation, the commit history, real usage — not that a package with a
+  plausible name resolves. "A search returned this name" is not "this is the
+  well-known project".
+- **The operating cost of one more track.** A dependency is a track in the sense of
+  step 0: it takes a named beneficiary, a cost owner, and a sunset or review
+  condition.
+
+Two scope rules keep this from cutting the wrong way. **The trust core is not
+covered by "reuse first"**: the engine, the trusted bootstrap, and the release and
+identity path have a deliberately high adoption bar, and their existing pinning,
+frozen-lockfile and no-install-scripts posture is itself a settled trade-off that
+this guidance does not reopen. **Product surfaces default to reuse.** And bound the
+search: a timebox, then decide on what you have and record that you did — an
+unbounded "let me look first" is its own failure mode.
 
 ## The knowledge store is a card catalogue, not a second copy of the chain
 

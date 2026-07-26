@@ -206,6 +206,11 @@ checksum, provenance, root, or archive checks. Read
 - `references/settings-elicitation.md` defines the conversational settings
   elicitation flow (agent-as-configuration-UI, observation-grounded, Tier-1
   explain-only).
+- `references/driver-capability-profile.md` defines `driver.capabilityProfile`
+  (`frontier` / `standard`) — how a deployment declares which tier of driver it
+  runs, which guidance that shapes, and the three boundaries it must not cross
+  (authority and audit constraints never vary; the user declares it and the agent
+  never infers it; engine limits stay out of it).
 - `references/backup-elicitation.md` defines the snapshot backup runbook and
   live-sync warning (external backup destination, `backup.cadence` /
   `backup.destination` settings), for the pinned release's snapshot surface.

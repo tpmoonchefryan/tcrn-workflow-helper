@@ -8,6 +8,39 @@ preference; the values in step 2 do not exist until step 1 has happened.
 Run `pnpm push-gate` before pushing. It re-derives every pinned digest from the
 bytes it claims to pin, and it is the only thing that authorizes a push.
 
+## 0. Batch the payload changes; re-pin once
+
+Every edit under `skill/` moves `EXPECTED_ARCHIVE_SHA256` and therefore drags the
+whole ceremony behind it — six anchor documents, the manifests, the artifacts, the
+full suite. That cost is per *ceremony*, not per edit, which makes the rhythm a
+real decision rather than a detail.
+
+**The rule: a candidate carries a batch of payload changes, not one.** Collect the
+edits that are ready, land them together, and run the ceremony once. Cutting a
+candidate per change multiplies a fixed cost by the number of changes and buys
+nothing — the intermediate candidates are never adopted by anyone.
+
+What this does not license:
+
+- **It is not a reason to hold a correction back.** A fix to something the payload
+  states wrongly rides the next candidate; it does not wait for the batch to feel
+  full. If nothing else is pending, a batch of one is the correct batch.
+- **It is not a licence to skip step 6.** A batch is one ceremony, and one ceremony
+  still runs the whole suite.
+- **The queue is a written thing.** A change agreed in conversation but not written
+  into the ride-along queue is not in the batch; saying it aloud does not enrol it.
+
+Two consequences worth stating, because both have bitten:
+
+- **A re-pin to a new Workflow version is its own kind of batch.** It touches
+  `IDENTITY`, the provenance copy, and the six anchors, but nothing under `skill/`,
+  so `EXPECTED_ARCHIVE_SHA256` must **not** move. If it moved and nothing under
+  `skill/` changed, stop — step 3 says the same thing from the other direction.
+- **Payload batch and version re-pin can share one candidate.** When both are
+  pending, do them in one candidate rather than two: the version re-pin is steps
+  1–4 and the payload batch moves the archive digest in step 5, so the ordering
+  already accommodates both.
+
 ## 1. Workflow first
 
 Cut the Workflow release and **tag it**. `IDENTITY` pins the commit, tree, and

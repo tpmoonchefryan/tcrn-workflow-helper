@@ -105,7 +105,16 @@ tampered or look-alike copy could simply rewrite these steps. Therefore:
    verifies, and always names what it deleted), and state the restore
    boundary before it matters: restore is same-path-only, and the control
    tree restores whole or not at all.
-8. **Ready to use** — tell the user Workflow is verified and where it lives.
+8. **Declare the driver capability profile** — ask once, in plain language: is the
+   agent driving this deployment a current top-tier model, or a smaller/older one?
+   Record the answer as `driver.capabilityProfile` (`frontier` or `standard`) per
+   `driver-capability-profile.md`. Ask it here rather than inferring it: a model's
+   own judgement about its own tier is exactly the wrong source, and an unknown
+   answer resolves to `standard` because strictness is the safe direction when
+   capability is unknown. Say what it does and does not change — it shapes how this
+   guidance is phrased, and it never varies an authority boundary, an audit
+   requirement, or any engine limit.
+9. **Ready to use** — tell the user Workflow is verified and where it lives.
    To work with tasks/knowledge, teach on-demand queries per
    `on-demand-context.md`; **never** pull work-item or knowledge bodies into the
    conversation preemptively.
