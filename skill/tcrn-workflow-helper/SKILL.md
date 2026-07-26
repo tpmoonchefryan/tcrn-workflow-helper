@@ -15,12 +15,14 @@ below — Deliberation Triggers and Recording Triggers — instead describe when
 would otherwise decide. Reading them in a session that never installs anything
 is the expected case.
 
-Supports TCRN Workflow `v0.5.0` on two Agent App hosts, Codex and
-Claude Code, with host-neutral protocols. In the pinned release, Claude Code
-activation is live and has been observed against a real host, though it has no
-operator command path yet; Codex has read-only tooling and no installer. This
-helper drives neither: its own mutating commands are test-root-only and nothing
-here touches a live host binary.
+Supports TCRN Workflow `v0.6.0` on two Agent App hosts, Codex and
+Claude Code, with host-neutral protocols. The pinned release ships a governed
+seven-command operator surface, the same catalog as structured MCP tools, and
+reversible project-local activation for both hosts. Those activation paths are
+inert until separately authorized; their current exact SessionStart definitions
+are code- and fixture-proven, but no current live host activation is claimed.
+This helper drives none of those surfaces: its own mutating commands are
+test-root-only and nothing here touches a live host binary.
 
 This Skill's prose (SKILL.md + references) may be distributed into a live host
 skills folder by a standard installer, but a distributed copy has **no authority

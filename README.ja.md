@@ -8,9 +8,9 @@
 
 [English](./README.md) · [简体中文](./README.zh-CN.md) · 日本語 · [한국어](./README.ko.md) · [Français](./README.fr.md)
 
-![status](https://img.shields.io/badge/status-0.1.0--candidate.21-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
+![status](https://img.shields.io/badge/status-0.1.0--candidate.27-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
 
-![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.1.0-blue)
+![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.6.0-blue)
 
 [まずこれを確認](#まずこれを確認) · [なぜこのプロジェクトが存在するのか](#なぜこのプロジェクトが存在するのか) · [何を強制するのか](#何を強制するのか) · [クイックスタート](#クイックスタート) · [率直な回答](#率直な回答) · [ライセンス](#ライセンス)
 
@@ -26,7 +26,7 @@
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# 86855ec4a3737362e8206b0478723ed0263e99af172809a9f1319961ff9ea6ad
+# 71063beb2aefa3cd92d734b1afc2e43c45a731e5748352caae4a8344dbb856f2
 ```
 
 この digest はここ、`SECURITY.md`、そして GitHub のリリースノートで公開されています。**計算した値が一致しなければ、そこで止めてください**——何も実行せず、「とりあえず試す」こともしないでください。一致しないことこそ、この仕組みが働いている証拠です。
@@ -133,7 +133,7 @@ helper の変更系コマンド（`install`/`update`/`reinstall`/`uninstall`）�
 
 ### テストスイートは実際に何を覆っているのか
 
-**77 テスト、すべてオフライン**（`node:net` を使う唯一の箇所は、特殊ファイル拒否のためのローカル unix ドメインソケットのフィクスチャです）：
+**87 テスト、すべてオフライン**（`node:net` を使う唯一の箇所は、特殊ファイル拒否のためのローカル unix ドメインソケットのフィクスチャです）：
 
 - トラストマトリクス：固定 digest の不一致、改竄された provenance、改竄されたアーカイブエントリ——それぞれが正確な reason code を主張します。
 - ライフサイクル：install / update / reinstall / uninstall を、バイト単位で同一のプライベートワークスペース保全、あらゆる有効な注入点での本物の `SIGKILL`（障害目録は実際の操作から発見され、手書きの一覧ではありません）、異なる PID の競合者によるロック競合、置換・外来ファイルの保全とともに。
@@ -155,12 +155,12 @@ helper の変更系コマンド（`install`/`update`/`reinstall`/`uninstall`）�
 | `manifests/` | バイト単位で複製された Workflow リリースの provenance。これは*自己申告のローカルビルド声明*（タイムスタンプはゼロ化）であって、ホスト型ビルダーの証明ではありません——digest で固定されているため差し替えは不可能で、第三者による確認可能性は再現ビルドの連鎖から来ます。 |
 | `artifacts/` | 五つの再現可能なリリース成果物。 |
 | `scripts/` | 決定的なアーカイブ/SBOM/チェックサム生成器、リリース検証器、CI リプレイ、プッシュゲート。 |
-| `test/` | 77 テストの証明スイート。 |
+| `test/` | 87 テストの証明スイート。 |
 | `RELEASING.md` | リリースのランブック——強制される順序、provenance の複製ルール、信頼面に触れるコミットのフルスイート規則。 |
 
 ## 固定された Workflow リリースが統治するもの
 
-helper の役割は変わりません——動く前にリリースを証明すること。そして固定しているリリース、TCRN Workflow `v0.1.0` は、スキルのリファレンスがオペレーターに操作を教える統制された面を備えています。
+helper の役割は変わりません——動く前にリリースを証明すること。そして固定しているリリース、TCRN Workflow `v0.6.0` は、スキルのリファレンスがオペレーターに操作を教える統制された面を備えています。
 
 - **カンファレンスとゲートの統治**——熟議はイベントログに記録され（`conference-open` / `-append-position` / `-close` / `-cancel`）、未充足のゲートは、カンファレンス議事録の証拠が解決するまで作業項目が `done` に達するのを阻みます（`WORKSPACE_GATE_PENDING`、`WORKSPACE_GATE_EVIDENCE_UNRESOLVED`）。
 - **アクター署名**——有効化されると、すべての変更系動詞は行為したアクターを帰属させねばならず、欠落や不正形式ではフェイルクローズします（`WORKSPACE_ACTOR_REQUIRED`、`WORKSPACE_ACTOR_INVALID`）。
@@ -172,7 +172,7 @@ helper の役割は変わりません——動く前にリリースを証明す�
 
 ## ステータス、正直に
 
-- `0.1.0-candidate.26` は**プレリリース候補**で、TCRN Workflow `v0.5.0` をちょうど対象とします。
+- `0.1.0-candidate.27` は**プレリリース候補**で、TCRN Workflow `v0.6.0` をちょうど対象とします。
 - インストールと削除は両ホストとも**テストルート限定**であり、ライブの Codex / Claude Code ホスト対応は主張しません。
 - **自前で構築した Ed25519 署名チェーンは 2026-07-19 に削除されました**。それは一度も錨を持ちませんでした：依存していた digest と鍵指紋は、ユーザーが独立に入手できるどこにも公開されておらず、このリポジトリの外の誰に対しても何も証明しませんでした。それに代わるものは、より単純で正直です：*実際に公開されている*ブートストラップ digest、そのブートストラップにコンパイルされた受理リリース digest、GitHub のイミュータブルリリース、そして再現ビルドの連鎖です。
 - Claude Code 固有の三つの挙動（settings フラグメントの可逆性、ユーザー対プロジェクトの優先順位、CLAUDE.md フォールバック）は、このリポジトリではなく**固定された Workflow リリース**で実装・証明されています——正確な証拠対応は `skill/tcrn-workflow-helper/references/trust-contract.md` を参照してください。

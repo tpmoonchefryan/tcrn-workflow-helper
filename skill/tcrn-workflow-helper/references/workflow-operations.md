@@ -370,9 +370,10 @@ agent, at the user's direction and with the user's approval — the user's own
 host, the user's own yes.
 
 That leaves one job: making sure the placed copy has not fallen behind the
-release it should match. The adapter already announces a governed session (its
-SessionStart summary reaches the model's context); that announcement is the
-signal to run the check, not a substitute for it.
+release it should match. When a separately approved adapter activation announces
+a governed session (its persona-free SessionStart summary reaches the model's
+context), that announcement is the signal to run the check, not a substitute
+for it.
 
 - **Each governed session, verify the placed copy against its pin.** Run the
   bootstrap's `verify-installed-copy` against the installed Skill directory.

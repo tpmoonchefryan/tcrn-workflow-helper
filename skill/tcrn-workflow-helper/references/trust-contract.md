@@ -9,10 +9,10 @@ non-canonical scalar encodings fail closed.
 ## Required identity
 
 The accepted Workflow release is repository
-`https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v0.5.0`,
-commit `eea93740f1bf2fa72dbf9963cf01260fcffaec14`, tree
-`4ebb9c3eac65a8364826745bd17280d5cfd907db`, and tag object
-`225017ae5fd683e85a744a76bef1bddbd6caeac7`.
+`https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v0.6.0`,
+commit `bae1c26bbcfe830d9e273d0cfdc516eda82689b3`, tree
+`22db11d53d1ff42061596b8750f5cf2465b325f5`, and tag object
+`185e613aa14dec0a14e09ab6182efdfeaca4899f`.
 
 ## Out-of-band trust anchor (root of trust)
 
@@ -74,11 +74,15 @@ remain test-root-only and never write to a live host Skill location.
 ## Host matrix
 
 This candidate supports two Agent App hosts, Codex and Claude Code, over one
-host-neutral protocol surface. In the pinned Workflow release, Claude Code
-activation is live and has been observed against a real host; Codex remains
-read-only with no installer. Neither is exercised here: each case family below
-names where its evidence actually lives, and nothing in this candidate involves
-a live `claude` or Codex App binary.
+host-neutral protocol surface. The pinned Workflow release ships reversible,
+project-local SessionStart activation for both hosts, plus a seven-command
+operator surface and the same catalog as structured MCP tools. All remain inert
+until separately pinned and authorized. The current exact SessionStart
+definitions are code- and fixture-proven; historical host receipts cover
+superseded definitions, so no current live activation is claimed. None of those
+host surfaces is exercised here: each case family below names where its evidence
+actually lives, and nothing in this candidate involves a live `claude` or Codex
+App binary.
 
 **Proven by this candidate's own test suite** (`npm test`, offline by
 construction: neither the bootstrap nor the suite opens an internet socket —
@@ -110,23 +114,20 @@ special-file rejection):
   disposable test root is the only write surface and that failed operations
   leave no residue.
 
-**Bound to the pinned Workflow release's hermetic proofs** (the three
-Claude-Code-new families are implemented and proven in the Workflow repository
-at exactly the pinned identity above, by its `verify:p6b` suite —
-fragment reversibility, forbidden-path, fallback, and cross-host parity
-cases): `.claude/settings.json` hook-fragment merge/remove byte-reversibility;
-user-vs-project precedence with user-level `~/.claude` never written; and
-directory trust-window fallback to CLAUDE.md-only. This candidate ships no
-settings or hook surface of its own; those behaviors execute only inside the
-pinned Workflow release.
+**Bound to the pinned Workflow release's hermetic proofs**: the Workflow
+repository at exactly the pinned identity above proves Claude settings-fragment
+merge/remove byte-reversibility, user-vs-project precedence, Codex inert install
+and exact-definition approval boundaries, persona-free SessionStart definitions,
+cross-host hostile-input parity, the pinned operator-authority grant, and the
+structured MCP catalog. This candidate ships no settings, hook, operator, or MCP
+surface of its own; those behaviors execute only inside the pinned Workflow
+release.
 
-**Not yet proven — planned P9-B live-validation families** (listed for
-completeness; no proof is claimed and no live support is asserted until the
-release board accepts them): approved network clone/update execution (this
-candidate's `plan-network` emits a static plan and performs no network
-mutation), bare-session fallback on either host, and per-host live-install
-surfaces (installation and removal remain test-root-only in this candidate on
-both hosts).
+**Not claimed by this candidate**: current exact live activation on either host,
+approved network clone/update execution (this candidate's `plan-network` emits a
+static plan and performs no network mutation), or live-install surfaces for the
+helper itself. Its installation and removal commands remain test-root-only on
+both hosts.
 
 ## Archive and manifest
 

@@ -112,11 +112,11 @@ tampered or look-alike copy could simply rewrite these steps. Therefore:
 
 ## After setup — expectations to state plainly
 
-- **No automatic session context.** Host-hook activation has no operator
-  command path in the pinned release, so sessions receive no injected
-  authority summary; this Skill's description is the only ambient surface.
-  The capability itself is real and receipted — the operator path is a later
-  release.
+- **No automatic session context by default.** The pinned release ships
+  reversible project-local activation for both hosts, but it stays inert until
+  its exact definitions, pins, and grant are separately authorized (and Codex
+  also requires host approval). If activated, its one fail-open SessionStart
+  summary is persona-free; installation alone never claims host activation.
 - **Upgrades.** A new release means a new independently published bootstrap
   digest: verify the new anchor, re-verify the placed copy, check out the new
   tag. A framework upgrade never touches Workspace bytes.
