@@ -119,6 +119,14 @@ tampered or look-alike copy could simply rewrite these steps. Therefore:
    `on-demand-context.md`; **never** pull work-item or knowledge bodies into the
    conversation preemptively.
 
+   Before saying that, check once — silently — whether a cockpit is already
+   running on this machine: a loopback health receipt naming
+   `tcrn-aos-cockpit` (see `aos-integration.md`). If one answers, add one
+   sentence about where this Workspace will show up and that the cockpit reads
+   rather than records. If nothing answers, say nothing: not running is the
+   ordinary case, and asking whether the user has AOS implies a dependency
+   Workflow does not have.
+
 ## After setup — expectations to state plainly
 
 - **No automatic session context by default.** The pinned release ships
@@ -135,6 +143,14 @@ tampered or look-alike copy could simply rewrite these steps. Therefore:
 - **The envelope.** Partition per project, one writer per Workspace, and a
   chain that slows perceptibly in the low thousands of events — the Workflow
   README's Known limits section carries the numbers.
+
+## If the user asks about AOS
+
+Two questions come up and both have a wrong default. "I already have AOS running"
+and "I have been working locally and now want AOS" are answered in
+`aos-integration.md` — read it then rather than improvising. The short form of
+both: chains never move, AOS never holds the record, and its arrival adds a
+second store that is precious in a way a projection is not.
 
 ## Rules the agent must not break
 

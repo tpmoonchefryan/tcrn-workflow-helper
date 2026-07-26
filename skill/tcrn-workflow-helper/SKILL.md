@@ -15,7 +15,7 @@ below — Deliberation Triggers and Recording Triggers — instead describe when
 would otherwise decide. Reading them in a session that never installs anything
 is the expected case.
 
-Supports TCRN Workflow `v0.6.0` on two Agent App hosts, Codex and
+Supports TCRN Workflow `v0.7.0` on two Agent App hosts, Codex and
 Claude Code, with host-neutral protocols. The pinned release ships a governed
 seven-command operator surface, the same catalog as structured MCP tools, and
 reversible project-local activation for both hosts. Those activation paths are
@@ -200,6 +200,11 @@ checksum, provenance, root, or archive checks. Read
   users (root-of-trust ordering, marker precondition, managed defaults).
 - `references/reason-codes.md` translates every stable reason code into plain
   language (what happened / security stop? / what to do).
+- `references/aos-integration.md` covers the two AOS questions that come up
+  during setup — a cockpit already running on the machine, and a user moving
+  from local-only Workflow to AOS — including the read verbs a cockpit needs and
+  the boundary this helper will not cross (it explains AOS; it never installs
+  or drives it).
 - `references/on-demand-context.md` defines how the agent fetches only
   prompt-relevant work/knowledge on demand — the Skill teaches querying, never
   carries data.

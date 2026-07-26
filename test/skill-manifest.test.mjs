@@ -12,6 +12,7 @@ const archivePath = fileURLToPath(new URL('../artifacts/skill-archive.json', imp
 const ALLOWED = [
   'SKILL.md',
   'agents/openai.yaml',
+  'references/aos-integration.md',
   'references/backup-elicitation.md',
   'references/driver-capability-profile.md',
   'references/first-run-wizard.md',
