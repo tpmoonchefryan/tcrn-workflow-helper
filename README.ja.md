@@ -8,9 +8,9 @@
 
 [English](./README.md) · [简体中文](./README.zh-CN.md) · 日本語 · [한국어](./README.ko.md) · [Français](./README.fr.md)
 
-![status](https://img.shields.io/badge/status-0.1.0--candidate.29-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
+![status](https://img.shields.io/badge/status-0.1.0--candidate.30-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
 
-![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.7.0-blue)
+![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.9.0-blue)
 
 [まずこれを確認](#まずこれを確認) · [なぜこのプロジェクトが存在するのか](#なぜこのプロジェクトが存在するのか) · [何を強制するのか](#何を強制するのか) · [クイックスタート](#クイックスタート) · [率直な回答](#率直な回答) · [ライセンス](#ライセンス)
 
@@ -26,7 +26,7 @@
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# 43f6d441103c36edb7378bb42bf2eab0294c86f7d32a634074312d9a5ab5a641
+# d6baa330741fdc82229dc9fab9eed0a28b349edcaa72d9cfb295ff1a804897e9
 ```
 
 この digest はここ、`SECURITY.md`、そして GitHub のリリースノートで公開されています。**計算した値が一致しなければ、そこで止めてください**——何も実行せず、「とりあえず試す」こともしないでください。一致しないことこそ、この仕組みが働いている証拠です。
@@ -160,19 +160,21 @@ helper の変更系コマンド（`install`/`update`/`reinstall`/`uninstall`）�
 
 ## 固定された Workflow リリースが統治するもの
 
-helper の役割は変わりません——動く前にリリースを証明すること。そして固定しているリリース、TCRN Workflow `v0.7.0` は、スキルのリファレンスがオペレーターに操作を教える統制された面を備えています。
+helper の役割は変わりません——動く前にリリースを証明すること。そして固定しているリリース、TCRN Workflow `v0.9.0` は、スキルのリファレンスがオペレーターに操作を教える統制された面を備えています。
 
 - **カンファレンスとゲートの統治**——熟議はイベントログに記録され（`conference-open` / `-append-position` / `-close` / `-cancel`）、未充足のゲートは、カンファレンス議事録の証拠が解決するまで作業項目が `done` に達するのを阻みます（`WORKSPACE_GATE_PENDING`、`WORKSPACE_GATE_EVIDENCE_UNRESOLVED`）。
 - **アクター署名**——有効化されると、すべての変更系動詞は行為したアクターを帰属させねばならず、欠落や不正形式ではフェイルクローズします（`WORKSPACE_ACTOR_REQUIRED`、`WORKSPACE_ACTOR_INVALID`）。
 - **アクティベーションのはしご**——統制面は単一のグローバルスイッチではなく、段階的で可逆な段を通じて有効化されます。統制レコードのないワークスペースの挙動は変わりません。
 - **バックアップとリストア**——密閉された、同一パスの全ツリースナップショットと、決定的なレシートおよびバイト単位の証明（`snapshot-manifest` / `snapshot-verify` → `SNAPSHOT_VERIFIED`）。`skill/tcrn-workflow-helper/references/backup-elicitation.md` を参照。
+- **統制された再配置**——ワークスペースは新しいパスや新しいマシンへ向かう、記録された経路を持ちます（`relocation-plan` / `-vacate` / `-adopt` / `-abort` / `-inspect`）。これらの動詞が動かすのは束縛であり、バイトはオペレーターが運び、イベントは一つも書き換えられません。フォークを防ぐのではなく、フォークを可視にします——頼る前にリリースの `docs/adr/0003-workspace-relocation.md` を読んでください。
+- **読めるイベントチェーン**——`event-list` はイベントをそのまま、ページ単位で返すため、`export` が拒否するほど大きなチェーンでも消費者が再導出できます。
 - **蒸留**——統制されたストア上での照合済み知識蒸留。
 
 これらの熟議を散文で引き起こすことは助言的であり、gate-v1 までは設計上信頼できません。スキルはそれを明示し、信頼できる強制は機械が確認できるゲートに委ねます。
 
 ## ステータス、正直に
 
-- `0.1.0-candidate.29` は**プレリリース候補**で、TCRN Workflow `v0.7.0` をちょうど対象とします。
+- `0.1.0-candidate.30` は**プレリリース候補**で、TCRN Workflow `v0.9.0` をちょうど対象とします。
 - インストールと削除は両ホストとも**テストルート限定**であり、ライブの Codex / Claude Code ホスト対応は主張しません。
 - **自前で構築した Ed25519 署名チェーンは 2026-07-19 に削除されました**。それは一度も錨を持ちませんでした：依存していた digest と鍵指紋は、ユーザーが独立に入手できるどこにも公開されておらず、このリポジトリの外の誰に対しても何も証明しませんでした。それに代わるものは、より単純で正直です：*実際に公開されている*ブートストラップ digest、そのブートストラップにコンパイルされた受理リリース digest、GitHub のイミュータブルリリース、そして再現ビルドの連鎖です。
 - Claude Code 固有の三つの挙動（settings フラグメントの可逆性、ユーザー対プロジェクトの優先順位、CLAUDE.md フォールバック）は、このリポジトリではなく**固定された Workflow リリース**で実装・証明されています——正確な証拠対応は `skill/tcrn-workflow-helper/references/trust-contract.md` を参照してください。

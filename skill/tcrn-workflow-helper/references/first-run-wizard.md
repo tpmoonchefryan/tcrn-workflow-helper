@@ -85,8 +85,10 @@ tampered or look-alike copy could simply rewrite these steps. Therefore:
    is an independent single-writer domain: its own chain, its own scale
    budget, its own lease; all may share one framework checkout and the one
    `release-trust/` root. State one consequence before the first `init`:
-   partition names become frozen paths (restore is same-path-only), so
-   choose names that will not be renamed.
+   partition names become paths the control tree binds absolutely, and a
+   restore targets the original path — a later change of address is a
+   recorded relocation ceremony, never a rename — so choose names that
+   will not need renaming.
 
    Before the knowledge store's first initialization, explain
    `KNOWLEDGE_DISPOSABLE_ACK_REQUIRED` in one line — the store is a derived
@@ -103,8 +105,10 @@ tampered or look-alike copy could simply rewrite these steps. Therefore:
    `backup.retention` (how many snapshots the destination keeps — default
    five; rotation deletes oldest-first, runs only after a new snapshot
    verifies, and always names what it deleted), and state the restore
-   boundary before it matters: restore is same-path-only, and the control
-   tree restores whole or not at all.
+   boundary before it matters: a restore targets the original path, and the
+   control tree restores whole or not at all. Do not say a workspace can
+   never move — the pinned release has a governed route for that, and it is a
+   separate ceremony rather than a restore performed elsewhere.
 8. **Declare the driver capability profile** — ask once, in plain language: is the
    agent driving this deployment a current top-tier model, or a smaller/older one?
    Record the answer as `driver.capabilityProfile` (`frontier` or `standard`) per
@@ -121,9 +125,11 @@ tampered or look-alike copy could simply rewrite these steps. Therefore:
 
    Before saying that, check once — silently — whether a cockpit is already
    running on this machine: a loopback health receipt naming
-   `tcrn-aos-cockpit` (see `aos-integration.md`). If one answers, add one
-   sentence about where this Workspace will show up and that the cockpit reads
-   rather than records. If nothing answers, say nothing: not running is the
+   `tcrn-aos-cockpit` (see `aos-integration.md`, which also states why
+   silence from that probe is not evidence about any other host). If one
+   answers, add one sentence about where this Workspace will show up and
+   that the cockpit reads rather than records. If nothing answers, say
+   nothing about it: not running is the
    ordinary case, and asking whether the user has AOS implies a dependency
    Workflow does not have.
 

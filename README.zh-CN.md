@@ -8,9 +8,9 @@
 
 [English](./README.md) · 简体中文 · [日本語](./README.ja.md) · [한국어](./README.ko.md) · [Français](./README.fr.md)
 
-![status](https://img.shields.io/badge/status-0.1.0--candidate.29-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
+![status](https://img.shields.io/badge/status-0.1.0--candidate.30-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
 
-![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.7.0-blue)
+![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.9.0-blue)
 
 [先核对这个](#先核对这个) · [为什么做这个项目](#为什么做这个项目) · [它强制什么](#它强制什么) · [快速开始](#快速开始) · [直白的回答](#直白的回答) · [许可证](#许可证)
 
@@ -26,7 +26,7 @@
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# 43f6d441103c36edb7378bb42bf2eab0294c86f7d32a634074312d9a5ab5a641
+# d6baa330741fdc82229dc9fab9eed0a28b349edcaa72d9cfb295ff1a804897e9
 ```
 
 该摘要发布在这里、在 `SECURITY.md` 中，以及 GitHub 发布说明里。**如果你算出来的值对不上，就停下**——不要运行任何东西，也不要"先试试看"。对不上，正是这套机制在起作用。
@@ -160,19 +160,21 @@ Helper 的改动型命令（`install`/`update`/`reinstall`/`uninstall`）只做�
 
 ## 被钉定的 Workflow 发布治理什么
 
-Helper 的职责没有变——在它运行之前证明这份发布。而它所钉定的这个版本，TCRN Workflow `v0.7.0`，带来了一个受治理的表面，技能的参考文档会教操作者去驱动它：
+Helper 的职责没有变——在它运行之前证明这份发布。而它所钉定的这个版本，TCRN Workflow `v0.9.0`，带来了一个受治理的表面，技能的参考文档会教操作者去驱动它：
 
 - **会议与门治理**——审议被记录在事件日志上（`conference-open` / `-append-position` / `-close` / `-cancel`），而一个未满足的门会阻止工作项到达 `done`，直到会议纪要证据将其解决（`WORKSPACE_GATE_PENDING`、`WORKSPACE_GATE_EVIDENCE_UNRESOLVED`）。
 - **执行者留痕**——一旦启用，每个改动型动词都必须归属一个执行中的执行者，缺失或格式错误都失败即关闭（`WORKSPACE_ACTOR_REQUIRED`、`WORKSPACE_ACTOR_INVALID`）。
 - **激活阶梯**——受治理表面通过分阶段、可逆的梯级激活，而不是靠一个全局开关；没有治理记录的工作区行为完全不变。
 - **备份与恢复**——密封的、同路径的整树快照，带确定性收据与逐字节一致的证明（`snapshot-manifest` / `snapshot-verify` → `SNAPSHOT_VERIFIED`）；见 `skill/tcrn-workflow-helper/references/backup-elicitation.md`。
+- **受治理的迁置**——工作区有了一条被记录在案的路径去往新的路径或新的机器（`relocation-plan` / `-vacate` / `-adopt` / `-abort` / `-inspect`）。这些动词移动的是绑定，字节由操作者自己搬，任何事件都不会被重写。它不能阻止分叉，只能让分叉可见——依赖它之前先读该发布的 `docs/adr/0003-workspace-relocation.md`。
+- **可读的事件链**——`event-list` 逐页原样返回事件，因此消费者可以重新推导一条大到 `export` 拒绝处理的链。
 - **蒸馏**——在受治理存储之上做对账后的知识蒸馏。
 
 以散文触发这些审议是建议性的、按设计不可靠，等待 gate-v1；技能对此有明确说明，并把可靠的强制推迟到机器可查的门上。
 
 ## 状态，如实相告
 
-- `0.1.0-candidate.29` 是一个**预发布候选**，恰好支持 TCRN Workflow `v0.7.0`。
+- `0.1.0-candidate.30` 是一个**预发布候选**，恰好支持 TCRN Workflow `v0.9.0`。
 - 安装与移除在两种宿主上都**仅限测试根目录**；不声称支持实时的 Codex 或 Claude Code 宿主。
 - **自建的 Ed25519 签名链已于 2026-07-19 移除**。它从来就没有被锚定过：它所依赖的摘要与密钥指纹，都没有发布在任何用户能独立获取的地方，所以这条链对本仓库之外的任何人都什么也证明不了。取代它的东西更简单也更诚实：一个*真正被发布*在多个独立位置的引导程序摘要、编译进该引导程序的被接受发布摘要、GitHub 不可变发布，以及可复现构建链。
 - 三项 Claude Code 专有行为（settings 片段可逆性、用户级与项目级优先级、CLAUDE.md 回退）是在**被钉定的 Workflow 发布**中实现并证明的，不在本仓库——确切的证据映射见 `skill/tcrn-workflow-helper/references/trust-contract.md`。

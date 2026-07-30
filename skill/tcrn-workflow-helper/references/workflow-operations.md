@@ -48,6 +48,7 @@ a scratch workspace created for that purpose and discarded after.
 | Recover a workspace that refuses writes | `lease-inspect`, then `recover` | Diagnose before acting. Never delete lease files by hand — that is a fail-closed corruption path. |
 | Protect the workspace before a risky change | `snapshot-manifest` / `snapshot-verify` | See `backup-elicitation.md`. Cadence is advisory — the agent proposes, the user decides — and it names a concrete moment: under `gate-close`, the proposal belongs in the same breath as reporting a gate `satisfied`. |
 | Carry a work item's authoritative scope on the record | `work-annotate` | An external key is a compressed label; what it stands for lives in decomposition positions a later reader may never open. Writing the scope and its deciding minutes onto the record closes that gap — see "Scope on the record" below. |
+| Move a workspace to a different path, or onto a different machine | `relocation-plan` first, then `relocation-vacate` / `-adopt`, with `relocation-inspect` at both addresses afterwards | The engine binds five absolute roots, so copying a control tree elsewhere produces an unreadable tree rather than a second live authority. These verbs move the *binding*; the operator moves the bytes. Read the one-way doors below before proposing the first hop. |
 | Batch Initiatives into a release train and ship them together | `work-create --kind Release` + `work-annotate --sprint` | A sprint is a delivery batch, not a work-tree node. The Release record is the train; members attach by the member-side `advisory:sprint` tag — see "Sprint delivery batches" below. |
 
 ## Which Workspace answers which moment
@@ -65,9 +66,21 @@ on first need, never silently. **Never default to the partition already open
 in front of you** because writing there is the path of least resistance: a
 single sub-project's work does not belong in `cross-project` merely because
 that is the chain in hand — route by scope, and create the sub-project's own
-partition if it is missing. Placement is permanent (there is no cross-partition
-migration in this release), so a record put in the wrong partition to save a
-step stays there.
+partition if it is missing. Placement is permanent — there is no verb that moves
+a *record* from one partition to another — so a record put in the wrong partition
+to save a step stays there.
+
+State that limit precisely, because the pinned release makes it easy to overstate
+in the other direction. What the relocation family moves is a whole workspace's
+address: the same chain, the same records, at a new path or on a new machine. It
+moves no record between partitions and merges no two chains. So both sentences are
+true at once, and neither substitutes for the other: **a partition can change
+where it lives; a record cannot change which partition it belongs to.**
+
+That first half has a second-order consequence for routing: the partition you are
+about to write to may not be on the machine you are on. Ask the copy that answers
+at that partition's roots, rather than assuming the nearest installed engine is
+the relevant one.
 
 ## Decomposing an Initiative
 
@@ -405,9 +418,10 @@ chain's high-water mark.
 
 ## One-way doors: say so before the user walks through
 
-Most of this workflow is reversible. Two things are not, and an agent that
+Most of this workflow is reversible. The ones below are not, and an agent that
 proposes them without saying so has misled the user even if the command
-succeeds.
+succeeds. This paragraph used to promise a count and then list more than it
+promised, so it no longer carries one.
 
 - **Actor attestation cannot be turned off.** Appending
   `attestation.actor.enabled` makes an actor id mandatory on every later
@@ -430,7 +444,32 @@ succeeds.
   it, not just writing, stops working. Reading the files to inspect them is
   fine; saving them is never fine. If a control-tree file has been reformatted,
   it is not repaired by hand — restore the whole tree from a verified snapshot,
-  the same as any other corruption.
+  the same as any other corruption. **A tree on another host is not an
+  exception.** `cat >`, `sed -i` or `rsync` over a remote shell is the same act
+  with the same outcome; a write to a chain that lives on another machine must be
+  performed by the engine *on that machine*.
+- **A workspace's first relocation version-locks it, and the ledger is a budget
+  rather than a log.** The hop is recorded in an append-only `relocations` field
+  of the workspace metadata, and its consequences are one-way in three separate
+  senses. First, any engine older than the release that introduced the field
+  refuses that workspace outright — not degraded reads, no reads — and that lands
+  at the vacate, so it applies even to a hop that was aborted and moved no byte.
+  Second, the ledger has a hard cap and no compaction verb, and each attempt
+  consumes entries whether or not bytes moved, so the number of moves a workspace
+  can ever make is finite; `relocation-plan` reports the remaining budget before
+  the ceremony starts, and it is worth reading out loud. Third, `relocation-abort`
+  after the destination has adopted is **not a rollback — it is a fork**, produced
+  with legal verbs and no damaged bytes, and the source cannot learn what the
+  destination did. Say all three before the first hop, not after it. Two operating
+  notes that follow: the two sides' ledger lengths are *expected* to differ,
+  because an adopt entry is written only into the destination copy and never sent
+  back, so never write a closing predicate that compares ledger lengths; and
+  closing any relocation work item requires running `relocation-inspect` at both
+  addresses the ledger names and comparing — it needs both trees at once, so no
+  single-machine verify can stand in for it. The authoritative account of what
+  this mechanism does *not* do is the pinned release's
+  `docs/adr/0003-workspace-relocation.md`, "The four ceilings"; read it rather
+  than a summary, and do not write a sentence claiming relocation prevents a fork.
 
 ## Keeping the placed Skill current: distribution is signalled, not written
 

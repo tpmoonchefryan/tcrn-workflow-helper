@@ -8,9 +8,9 @@
 
 English · [简体中文](./README.zh-CN.md) · [日本語](./README.ja.md) · [한국어](./README.ko.md) · [Français](./README.fr.md)
 
-![status](https://img.shields.io/badge/status-0.1.0--candidate.29-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
+![status](https://img.shields.io/badge/status-0.1.0--candidate.30-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
 
-![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.7.0-blue)
+![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.9.0-blue)
 
 [Verify this first](#verify-this-first) · [Why](#why-this-project-exists) · [What it enforces](#what-it-enforces) · [Quick start](#quick-start) · [Plain answers](#plain-answers-to-fair-questions) · [License](#license)
 
@@ -26,7 +26,7 @@ The bootstrap is the only thing you ever have to trust, so check it before you t
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# 43f6d441103c36edb7378bb42bf2eab0294c86f7d32a634074312d9a5ab5a641
+# d6baa330741fdc82229dc9fab9eed0a28b349edcaa72d9cfb295ff1a804897e9
 ```
 
 That digest is published here, in `SECURITY.md`, and in the GitHub release notes. **If what you compute does not match, stop** — do not run anything, do not "try it anyway". A mismatch is the system working.
@@ -160,19 +160,21 @@ Because a receipt that certifies a validation run should not itself be certified
 
 ## What the pinned Workflow release governs
 
-The helper's job is unchanged — prove the release before it runs. The release it pins, TCRN Workflow `v0.7.0`, ships a governed surface that the Skill's references teach the operator to drive:
+The helper's job is unchanged — prove the release before it runs. The release it pins, TCRN Workflow `v0.9.0`, ships a governed surface that the Skill's references teach the operator to drive:
 
 - **Conference & gate governance** — deliberations are recorded on the event log (`conference-open` / `-append-position` / `-close` / `-cancel`), and a pending gate blocks a work item from reaching `done` until conference-minutes evidence resolves it (`WORKSPACE_GATE_PENDING`, `WORKSPACE_GATE_EVIDENCE_UNRESOLVED`).
 - **Actor attestation** — once enabled, every mutating verb must attribute an acting actor, failing closed on an absent or malformed one (`WORKSPACE_ACTOR_REQUIRED`, `WORKSPACE_ACTOR_INVALID`).
 - **Activation ladder** — the governed surface activates in staged, reversible rungs rather than through a single global switch; a workspace with no governance records is behaviorally unchanged.
 - **Backup & restore** — hermetic, same-path, whole-tree snapshots with a deterministic receipt and a byte-identical proof (`snapshot-manifest` / `snapshot-verify` → `SNAPSHOT_VERIFIED`); see `skill/tcrn-workflow-helper/references/backup-elicitation.md`.
+- **Governed relocation** — a workspace has a recorded route to a new path or a new machine (`relocation-plan` / `-vacate` / `-adopt` / `-abort` / `-inspect`). The verbs move the binding, the operator moves the bytes, and no event is rewritten. It does not prevent a fork; it makes one legible — read the release's `docs/adr/0003-workspace-relocation.md` before relying on it.
+- **A readable chain** — `event-list` returns events verbatim, page by page, so a consumer can re-derive a chain that is too large for `export`.
 - **Distillation** — reconciled knowledge distillation over the governed store.
 
 Prose triggering of these deliberations is advisory and unreliable-by-design pending gate-v1; the Skill states so explicitly and defers reliable enforcement to machine-checkable gates.
 
 ## Status, honestly
 
-- `0.1.0-candidate.29` is a **pre-release candidate** supporting exactly TCRN Workflow `v0.7.0`.
+- `0.1.0-candidate.30` is a **pre-release candidate** supporting exactly TCRN Workflow `v0.9.0`.
 - Installation and removal are **test-root-only** on both hosts; no live Codex or Claude Code host support is asserted.
 - **The self-built Ed25519 signing chain was removed on 2026-07-19.** It was never anchored: the digest and key fingerprint it depended on were published nowhere a user could independently obtain them, so the chain proved nothing to anyone outside this repository. What replaces it is simpler and honest: a bootstrap digest that is *actually published* in independent places, accepted release digests compiled into that bootstrap, GitHub immutable releases, and the reproducible-build chain.
 - The three Claude-Code-specific behaviors (settings-fragment reversibility, user-vs-project precedence, CLAUDE.md fallback) are implemented and proven **in the pinned Workflow release**, not in this repository — see `skill/tcrn-workflow-helper/references/trust-contract.md` for the exact evidence map.

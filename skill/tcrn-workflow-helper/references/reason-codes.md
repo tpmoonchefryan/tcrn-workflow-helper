@@ -130,3 +130,43 @@ Emitted by the installed Workflow's snapshot verbs (`snapshot-manifest` /
   control tree.
 - `SNAPSHOT_INPUT_INVALID` — a snapshot command input (flags/arguments) is
   invalid. / no / correct the invocation and retry.
+
+## Governed relocation (product codes, new in Workflow `v0.9.0`)
+
+Emitted by the installed Workflow's relocation verbs, and by any verb reached at
+an address a relocation has retired. Not exhaustive — the family carries far more
+refusals than an operator meets, and the engine's own message names the flag or
+path at fault. See `references/workflow-operations.md` for the one-way properties
+and the pinned release's `docs/adr/0003-workspace-relocation.md` for what the
+mechanism does not do.
+
+- `WORKSPACE_RELOCATION_VACATED` — the address was vacated by a governed
+  relocation and is no longer a live workspace. / no / this is the mechanism
+  working: the workspace now lives at the destination the ledger names. Do not
+  restore the old `workspace.json` to revive it — that manufactures a second live
+  authority for one chain and the engine cannot detect it.
+- `WORKSPACE_RELOCATION_ADOPTION_REQUIRED` — this tree is a relocated copy that
+  has not been adopted yet. / no / run `relocation-adopt` here with the hop's
+  manifest text and an adopt-stage authority. Between the vacate and the adopt
+  **zero** addresses are live, by design — this refusal is that gap, not a fault.
+- `WORKSPACE_RELOCATION_UNSETTLED` — the control tree carries atomic-write residue
+  (`.tmp-*`) and is not in a settled state to move. / no / run `recover`, then
+  `validate`, then relocate. It is checked at the vacate precisely because that is
+  where `recover` can still fix it.
+- `WORKSPACE_RELOCATION_CONTROL_TREE_INCOMPLETE` — the copy is missing a directory
+  the control tree requires. / yes / a copy tool dropped an empty directory. Re-copy
+  with a tool that preserves them; do not create the directory by hand.
+- `WORKSPACE_RELOCATION_TRANSPORT_RESIDUE` — the copy carried a lock or claim file
+  across. / yes / remove the named file from the copy and re-verify. The snapshot
+  manifest excludes these by design and therefore cannot see them, so
+  `SNAPSHOT_VERIFIED` on the copy is not evidence against this refusal.
+- `WORKSPACE_RELOCATION_LEDGER_FULL` — the workspace has used its relocation
+  budget. / no / there is no compaction verb and no way to raise the cap; each
+  attempt spends entries whether or not bytes moved. `relocation-plan` reports the
+  remaining budget before the ceremony, which is the moment to read it out loud.
+- `WORKSPACE_SCHEMA_INVALID` (on a relocated workspace) — an engine older than the
+  release that introduced the relocation ledger is refusing a workspace that
+  carries one. / yes / not corruption and not repairable by editing: that engine
+  cannot read this workspace at all. Use the pinned release. This is why a first
+  relocation version-locks a partition **even when the hop was aborted and moved no
+  byte** — the ledger is append-only, so cancelling a move still writes to it.

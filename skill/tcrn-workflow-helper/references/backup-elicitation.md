@@ -26,9 +26,30 @@ are first-class — always double-quote them.
 
 ## Two doctrines to state before starting
 
-1. **Same-path-only.** A restore targets the exact original path on the same
-   machine. Root rebind (a new path or machine) has no apply path in this
-   release. Restore in place at the original `<root>`.
+1. **A restore is same-path.** It targets the exact original path. The reason is
+   unchanged and is not a limitation to route around: the engine binds five
+   absolute roots, so a restored tree at any other path is refused by every read
+   verb rather than quietly adopted. Restore in place at the original `<root>`.
+
+   **Half of this doctrine is retired, and the half that is retired is the
+   interesting one.** It used to continue: *root rebind (a new path or machine) has
+   no apply path in this release.* That was true of the releases it was written
+   against; it is not true of the pinned one, which ships `relocation-plan`,
+   `relocation-vacate`, `relocation-adopt`, `relocation-abort` and
+   `relocation-inspect`. What survives is the same-path rule for a restore. What is
+   withdrawn is the claim of impossibility — and with it the habit of telling an
+   operator that a workspace can never change machines.
+
+   Keep the two apart when explaining them, because they are different operations
+   with different receipts, different authorities and different failure modes:
+   **a restore puts a verified copy back where it came from; a relocation is a
+   separate recorded ceremony that changes where a workspace is bound.** Never
+   present relocation as "restoring to a new machine". If a workspace legitimately
+   has to move, restore it at its original path first, prove it, and relocate from
+   there. Before proposing a first hop, state the one-way properties the operator
+   has to know — they are in `references/workflow-operations.md` under one-way
+   doors, and the authoritative account is the pinned release's
+   `docs/adr/0003-workspace-relocation.md`.
 2. **Lockstep-only.** Snapshot and restore the WHOLE `.tcrn-workflow` control
    tree — both the workspace event log and the knowledge store together. A
    partial restore bricks the store and is unrecoverable by design.
@@ -98,7 +119,9 @@ are first-class — always double-quote them.
 
 1. **Quiesce.** End every agent session. Never restore over a live workspace.
 2. **Copy the tree back to the ORIGINAL `<root>`** (whole control tree, both
-   stores together — never a partial restore).
+   stores together — never a partial restore). If the workspace is meant to end
+   up somewhere else, this step does not change: restore here, then run the
+   relocation ceremony as its own operation.
 3. **Prove the restored tree** with `snapshot-verify --root "<root>" --manifest
    "<receipt>"`; expect `SNAPSHOT_VERIFIED`.
 4. **Validate both stores** (`validate` and `knowledge-validate`) before agents
@@ -138,6 +161,27 @@ files mid-copy defeats the byte-identical guarantee and can surface
 `SNAPSHOT_MISMATCH`. A destination on a synced or cloud-backed filesystem also
 means workspace data leaves the machine — treat that as an off-machine transfer
 and get explicit operator approval before accepting such a `backup.destination`.
+
+## When the workspace does not live on this machine
+
+Every step above runs where the control tree is. The quiesce, both snapshot verbs
+and the tree copy all touch the engine's own roots, so they run on the host that
+holds them — not on whichever machine the operator happens to be typing on. Three
+consequences to state before the first off-host backup:
+
+- **Say which host each step ran on.** A receipt that does not name the machine it
+  measured cannot be checked later, and this is precisely where a wrong assumption
+  survives longest.
+- **A backup taken on the host that holds the chain is a copy, not an off-site
+  copy.** Both halves sit on one machine and one loss takes both. An off-site copy
+  is a second transfer to a different machine, and which end initiates it is a
+  credentials question rather than a preference: the end that can authenticate to
+  the other is the end that starts it. Deciding that from convenience produces a
+  configuration that cannot actually run.
+- **A cadence pointed at a local path keeps succeeding after the chain moves, and
+  covers nothing.** It finds no workspace, reports no error, and the silence reads
+  as health. A backup check whose subject may have moved has to assert what it
+  found, not merely that it finished.
 
 ## Never a backup destination
 
