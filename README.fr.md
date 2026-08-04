@@ -10,7 +10,7 @@
 
 ![status](https://img.shields.io/badge/status-0.1.0--candidate.30-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
 
-![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.9.0-blue)
+![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.10.2-blue)
 
 [Vérifiez ceci en premier](#vérifiez-ceci-en-premier) · [Pourquoi ce projet existe](#pourquoi-ce-projet-existe) · [Ce qu'il impose](#ce-quil-impose) · [Démarrage rapide](#démarrage-rapide) · [Réponses directes](#réponses-directes) · [Licence](#licence)
 
@@ -26,7 +26,7 @@ L'amorceur est la seule chose que vous ayez jamais à croire ; vérifiez-le donc
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# d6baa330741fdc82229dc9fab9eed0a28b349edcaa72d9cfb295ff1a804897e9
+# a1e0f2c4c318bd303e974100602d221605b9e38a3fd34f25c6ae8d52c5956b3b
 ```
 
 Cette empreinte est publiée ici, dans `SECURITY.md` et dans les notes de version GitHub. **Si ce que vous calculez ne correspond pas, arrêtez-vous** — n'exécutez rien, n'essayez pas « quand même ». Une divergence, c'est le système qui fonctionne.
@@ -160,7 +160,7 @@ Parce qu'un reçu qui certifie une exécution de validation ne devrait pas être
 
 ## Ce que gouverne la release Workflow épinglée
 
-Le rôle du helper est inchangé — prouver la release avant qu'elle ne s'exécute. Et la release qu'il épingle, TCRN Workflow `v0.9.0`, apporte une surface gouvernée que les références de la compétence apprennent à l'opérateur à piloter :
+Le rôle du helper est inchangé — prouver la release avant qu'elle ne s'exécute. Et la release qu'il épingle, TCRN Workflow `v0.10.2`, apporte une surface gouvernée que les références de la compétence apprennent à l'opérateur à piloter :
 
 - **Gouvernance des conférences et des portes** — les délibérations sont consignées dans le journal d'événements (`conference-open` / `-append-position` / `-close` / `-cancel`), et une porte non satisfaite empêche un élément de travail d'atteindre `done` tant que les preuves du compte rendu ne la résolvent pas (`WORKSPACE_GATE_PENDING`, `WORKSPACE_GATE_EVIDENCE_UNRESOLVED`).
 - **Attestation d'acteur** — une fois activée, chaque verbe modifiant doit attribuer un acteur agissant, et échoue en fermeture si celui-ci est absent ou mal formé (`WORKSPACE_ACTOR_REQUIRED`, `WORKSPACE_ACTOR_INVALID`).
@@ -174,7 +174,7 @@ Déclencher ces délibérations par la prose reste consultatif et non fiable par
 
 ## Statut, honnêtement
 
-- `0.1.0-candidate.30` est un **candidat de pré-version** prenant en charge exactement TCRN Workflow `v0.9.0`.
+- `0.1.0-candidate.30` est un **candidat de pré-version** prenant en charge exactement TCRN Workflow `v0.10.2`.
 - L'installation et la suppression sont **limitées aux racines de test** sur les deux hôtes ; aucune prise en charge active de Codex ou Claude Code n'est affirmée.
 - **La chaîne de signature Ed25519 maison a été supprimée le 2026-07-19.** Elle n'a jamais été ancrée : l'empreinte et le doigt de clé dont elle dépendait n'étaient publiés nulle part où un utilisateur pouvait les obtenir indépendamment, si bien que la chaîne ne prouvait rien à quiconque hors de ce dépôt. Ce qui la remplace est plus simple et honnête : une empreinte d'amorceur *réellement publiée* à des endroits indépendants, des empreintes de release acceptées compilées dans cet amorceur, les releases immuables GitHub et la chaîne de build reproductible.
 - Les trois comportements propres à Claude Code (réversibilité du fragment de réglages, précédence utilisateur/projet, repli CLAUDE.md) sont implémentés et prouvés **dans la release Workflow épinglée**, pas dans ce dépôt — voir `skill/tcrn-workflow-helper/references/trust-contract.md` pour la carte exacte des preuves.

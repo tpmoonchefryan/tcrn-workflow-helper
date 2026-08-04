@@ -6,15 +6,15 @@ import { basename, dirname, isAbsolute, relative, resolve, sep } from 'node:path
 import { fileURLToPath } from 'node:url';
 
 export const IDENTITY = Object.freeze({
-  repository: 'https://github.com/tpmoonchefryan/tcrn-workflow.git', version: 'v0.9.0',
-  commit: '729cd045f8614ae984c2ad6f592341fbae49019c', tree: '1ee7a4c83725b7ce33740d14961a067d2a48c5cb',
-  tagObject: '50e2ead4016d3d70c29cab044d5264af86f01ded',
+  repository: 'https://github.com/tpmoonchefryan/tcrn-workflow.git', version: 'v0.10.2',
+  commit: '3d8e5be10453f2821e92a6beb244b07e19ad1524', tree: '9d3750f6cd52aa7bce0566248aaf0217dafe2174',
+  tagObject: '7f8ca60efae84b052c0577b70b29eee29df54157',
 });
 // The accepted release bytes are pinned HERE, in the runtime the user verifies
 // out-of-band against its published SHA-256 -- not in a document that ships beside
 // the download and could be rewritten by whoever rewrote the download.
-export const EXPECTED_ARCHIVE_SHA256 = 'ce3b873bb0493106f44233fa69c0c0009429697010fdb8927d122bdbeff14d70';
-export const EXPECTED_PROVENANCE_SHA256 = '42a4608e88564ae8773e68b28974155db9e0c764b1098c96638b7a658f8a560b';
+export const EXPECTED_ARCHIVE_SHA256 = 'a1d10bf68ff0756aa39825c71635f6147ce238eef85da987640a3e5b6fb625c5';
+export const EXPECTED_PROVENANCE_SHA256 = '2aa94b3f9d3fb55695c6b6f00a763a289f27557c7e8a2a3f46ab2a13c94d1e46';
 const ARCHIVE_SCHEMA = 'tcrn.workflow.helper.archive.v1';
 const STATE_SCHEMA = 'tcrn.workflow.helper.state.v1';
 const TXN_SCHEMA = 'tcrn.workflow.helper.transaction.v2';
