@@ -7,15 +7,17 @@ agent needs a work item or a knowledge record, it fetches **only the
 prompt-relevant piece, on demand**, using the Workflow's own governed query
 commands — which are metadata-first and budgeted by construction.
 
-## These are Workflow (product) commands, run AFTER install — not helper commands
+## These are Workflow (product) read commands, run via the MCP read face — not helper commands
 
 The helper (this Skill's trust boundary) exposes only trust/lifecycle verbs
 (`validate`, `verify-installed-copy`, `resolve`, `plan-network`,
 `install`/`update`/`reinstall`/`uninstall`). It has **no** work/knowledge query
 command, on purpose — that keeps the verifier and the product in separate trust
-domains. The commands below belong to the installed **TCRN Workflow** CLI
-(`node scripts/tcrn-workflow.mjs …`) at the pinned release, and are invoked only
-after the Workflow is verified and resolved.
+domains. The commands below belong to the installed **TCRN Workflow** engine and
+are invoked through the platform's **MCP read face** (`tcrn-workflow-aos-read`,
+tools prefixed `tcrn_remote_read_`), each naming a **partition** (the workspace
+path is supplied by the topology, never by the caller). Reads go through MCP, not
+SSH; SSH direct is break-glass only (see the platform root `CLAUDE.md`).
 
 ## What `context-route` actually does — and does NOT do
 
@@ -37,35 +39,40 @@ the per-verb windows and by this document — apply the same freshness and
 budget restraint yourself, and never treat the router's refusal as a check to
 work around.
 
-## The metadata-first query commands to teach (the real pipeline)
+## The metadata-first query commands to teach (the real pipeline, via the MCP read face)
 
-- `knowledge-list` — lists knowledge records by metadata (never opens bodies).
-  The starting point for enumerating what exists in scope.
-- `knowledge-candidates` — the relevance-selection verb (present at the pinned
-  release): given a scope/query it returns a **candidate set** of record
-  references by metadata, ranked/filtered, still bodies-closed. This is where
-  "what is relevant to this prompt" is decided.
+- `tcrn_remote_read_knowledge_list` — lists knowledge records by metadata (never
+  opens bodies). The starting point for enumerating what exists in scope.
+- `tcrn_remote_read_knowledge_candidates` — the relevance-selection verb: given a
+  scope/query it returns a **candidate set** of record references by metadata,
+  ranked/filtered, still bodies-closed. This is where "what is relevant to this
+  prompt" is decided.
 - `context-route` — the P6 router/enforcer: given the candidate set you built,
   it enforces **freshness / budget / authority** and returns the admitted
   metadata-first references. No relevance selection; no bodies.
-- `knowledge-snippet` — returns a bounded snippet, not a full body.
-- `knowledge-body` — returns a single record's body **only when explicitly
-  requested** for that one record.
-- `knowledge-freshness` — checks freshness metadata.
+- `tcrn_remote_read_knowledge_snippet` — returns a bounded snippet, not a full body.
+- `tcrn_remote_read_knowledge_body` — returns a single record's body **only when
+  explicitly requested** for that one record.
+- `tcrn_remote_read_knowledge_freshness` — checks freshness metadata.
+
+Each is a partition-scoped MCP read tool: pass `partition=<分区>`; the workspace
+path behind it comes from `deploy/aos-local-client/aos-partitions.mjs`. Stable CLI
+reason codes are preserved.
 
 ## The rule for the agent (the pipeline order matters)
 
-1. Enumerate with `knowledge-list`, then narrow to relevant candidates with
-   `knowledge-candidates` — this is the only step that decides relevance, and it
-   stays metadata-first (no bodies).
+1. Enumerate with `tcrn_remote_read_knowledge_list`, then narrow to relevant
+   candidates with `tcrn_remote_read_knowledge_candidates` — this is the only step
+   that decides relevance, and it stays metadata-first (no bodies).
 2. Construct a `context-route` request from that candidate set; let the router
    enforce freshness, budget, and authority. Treat what it admits as the
    governed working set — it filtered on policy, not on relevance. (From
    today's shell this step stops at `CONTEXT_AUTHORITY_REQUIRED` — see above;
    keep the candidate set metadata-first, apply the freshness and budget
    restraint yourself, and continue with step 3.)
-3. Read a body (`knowledge-body`) only for a specific admitted record the task
-   actually needs, and only when asked — one at a time, within budget.
+3. Read a body (`tcrn_remote_read_knowledge_body`) only for a specific admitted
+   record the task actually needs, and only when asked — one at a time, within
+   budget.
 4. Never bulk-load work items or knowledge bodies "just in case", and never let
    this Skill or its wizard place that data into context preemptively.
 
