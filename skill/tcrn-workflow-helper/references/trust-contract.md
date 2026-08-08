@@ -9,10 +9,10 @@ non-canonical scalar encodings fail closed.
 ## Required identity
 
 The accepted Workflow release is repository
-`https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v0.10.2`,
-commit `3d8e5be10453f2821e92a6beb244b07e19ad1524`, tree
-`9d3750f6cd52aa7bce0566248aaf0217dafe2174`, and tag object
-`7f8ca60efae84b052c0577b70b29eee29df54157`.
+`https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v0.11.8`,
+commit `4ff61229934f3abb6d716140b6e134a80dd7cdab`, tree
+`56e3dc6505e1854fc911f5156a5f6bf69aaaa4b0`, and tag object
+`45de380899e38bcc868e32a56ecec6789f853b44`.
 
 ## Out-of-band trust anchor (root of trust)
 
