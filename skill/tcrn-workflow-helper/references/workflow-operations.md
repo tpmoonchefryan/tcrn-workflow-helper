@@ -379,6 +379,42 @@ Workflow `v0.3.1` or later everywhere that chain is read — a binary that
 predates the operation refuses the whole chain, by design. Workspaces that
 never annotate are byte-identical to before.
 
+## Story scope, dispatch brief, and closeout conservation
+
+The platform dispatch convention is the canonical rule source at
+`docs/dispatch-readiness-convention.md`; this helper copy routes to it and
+does not create a second policy. A Story is still the deepest planning record,
+but its scope is now a hard ten-block contract, in this exact order and exactly
+once: `Goal`, `Requirements`, `Acceptance Criteria`, `Business Background`,
+`Preconditions`, `Assumptions`, `Use Cases & Examples`, `Feature Toggle &
+Setting`, `Permissions`, `Implementation Notes`. A block that has no applicable
+content stays present with an explicit `无——原因`; omission is not equivalent
+to "none". Acceptance Criteria must contain ordered `GIVEN`/`WHEN`/`THEN` or
+explicit bullet points.
+
+The ten blocks add to, and do not replace, the old record contract: phenomenon
+and rerunnable evidence, concrete fix items, a falsifiable red/green acceptance,
+and decision points with their current ruling/status. The Goal must also say who
+changes what, the purpose anchor, the compliance criterion, and the accountable
+decider. `work-create --kind Story --scope ...` is the atomic new-record path;
+`work-annotate --scope ...` replaces the full advisory scope under numeric CAS;
+`ready`, `active`, and `done` transitions revalidate the current scope. Existing
+terminal history remains append-only; every non-terminal Story must be migrated
+and read back before it can move onward.
+
+The execution brief is separate from the chain. Before dispatch, validate a
+structured brief with `pnpm --dir tcrn-workflow dispatch:validate -- --brief
+<brief.json>`. It must contain non-empty `redLineBoundaries`, `filePointers`,
+`verificationCommands`, `chainCloseoutActions`, and
+`effectiveEvidenceCommands`; a missing field returns
+`DISPATCH_BRIEF_INCOMPLETE` and is a refusal to dispatch. The closeout side is
+still live-authority based: read `status`, complete `work-list`, and each
+relevant `work-show`, then run the final evidence commands after the last
+commit. A manifest, self-written result table, or self-closing flag is not an
+authority substitute. The source-to-rule conservation registry is
+`tcrn-workflow/scripts/policy/story-rule-conservation.json`; every retained,
+stricter, or deferred rule needs a positive leg and a deletion red leg.
+
 ## Before any mutation: three things the engine will insist on
 
 Every mutating verb requires an explicit workspace path, a strict RFC 3339
