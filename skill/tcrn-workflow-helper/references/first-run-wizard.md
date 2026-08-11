@@ -37,6 +37,25 @@ tampered or look-alike copy could simply rewrite these steps. Therefore:
 - The agent creates the state root on first run and uses it for every `--state`,
   `--archive`, `--test-root`, and clone destination.
 
+### Registry distribution path (when the user asks for registry installation)
+
+Use the standard `skills` installer for placement; the helper's lifecycle
+commands remain test-root-only. Once the Owner has authorized a public source,
+the copy-oriented command is:
+
+```sh
+npx skills add <owner>/<repository> \
+  --skill tcrn-workflow-helper \
+  --global --agent claude-code --agent codex --copy --yes
+```
+
+The installer only places files. Independently verify the bootstrap, then run
+`verify-installed-copy` against each host copy before allowing the copy to guide
+the first-run wizard. A symlink is not a valid installed-copy proof. The
+platform's disposable matrix uses `<scratch>/.claude/skills/` and
+`<scratch>/.agents/skills/`; those shapes are test evidence, not live-host
+activation. See `docs/skills-registry.md` for the release/publication boundary.
+
 ## Steps
 
 1. **Root of trust + marker** — Steps 0 and 1 above. Explain in plain language

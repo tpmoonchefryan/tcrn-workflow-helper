@@ -97,6 +97,18 @@ Les commandes ci-dessus sont la machinerie de confiance. Au quotidien, vous ne l
 3. **Configurer par la conversation.** Demandez à votre agent de mettre en place TCRN Workflow. L'assistant de première exécution de la Skill le guide — et vous avec — pour le reste, en langage clair : résolution de l'unique checkout Workflow approuvé (`ROOT_RESOLVED`), création de l'espace de travail, choix de la destination et du rythme de sauvegarde. Vous ne tapez aucun chemin.
 4. **Puis travaillez, simplement.** La Skill apprend à votre agent quels moments de travail méritent un enregistrement — une décision, une décomposition, un livrable achevé, un « terminé » contesté — et quel verbe l'enregistre. Une seule règle dure traverse tout : il propose, et rien ne s'écrit sans votre oui explicite. Pour voir la boucle sous-jacente de vos propres yeux, le dépôt Workflow embarque un tutoriel épinglé par la preuve dans `docs/tutorial/governed-loop.md`.
 
+### Installer via le registre Skills
+
+Après autorisation par l'Owner d'une source publique, utilisez l'installateur standard orienté copie :
+
+```sh
+npx skills add <owner>/<repository> \
+  --skill tcrn-workflow-helper \
+  --global --agent claude-code --agent codex --copy --yes
+```
+
+L'installateur ne fait que placer les fichiers de la Skill ; `trusted-bootstrap.mjs` vérifie séparément la racine de confiance. Pour la matrice de test, utilisez `<scratch-host>/.claude/skills` et `<scratch-host>/.agents/skills` ; une racine symbolique n'est pas une copie validée.
+
 Ce qui reste à vous : chaque décision. Ce qui reste au moteur : leur application. Ce qui reste vérifiable : tout cela.
 
 ## Comment la chaîne de confiance s'assemble

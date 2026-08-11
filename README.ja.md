@@ -97,6 +97,18 @@ node bootstrap/trusted-bootstrap.mjs install --test-root <dir>/tcrn-helper-test-
 3. **セットアップは会話で。** エージェントに TCRN Workflow のセットアップを頼みます。Skill の初回ウィザードが残りの手順を——あなたにも——平易な言葉で案内します：承認された唯一の Workflow チェックアウトの解決（`ROOT_RESOLVED`）、ワークスペースの作成、バックアップ先と節目の選択。パスを打つ必要はありません。
 4. **あとは普通に働く。** Skill はエージェントに、どんな仕事の瞬間が記録に値するか——決定、分解、完了した成果物、争いのある「完了」——そしてどの動詞がそれを記録するかを教えます。貫かれる硬い規則は一つ：エージェントは提案するだけで、あなたの明示的な同意なしには何も書き込まれません。土台のループを自分の目で見たければ、Workflow リポジトリの `docs/tutorial/governed-loop.md` に、証明で釘付けされたチュートリアルがあります。
 
+### Skills レジストリ経由のインストール
+
+公開ソースについて Owner の承認を得た後は、標準のコピー型インストーラを使います。
+
+```sh
+npx skills add <owner>/<repository> \
+  --skill tcrn-workflow-helper \
+  --global --agent claude-code --agent codex --copy --yes
+```
+
+インストーラは Skill ファイルを配置するだけで、`trusted-bootstrap.mjs` が信頼ルートを独立して検証します。スクラッチ検証では `<scratch-host>/.claude/skills` と `<scratch-host>/.agents/skills` を使い、シンボリックリンクのルートを検証済みコピーとは扱いません。
+
 あなたのものであり続けるのは、すべての決定。エンジンのものであり続けるのは、その強制。検証可能であり続けるのは、その全部です。
 
 ## 信頼チェーンの組み立て方

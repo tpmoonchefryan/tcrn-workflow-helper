@@ -97,6 +97,18 @@ node bootstrap/trusted-bootstrap.mjs install --test-root <dir>/tcrn-helper-test-
 3. **通过对话完成设置。** 让 agent 去设置 TCRN Workflow。Skill 的首次运行向导会用平实语言带着它——也带着你——走完其余步骤：解析唯一被认可的 Workflow 检出（`ROOT_RESOLVED`）、创建工作区、选定备份目的地与节奏。你不需要敲任何路径。
 4. **然后正常工作。** Skill 教你的 agent 判断什么样的工作时刻值得一条记录——一个决定、一次分解、一件完成的交付、一个有争议的「完成」——以及用哪个动词记录。一条硬规则贯穿始终：它只提议，没有你的明确同意什么都不会写入。想亲眼看一遍底层闭环，Workflow 仓库在 `docs/tutorial/governed-loop.md` 带有一份被证明钉住的教程。
 
+### 通过 Skills 注册表安装
+
+公开来源获得 Owner 授权后，使用标准的复制式安装器：
+
+```sh
+npx skills add <owner>/<repository> \
+  --skill tcrn-workflow-helper \
+  --global --agent claude-code --agent codex --copy --yes
+```
+
+安装器只负责放置 Skill 文件；`trusted-bootstrap.mjs` 仍会独立校验信任根。临时矩阵可使用 `<scratch-host>/.claude/skills` 与 `<scratch-host>/.agents/skills`，不要把符号链接根目录当作已验证副本。
+
 属于你的：每一个决定。属于引擎的：强制执行它们。可以查验的：以上全部。
 
 ## 信任链是怎么拼起来的

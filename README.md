@@ -97,6 +97,20 @@ The commands above are the trust machinery. Day to day, you mostly do not run th
 3. **Set up through conversation.** Ask your agent to set up TCRN Workflow. The Skill's first-run wizard walks it — and you — through the rest with plain-language explanations: resolving one approved Workflow checkout (`ROOT_RESOLVED`), creating the workspace, choosing a backup destination and cadence. You type no paths.
 4. **Then just work.** The Skill teaches your agent when a working moment deserves a record — a decision, a decomposition, a completed deliverable, a contested "done" — and which verb records it. The one hard rule: it offers, and nothing is written without your explicit yes. To see the underlying loop with your own eyes, the Workflow repository ships a proof-backed tutorial at `docs/tutorial/governed-loop.md`.
 
+### Install through the Skills registry
+
+After a public source is authorized, the standard copy-oriented installer is:
+
+```sh
+npx skills add <owner>/<repository> \
+  --skill tcrn-workflow-helper \
+  --global --agent claude-code --agent codex --copy --yes
+```
+
+The installer places files; it is not the trust root. Independently verify the
+bootstrap and run `verify-installed-copy` for each host copy. The publication
+handoff and scratch matrix are documented in `docs/skills-registry.md`.
+
 What stays yours: every decision. What stays the engine's: enforcing them. What stays checkable: all of it.
 
 ## How the trust chain fits together
@@ -155,6 +169,7 @@ Because a receipt that certifies a validation run should not itself be certified
 | `manifests/` | The byte-copied Workflow release provenance. It is a *self-asserted local build statement* (zeroed timestamps), not a hosted-builder attestation — pinned by digest so it cannot be swapped; third-party checkability comes from the reproducible-build chain. |
 | `artifacts/` | The five reproducible release artifacts. |
 | `scripts/` | Deterministic archive/SBOM/checksum generators, release verifier, CI replay, push gate. |
+| `docs/skills-registry.md` | Skills registry source shape, copy-oriented install command, trust matrix, and publication park boundary. |
 | `test/` | The 87-test proof suite. |
 | `RELEASING.md` | The release runbook — the forced ordering, the provenance copy rule, and the full-suite rule for trust-surface commits. |
 
