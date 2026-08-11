@@ -101,10 +101,9 @@ tampered or look-alike copy could simply rewrite these steps. Therefore:
    Workspace is still empty, is the cheapest time to set backups up. Walk
    `backup-elicitation.md`: record a snapshot baseline, elicit
    `backup.destination`, `backup.cadence` (cadence is advisory — there is
-   no scheduler; the agent proposes, the user decides) and
-   `backup.retention` (how many snapshots the destination keeps — default
-   five; rotation deletes oldest-first, runs only after a new snapshot
-   verifies, and always names what it deleted), and state the restore
+   no scheduler; the agent proposes, the user decides), and the backup
+   runbook's prose-only retention count (rotation deletes oldest-first, runs
+   only after a new snapshot verifies, and always names what it deleted), and state the restore
    boundary before it matters: a restore targets the original path, and the
    control tree restores whole or not at all. Do not say a workspace can
    never move — the pinned release has a governed route for that, and it is a

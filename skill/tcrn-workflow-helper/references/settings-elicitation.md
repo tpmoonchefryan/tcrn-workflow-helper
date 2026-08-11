@@ -11,8 +11,29 @@ settings. The flow is strict and observation-grounded:
    implicit or bundled changes.
 4. **Explicit user confirmation** — apply nothing without a fresh, explicit
    user confirmation of that exact diff in this conversation.
-5. **Receipt** — record an overlay admission receipt and decision record for
-   the applied change.
+5. **Receipt** — apply the governed `settings-set` write through the public
+   ceremony with an actor, then retain the engine's settings-write receipt and
+   read the catalog back. Do not invent an overlay or write the control tree.
+
+## The current catalog is the only settings vocabulary
+
+The pinned engine catalog currently registers exactly these four keys in the
+`workspace_configuration` layer:
+
+- `backup.cadence` — enum: `gate-close`, `session-end`, or `manual`;
+- `backup.destination` — absolute destination path, outside the Workspace and
+  its control tree;
+- `driver.capabilityProfile` — registered string profile, with the deployed
+  guidance's `frontier` and `standard` choices recorded as user intent;
+- `workspace.generatedArtifactsPath` — Workspace-relative generated-artifacts
+  path.
+
+The catalog read is the authority for type, layer, default, and current value.
+The backup retention count is not a registered setting key: it is a prose-only
+step inside the backup runbook and must not be sent to `settings-set`. A new
+preference is either admitted to the engine catalog by its own governed change,
+or remains explicitly prose-only; never grow a shadow settings vocabulary in
+the helper.
 
 ## Provenance rule (anti-injection)
 

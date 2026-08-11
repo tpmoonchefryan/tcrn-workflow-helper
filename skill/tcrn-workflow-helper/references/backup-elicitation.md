@@ -106,10 +106,10 @@ are first-class — always double-quote them.
    `SNAPSHOT_PATH_INVALID`, `SNAPSHOT_INPUT_INVALID`): do not keep the copy — see
    `references/reason-codes.md`.
 
-6. **Rotate.** Only after step 5's `SNAPSHOT_VERIFIED`, apply
-   `backup.retention`: list the per-snapshot directories under the destination
-   that match this flow's `<partition>-<utc-instant>` naming, and while more
-   than the retention count remain, delete the oldest. Three rails are
+6. **Rotate.** Only after step 5's `SNAPSHOT_VERIFIED`, apply the runbook's
+   prose-only retention count: list the per-snapshot directories under the
+   destination that match this flow's `<partition>-<utc-instant>` naming, and
+   while more than the retention count remain, delete the oldest. Three rails are
    absolute: never delete anything before the new copy has verified; never
    touch any path that is not a matching per-snapshot directory under the
    destination; and name every deleted snapshot in the same breath as the
@@ -137,11 +137,12 @@ are first-class — always double-quote them.
   `satisfied` without proposing the snapshot in the same breath is a missed
   backup, not a kept preference. A cadence the user chose earns its keep only
   by surfacing at its moment.
-- `backup.retention` — a Tier-2 conversational preference of this flow: how
-  many verified snapshots the destination keeps (default `5`; a positive
-  integer, or `unlimited`). Rotation is a runbook step, never a scheduler: it
-  runs only inside the SNAPSHOT flow, immediately after a new snapshot proves
-  `SNAPSHOT_VERIFIED`, oldest first, reporting every deletion by name.
+- Retention count is a prose-only choice of this runbook, not a registered
+  Workspace setting. It controls how many verified snapshots the destination
+  keeps (default `5`; a positive integer, or `unlimited`). Rotation is a
+  runbook step, never a scheduler: it runs only inside the SNAPSHOT flow,
+  immediately after a new snapshot proves `SNAPSHOT_VERIFIED`, oldest first,
+  reporting every deletion by name. Do not send it to `settings-set`.
 - `backup.destination` — a Tier-2 conversational preference with **no default**:
   always elicit an explicit absolute path. Recommend a destination that is
   **OUTSIDE both** the workspace control directory `.tcrn-workflow`

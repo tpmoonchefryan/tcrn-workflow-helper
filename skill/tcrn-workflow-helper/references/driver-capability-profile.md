@@ -12,8 +12,8 @@ and silently under-executed.
 
 ## The two profiles
 
-- **`frontier`** (default) — the driver is a current top-tier model. Guidance may be
-  stated as principles and judgement calls: *when* to deliberate, *whether* an
+- **`frontier`** — the driver is a current top-tier model. Guidance may be stated
+  as principles and judgement calls: *when* to deliberate, *whether* an
   instrument fits, *what* a situation warrants.
 - **`standard`** — the driver is a smaller or older model, or an unknown one.
   Guidance for this tier is **fewer, simpler, harder** steps: fixed checkpoints at
@@ -72,9 +72,11 @@ Concretely, the same intent takes two forms:
   identically elsewhere, which is the one property the chain exists to provide.
   Changing such a limit is a versioned engine change with its own compatibility
   story, never a profile.
-- **Anything the user has not been asked about.** Absent an explicit declaration the
-  value is `frontier` by default *for guidance shaping only*; it never silently
-  loosens a boundary listed above, because those do not vary at all.
+- **Anything the user has not been asked about.** The engine catalog's initial
+  value is the registered string `default`; that is a neutral catalog value, not
+  a claim that the driver is `frontier`. Until the user declares a profile,
+  guidance treats unknown capability as `standard` for shaping only; it never
+  silently loosens a boundary listed above, because those do not vary at all.
 
 ## The profile-sensitive registry
 

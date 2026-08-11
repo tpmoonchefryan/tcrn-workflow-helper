@@ -459,9 +459,11 @@ proposes them without saying so has misled the user even if the command
 succeeds. This paragraph used to promise a count and then list more than it
 promised, so it no longer carries one.
 
-- **Actor attestation cannot be turned off.** Appending
-  `attestation.actor.enabled` makes an actor id mandatory on every later
-  mutation, and a second enable event is rejected as a corrupt chain. There is
+- **Actor attestation cannot be turned off.** Appending the
+  `attestation.actor.enabled` event makes an actor id mandatory on every later
+  mutation, and a second enable event is rejected as a corrupt chain. This is
+  an engine event, not a `workspace_configuration` setting and not a value to
+  place in the settings catalog. There is
   no disable operation and cannot be one — the chain is append-only, so
   "turning it off" would mean rewriting history. Explain the consequence before
   proposing it: every future mutation, by every tool and every agent, must

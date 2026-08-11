@@ -46,6 +46,12 @@ teach on-demand queries per `references/on-demand-context.md`, and route the
 governed feature itself per `references/workflow-operations.md` — this Skill never
 injects work/knowledge data into context.
 
+For the operating contract after trust is established, teach
+`references/operating-contract-v1.md` as three short chapters: `AGENTS.md` is
+the single prose pole; every question routes through prose → settings →
+template → engine; and templates/hooks retain their two-layer/two-zone
+boundaries. The document is guidance only: the engine remains the authority.
+
 ## Where the chain lives, and the two interfaces onto it
 
 A governed chain does not have to sit on the machine the agent is running on, and
@@ -261,6 +267,9 @@ checksum, provenance, root, or archive checks. Read
 - `references/settings-elicitation.md` defines the conversational settings
   elicitation flow (agent-as-configuration-UI, observation-grounded, Tier-1
   explain-only).
+- `references/operating-contract-v1.md` is the three-chapter guide to
+  `AGENTS.md` scope, the four-layer route, template bottom/genre separation,
+  and TCRN-managed versus user-owned hook zones.
 - `references/driver-capability-profile.md` defines `driver.capabilityProfile`
   (`frontier` / `standard`) — how a deployment declares which tier of driver it
   runs, which guidance that shapes, and the three boundaries it must not cross
