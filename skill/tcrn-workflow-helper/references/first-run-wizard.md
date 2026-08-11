@@ -44,7 +44,7 @@ commands remain test-root-only. Once the Owner has authorized a public source,
 the copy-oriented command is:
 
 ```sh
-npx skills add <owner>/<repository> \
+npx skills add tpmoonchefryan/tcrn-workflow-helper \
   --skill tcrn-workflow-helper \
   --global --agent claude-code --agent codex --copy --yes
 ```
@@ -149,7 +149,15 @@ activation. See `docs/skills-registry.md` for the release/publication boundary.
    are in scope. The catalog's default is information, not permission to write;
    no setting changes occur until the single batch confirmation.
 
-   The `AGENTS.md` seed is the operating-contract teaching template: it points
+   The host-wiring rule has one standing exception, and it is stated here rather than
+discovered: **the stop-pact `Stop` hook is registered by hand.** The adapter family
+cannot write user-level configuration — both of its layers refuse that scope — so no
+adapter verb can place or restore that hook. An agent that removes it (or a machine
+rebuilt from scratch) has no supported route back, and the honest instruction is to
+write it into the project's own settings and say so, not to pretend a verb did it.
+Every other part of host wiring goes through the adapter/MCP verbs as described.
+
+The `AGENTS.md` seed is the operating-contract teaching template: it points
    to the prose → settings → template → engine route, names the platform
    boundary, and leaves authority-bearing decisions to the governed chain. It is
    ordinary prose, not a control-tree file. The host-wiring step likewise uses

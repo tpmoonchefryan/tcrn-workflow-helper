@@ -15,7 +15,7 @@ below — Deliberation Triggers and Recording Triggers — instead describe when
 would otherwise decide. Reading them in a session that never installs anything
 is the expected case.
 
-Supports TCRN Workflow `v0.11.10` on two Agent App hosts, Codex and
+Supports TCRN Workflow `v0.11.11` on two Agent App hosts, Codex and
 Claude Code, with host-neutral protocols. The pinned release ships a governed
 seven-command operator surface, the same catalog as structured MCP tools, and
 reversible project-local activation for both hosts. Two of its capabilities are
