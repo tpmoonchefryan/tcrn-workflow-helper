@@ -46,6 +46,11 @@ teach on-demand queries per `references/on-demand-context.md`, and route the
 governed feature itself per `references/workflow-operations.md` — this Skill never
 injects work/knowledge data into context.
 
+For a multi-project setup, the wizard's resolved tree follows
+`references/platform-layout.md`; that document defines the five engine roots,
+the shared release-trust root, per-partition attestations, stable key prefixes,
+and the one-confirmation/one-way-gate language.
+
 For the operating contract after trust is established, teach
 `references/operating-contract-v1.md` as three short chapters: `AGENTS.md` is
 the single prose pole; every question routes through prose → settings →

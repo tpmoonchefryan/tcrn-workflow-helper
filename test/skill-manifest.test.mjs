@@ -18,6 +18,7 @@ const ALLOWED = [
   'references/first-run-wizard.md',
   'references/on-demand-context.md',
   'references/operating-contract-v1.md',
+  'references/platform-layout.md',
   'references/reason-codes.md',
   'references/settings-elicitation.md',
   'references/trust-contract.md',

@@ -151,7 +151,7 @@ Because a receipt that certifies a validation run should not itself be certified
 | Path | Contents |
 | --- | --- |
 | `bootstrap/trusted-bootstrap.mjs` | The single-file trust boundary: archive validation, pinned release-byte digests, identity pinning, transactional lifecycle. **Verify its SHA-256 out-of-band before use.** |
-| `skill/tcrn-workflow-helper/` | The Agent Skill payload: `SKILL.md`, trust contract, settings-elicitation reference, per-host metadata. This directory is what the pinned archive contains. |
+| `skill/tcrn-workflow-helper/` | The Agent Skill payload: `SKILL.md`, trust contract, first-run/platform-layout guidance, settings-elicitation reference, per-host metadata. The committed candidate archive remains separately pinned until the release train re-pins this source tree. |
 | `manifests/` | The byte-copied Workflow release provenance. It is a *self-asserted local build statement* (zeroed timestamps), not a hosted-builder attestation — pinned by digest so it cannot be swapped; third-party checkability comes from the reproducible-build chain. |
 | `artifacts/` | The five reproducible release artifacts. |
 | `scripts/` | Deterministic archive/SBOM/checksum generators, release verifier, CI replay, push gate. |

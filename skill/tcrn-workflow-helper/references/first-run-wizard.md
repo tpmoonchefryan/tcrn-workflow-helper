@@ -90,6 +90,55 @@ tampered or look-alike copy could simply rewrite these steps. Therefore:
    recorded relocation ceremony, never a rename — so choose names that
    will not need renaming.
 
+   ### Platform workspace initialization: one plan, one confirmation
+
+   When the observed directory contains multiple repositories, use
+   `references/platform-layout.md` as the layout contract. Discovery is
+   evidence, not a guess:
+
+   1. Walk upward from the directory the user opened and look for an existing
+      `.tcrn-workspace/` marker. Also inspect sibling directories for
+      repository markers (`.git` or a project manifest) so the proposed
+      partitions are visible before any write.
+   2. If the opened path is inside a Git repository, do not put the platform
+      container in that repository. Explain that governance bytes must stay
+      out of product history, propose the repository's parent as the platform
+      root, and stop if that proposal is not accepted. A single-repository user
+      still gets a platform container at the chosen parent; "only one
+      repository" is not a reason to put `.tcrn-workspace/` inside the
+      repository.
+   3. Show the complete proposed tree before initialization: partition names
+      and derived key prefixes, all five engine roots, the shared
+      `release-trust` root, each partition's `attestations/` destination,
+      settings initial values, the `AGENTS.md` seed, and the host-wiring steps
+      for Claude Code and Codex.
+   4. Ask for one explicit yes covering this whole displayed batch. Do not
+      split the confirmation into hidden follow-up writes. After yes, execute
+      the existing public engine and adapter verbs in order, retaining every
+      receipt and readback; a refusal stops that step and does not get papered
+      over by a file copy.
+
+   The preview must call out the two one-way consequences in plain language:
+   enabling attestations is irreversible (there is no disable path), and a
+   partition's derived key prefix is permanent for that partition's records. A
+   future path change is a relocation ceremony, not a directory rename.
+
+   The settings part of the preview is live rather than hard-coded. Read
+   `settings-catalog`, show each current/default value, and show the exact
+   proposed before/after for `backup.cadence`, `backup.destination`,
+   `driver.capabilityProfile`, and `engine.requiredVersion` when those choices
+   are in scope. The catalog's default is information, not permission to write;
+   no setting changes occur until the single batch confirmation.
+
+   The `AGENTS.md` seed is the operating-contract teaching template: it points
+   to the prose → settings → template → engine route, names the platform
+   boundary, and leaves authority-bearing decisions to the governed chain. It is
+   ordinary prose, not a control-tree file. The host-wiring step likewise uses
+   the existing adapter/MCP installation and activation verbs with the host's
+   own approval surface; it must not hand-edit `~/.claude/settings.json`, Codex
+   configuration, or hooks as a shortcut. Installation, host approval, and a
+   real host trigger remain separate evidence claims.
+
    Before the knowledge store's first initialization, explain
    `KNOWLEDGE_DISPOSABLE_ACK_REQUIRED` in one line — the store is a derived
    index, never the source of record, and saying so is required per
