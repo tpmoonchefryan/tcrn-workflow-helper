@@ -77,6 +77,24 @@ kind; do not reuse a key after a refusal or correction. The derivation law is
 permanent for the partition's records, so changing a prefix requires a new
 governed direction rather than a text edit.
 
+## Declaring the engine a container requires
+
+The engine runs at machine level while chains live in the platform container,
+so one engine serves every partition on the machine. `engine.requiredVersion`
+is how a container states the contract its records were written under. Set it
+during initialization to the engine version in use, and raise it when a chain
+starts depending on a newer contract.
+
+An engine that does not satisfy the declaration refuses by name and reports
+both the required and the running version, rather than presenting a version
+shortfall as a damaged chain. A container that carries no declaration is not
+judged against one, so existing containers keep reading and writing unchanged;
+adding the declaration later is an ordinary governed setting write.
+
+The value is the engine's own version string. Do not invent a range or a
+comparator: the declaration names a floor, and the engine performs the
+comparison.
+
 ## First-run preview and irreversible choices
 
 Before the first write, the wizard displays one complete plan containing:
