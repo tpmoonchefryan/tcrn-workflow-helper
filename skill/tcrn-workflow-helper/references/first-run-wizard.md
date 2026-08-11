@@ -208,6 +208,31 @@ The `AGENTS.md` seed is the operating-contract teaching template: it points
    ordinary case, and asking whether the user has AOS implies a dependency
    Workflow does not have.
 
+10. **Offer the portal** — the checkout the user just made includes a local
+     portal for the parts of Workflow a person configures most: the settings
+     catalog, the canonical `AGENTS.md`, and a reconciliation between the two.
+     It arrives with the engine and drives the CLI it arrived with, so there is
+     nothing further to fetch and no version to keep in step.
+
+     Mention it once, plainly, and only after the Workspace exists — a portal
+     with nothing to show is a worse first impression than no portal. Say what
+     it does and what it does not: every value on screen is the engine's answer
+     and every write returns the engine's own receipt; the portal owns no
+     governance logic and never touches a control tree. It binds loopback and
+     mints a token per run, so another page in the same browser cannot post to
+     it.
+
+     With the user's approval, generate the launchers into the platform root and
+     tell them which file is theirs — `.command` on macOS, `.sh` on Linux,
+     `.cmd` on Windows. The generator writes ordinary reviewable files with
+     absolute paths and never a symlink.
+
+     ```sh
+     node <workflow>/portal/scripts/generate-launchers.mjs \
+       --container <platform>/.tcrn-workspace \
+       --output-dir <platform> --prose-root <platform>
+     ```
+
 ## After setup — expectations to state plainly
 
 - **No automatic session context by default.** The pinned release ships
