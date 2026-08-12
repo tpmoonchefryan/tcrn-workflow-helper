@@ -25,10 +25,11 @@ no tier vocabulary is imposed.
 
 `host-config-set`, `host-config-remove`, `host-config-default` (`--clear true`
 to unset explicitly — omission is refused, never read as a clear),
-`persona-binding-set`, `persona-binding-remove`, and the read face
-`execution-config` (`--host` filters). Every write takes `--expected-version`
-from a fresh read and returns the engine's receipt; each action is its own
-chain event, so "the default moved" is one legible line in the audit trail.
+`persona-binding-set`, `persona-binding-remove`, `persona-set`,
+`persona-remove`, and the read faces `execution-config` (`--host` filters) and
+`persona-list`. Every write takes `--expected-version` from a fresh read and
+returns the engine's receipt; each action is its own chain event, so "the
+default moved" is one legible line in the audit trail.
 
 A removal the state still points at — the host's default, or any persona
 binding — refuses with `EXECUTION_CONFIGURATION_IN_USE`. Move or clear the
@@ -56,7 +57,16 @@ which would override the user's recorded choice.
   validated for presence and value and never for truth — the same
   authorization-not-authentication ceiling the gate machinery states about
   itself. Where the floor does not cover, the flag is optional and recorded
-  into the minutes when given.
+into the minutes when given.
+
+Three orchestration settings complete the catalog. `execution.maxConcurrentSubagents`
+is stored as a string integer from 1 through 32 and defaults to `8`;
+`execution.maxDispatchDepth` is stored as a string integer from 1 through 4
+and defaults to `1`; and `execution.personalessDispatch` is the closed enum
+`allowed` / `forbidden`, defaulting to `allowed`. The engine validates these
+values when `settings-set` runs; the portal must not invent a fallback when a
+value is refused.
 
 The portal's Execution surface manages all of this — configurations, defaults,
-bindings — with the engine's own receipt shown after every write.
+bindings, persona content, and the three orchestration keys — with the engine's
+own receipt shown after every write.

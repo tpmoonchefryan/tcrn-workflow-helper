@@ -19,6 +19,7 @@ const ALLOWED = [
   'references/on-demand-context.md',
   'references/operating-contract-v1.md',
   'references/execution-config.md',
+  'references/persona-content.md',
   'references/platform-layout.md',
   'references/reason-codes.md',
   'references/settings-elicitation.md',
