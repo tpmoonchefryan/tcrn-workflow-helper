@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 const helperRoot = fileURLToPath(new URL("../", import.meta.url));
 const skillRoot = join(helperRoot, "skill", "tcrn-workflow-helper");
 const catalogSource = join(helperRoot, "..", "tcrn-workflow", "packages", "core", "src", "settings.ts");
-const settingPattern = /\b(?:backup\.cadence|backup\.destination|driver\.capabilityProfile|engine\.requiredVersion|execution\.independenceFloor|execution\.maxConcurrentSubagents|execution\.maxDispatchDepth|execution\.personalessDispatch|execution\.subagentPolicy|workspace\.generatedArtifactsPath|backup\.retention)\b/gu;
+const settingPattern = /\b(?:backup\.cadence|backup\.destination|driver\.capabilityProfile|engine\.requiredVersion|execution\.claudeCodeSubagentPlan|execution\.codexSubagentPlan|execution\.independenceFloor|execution\.maxConcurrentSubagents|execution\.maxDispatchDepth|execution\.personalessDispatch|execution\.subagentPolicy|workspace\.generatedArtifactsPath)\b/gu;
 
 async function markdownFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });

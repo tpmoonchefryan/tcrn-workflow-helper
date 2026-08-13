@@ -15,7 +15,7 @@ below — Deliberation Triggers and Recording Triggers — instead describe when
 would otherwise decide. Reading them in a session that never installs anything
 is the expected case.
 
-Supports TCRN Workflow `v0.11.14` on two Agent App hosts, Codex and
+Supports TCRN Workflow `v0.11.15` on two Agent App hosts, Codex and
 Claude Code, with host-neutral protocols. The pinned release ships a governed
 seven-command operator surface, the same catalog as structured MCP tools, and
 reversible project-local activation for both hosts. Two of its capabilities are
@@ -278,6 +278,8 @@ checksum, provenance, root, or archive checks. Read
 - `references/driver-capability-profile.md` defines `driver.capabilityProfile`
   (`frontier` / `standard`) — how a deployment declares which tier of driver it
   runs, which guidance that shapes, and the three boundaries it must not cross
+- `references/model-plan.md` defines the host-scoped subagent model plan,
+  active setting references, and its four governed write verbs.
   (authority and audit constraints never vary; the user declares it and the agent
   never infers it; engine limits stay out of it).
 - `references/backup-elicitation.md` defines the snapshot backup runbook and

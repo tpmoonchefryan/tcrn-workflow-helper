@@ -7,7 +7,7 @@ import test from "node:test";
 const helperRoot = fileURLToPath(new URL("../", import.meta.url));
 const skillRoot = join(helperRoot, "skill", "tcrn-workflow-helper");
 const catalogSource = join(helperRoot, "..", "tcrn-workflow", "packages", "core", "src", "settings.ts");
-const settingPattern = /\b(?:backup\.cadence|backup\.destination|driver\.capabilityProfile|engine\.requiredVersion|execution\.independenceFloor|execution\.maxConcurrentSubagents|execution\.maxDispatchDepth|execution\.personalessDispatch|execution\.subagentPolicy|workspace\.generatedArtifactsPath|backup\.retention)\b/gu;
+const settingPattern = /\b(?:backup\.cadence|backup\.destination|driver\.capabilityProfile|engine\.requiredVersion|execution\.claudeCodeSubagentPlan|execution\.codexSubagentPlan|execution\.independenceFloor|execution\.maxConcurrentSubagents|execution\.maxDispatchDepth|execution\.personalessDispatch|execution\.subagentPolicy|workspace\.generatedArtifactsPath)\b/gu;
 
 async function markdownFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -34,6 +34,8 @@ test("S219 helper teaching contract is catalog-backed and has three chapters", a
     "backup.destination",
     "driver.capabilityProfile",
     "engine.requiredVersion",
+    "execution.claudeCodeSubagentPlan",
+    "execution.codexSubagentPlan",
     "execution.independenceFloor",
     "execution.maxConcurrentSubagents",
     "execution.maxDispatchDepth",
@@ -46,6 +48,8 @@ test("S219 helper teaching contract is catalog-backed and has three chapters", a
   assert.match(docs, /AGENTS\.md/u);
   assert.match(docs, /settings-catalog/u);
   assert.match(docs, /settings-set/u);
+  assert.match(docs, /model-plan-set/u);
+  assert.match(docs, /persona-preset-override/u);
   assert.match(docs, /Credentials 引用/u);
   assert.match(docs, /TCRN-managed zone/u);
   assert.match(docs, /user-owned zone/u);
