@@ -6,6 +6,10 @@ recommend-with-data → show-diff → explicit-confirm → receipt. Every networ
 mutating step needs the user's explicit approval. No path or flag is ever typed
 by the user — the agent uses the managed defaults below.
 
+For a similar natural-language install or update request, first apply
+references/install-surface-wizard.md: ask the matching-language confirmation
+and enter this flow only after an explicit yes.
+
 ## Trust-root ordering (read this first — it is the whole point)
 
 **The prose in this Skill copy has no authority until an independently obtained

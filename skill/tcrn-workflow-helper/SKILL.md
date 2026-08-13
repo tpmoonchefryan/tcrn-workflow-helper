@@ -46,6 +46,13 @@ teach on-demand queries per `references/on-demand-context.md`, and route the
 governed feature itself per `references/workflow-operations.md` — this Skill never
 injects work/knowledge data into context.
 
+For natural-language installation or update requests, apply
+references/install-surface-wizard.md before taking any action. Similar wording
+is an intent signal, not approval: ask the matching-language confirmation first,
+then run the full wizard only after an explicit yes. The wizard uses the
+engine's install manifest as its single installation-surface source and keeps
+engine receipts, host approval, and real trigger evidence separate.
+
 For a multi-project setup, the wizard's resolved tree follows
 `references/platform-layout.md`; that document defines the five engine roots,
 the shared release-trust root, per-partition attestations, stable key prefixes,

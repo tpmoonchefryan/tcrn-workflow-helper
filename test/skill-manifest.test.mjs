@@ -16,6 +16,7 @@ const ALLOWED = [
   'references/backup-elicitation.md',
   'references/driver-capability-profile.md',
   'references/first-run-wizard.md',
+  'references/install-surface-wizard.md',
   'references/model-plan.md',
   'references/on-demand-context.md',
   'references/operating-contract-v1.md',
