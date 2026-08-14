@@ -8,9 +8,9 @@
 
 [English](./README.md) · [简体中文](./README.zh-CN.md) · [日本語](./README.ja.md) · 한국어 · [Français](./README.fr.md)
 
-![status](https://img.shields.io/badge/status-0.1.0--candidate.42-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
+![status](https://img.shields.io/badge/status-0.1.0--candidate.43-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
 
-![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.11.15-blue)
+![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.11.16-blue)
 
 [먼저 이것부터 확인하세요](#먼저-이것부터-확인하세요) · [이 프로젝트가 존재하는 이유](#이-프로젝트가-존재하는-이유) · [무엇을 강제하는가](#무엇을-강제하는가) · [빠른 시작](#빠른-시작) · [솔직한 답변](#솔직한-답변) · [라이선스](#라이선스)
 
@@ -26,7 +26,7 @@
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# c61bf3990e57a5506b796b935b6d259c6330736660663b8e96ac10828cb0e6a3
+# 5a09eda1f245c097caa124b3cfc77462ab583e96a9cabec349a85abd565b0eb1
 ```
 
 이 다이제스트는 여기, `SECURITY.md`, 그리고 GitHub 릴리스 노트에 공개되어 있습니다. **계산한 값이 맞지 않으면 멈추십시오** — 아무것도 실행하지 말고, "그래도 한번 해보자"도 하지 마십시오. 불일치는 이 장치가 제대로 작동하고 있다는 뜻입니다.
@@ -172,7 +172,7 @@ helper의 변경 계열 명령(`install`/`update`/`reinstall`/`uninstall`)은 �
 
 ## 고정된 Workflow 릴리스가 관장하는 것
 
-helper의 역할은 그대로입니다 — 돌기 전에 릴리스를 증명하는 것. 그리고 지금 고정하고 있는 릴리스인 TCRN Workflow `v0.11.15`은, 스킬의 레퍼런스가 운영자에게 다루는 법을 가르치는 통제된 표면을 제공합니다.
+helper의 역할은 그대로입니다 — 돌기 전에 릴리스를 증명하는 것. 그리고 지금 고정하고 있는 릴리스인 TCRN Workflow `v0.11.16`은, 스킬의 레퍼런스가 운영자에게 다루는 법을 가르치는 통제된 표면을 제공합니다.
 
 - **콘퍼런스와 게이트 거버넌스** — 숙의는 이벤트 로그에 기록되고(`conference-open` / `-append-position` / `-close` / `-cancel`), 충족되지 않은 게이트는 콘퍼런스 회의록 증거가 해소할 때까지 작업 항목이 `done`에 도달하는 것을 막습니다(`WORKSPACE_GATE_PENDING`, `WORKSPACE_GATE_EVIDENCE_UNRESOLVED`).
 - **액터 어테스테이션** — 켜지면 모든 변경 계열 동사가 행위한 액터를 귀속해야 하며, 없거나 형식이 잘못되면 페일클로즈합니다(`WORKSPACE_ACTOR_REQUIRED`, `WORKSPACE_ACTOR_INVALID`).
@@ -186,7 +186,7 @@ helper의 역할은 그대로입니다 — 돌기 전에 릴리스를 증명하�
 
 ## 상태, 정직하게
 
-- `0.1.0-candidate.42`는 **프리릴리스 후보**이며 정확히 TCRN Workflow `v0.11.15`을 지원합니다.
+- `0.1.0-candidate.43`는 **프리릴리스 후보**이며 정확히 TCRN Workflow `v0.11.16`을 지원합니다.
 - 설치와 제거는 두 호스트 모두 **테스트 루트 전용**이며, 라이브 Codex 또는 Claude Code 호스트 지원은 주장하지 않습니다.
 - **직접 만든 Ed25519 서명 체인은 2026-07-19에 제거되었습니다**. 그것은 한 번도 닻을 내린 적이 없었습니다: 의존하던 다이제스트와 키 지문이 사용자가 독립적으로 얻을 수 있는 어디에도 공개되지 않아, 이 저장소 밖의 누구에게도 아무것도 증명하지 못했습니다. 그것을 대신하는 것은 더 단순하고 정직합니다: *실제로 공개된* 부트스트랩 다이제스트, 그 부트스트랩에 컴파일된 수용 릴리스 다이제스트, GitHub 불변 릴리스, 그리고 재현 빌드 사슬.
 - Claude Code 고유의 세 가지 동작(settings 조각 가역성, 사용자 대 프로젝트 우선순위, CLAUDE.md 폴백)은 이 저장소가 아니라 **고정된 Workflow 릴리스**에서 구현되고 증명되었습니다 — 정확한 증거 대응은 `skill/tcrn-workflow-helper/references/trust-contract.md`를 참조하십시오.

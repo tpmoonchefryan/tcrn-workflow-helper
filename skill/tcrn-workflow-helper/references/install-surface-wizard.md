@@ -1,6 +1,6 @@
 # Installation-surface wizard
 
-This document is the candidate.42 language and intent contract for TCRN
+This document is the candidate.43 language and intent contract for TCRN
 Workflow installation and update requests. It is guidance, not an authority
 source. The engine, its install manifest, and the host's approval surface
 remain authoritative.
