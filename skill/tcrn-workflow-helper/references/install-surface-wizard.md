@@ -1,6 +1,6 @@
 # Installation-surface wizard
 
-This document is the candidate.41 language and intent contract for TCRN
+This document is the candidate.42 language and intent contract for TCRN
 Workflow installation and update requests. It is guidance, not an authority
 source. The engine, its install manifest, and the host's approval surface
 remain authoritative.
@@ -49,6 +49,22 @@ two examples that must receive the matching-language question above:
 Do not silently translate a similar request to English, infer approval from
 the presence of the word install or update, or execute a host command before
 the question is answered.
+
+## Engine capability preflight
+
+After the matching-language confirmation and trust check, but before reading
+`install-manifest`, query the exact engine copy for its version and advertised
+read-only capabilities. The installation-surface wizard requires Workflow
+`v0.11.16` or newer and the `install-manifest` capability. This is a
+version/capability preflight, not a guessed command probe.
+
+If the engine reports an older version, omits `install-manifest`, or returns
+`CLI_UNKNOWN` for the capability query, stop before invoking
+`install-manifest`. Report `ENGINE_CAPABILITY_PREFLIGHT_REQUIRED`, show the
+observed version/capability result, and tell the operator that the pending
+Workflow `v0.11.16` release and helper re-pin are not authorized by this
+candidate. Do not continue with a partial plan, do not write a receipt, and do
+not treat the preflight stop as host approval or Owner acceptance.
 
 ## Full wizard
 

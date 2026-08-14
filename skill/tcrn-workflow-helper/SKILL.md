@@ -50,8 +50,12 @@ For natural-language installation or update requests, apply
 references/install-surface-wizard.md before taking any action. Similar wording
 is an intent signal, not approval: ask the matching-language confirmation first,
 then run the full wizard only after an explicit yes. The wizard uses the
-engine's install manifest as its single installation-surface source and keeps
-engine receipts, host approval, and real trigger evidence separate.
+engine's install manifest as its single installation-surface source, but first
+requires a read-only version/capability preflight for the install-manifest
+surface. The preflight stops before that verb when the engine is older than
+`v0.11.16` or does not advertise the capability; it never turns `CLI_UNKNOWN`
+into a false green. Engine receipts, host approval, and real trigger evidence
+remain separate.
 
 For a multi-project setup, the wizard's resolved tree follows
 `references/platform-layout.md`; that document defines the five engine roots,

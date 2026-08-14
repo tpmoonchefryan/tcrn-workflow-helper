@@ -5,7 +5,7 @@ import test from 'node:test';
 
 const documentPath = fileURLToPath(new URL('../skill/tcrn-workflow-helper/references/install-surface-wizard.md', import.meta.url));
 
-test('candidate.41 installation surface has all five languages and both fixed operations', async () => {
+test('candidate.42 installation surface has all five languages and both fixed operations', async () => {
   const text = await readFile(documentPath, 'utf8');
   const phrases = [
     ['en', 'Help me install TCRN Workflow', 'Help me update TCRN Workflow'],
@@ -22,7 +22,7 @@ test('candidate.41 installation surface has all five languages and both fixed op
   assert.match(text, /both Claude and Codex adapters/u);
 });
 
-test('candidate.41 similar requests are examples only and cover two per language', async () => {
+test('candidate.42 similar requests are examples only and cover two per language', async () => {
   const text = await readFile(documentPath, 'utf8');
   const rows = [
     ['en', 'install the workflow', 'can you set up TCRN Workflow'],
@@ -36,4 +36,13 @@ test('candidate.41 similar requests are examples only and cover two per language
   }
   assert.match(text, /Similar requests are intent signals, not commands/u);
   assert.match(text, /does not write a control tree/u);
+});
+
+test('candidate.42 preflights engine capability before the install manifest', async () => {
+  const text = await readFile(documentPath, 'utf8');
+  assert.match(text, /before reading[\s\S]*`install-manifest`/u);
+  assert.match(text, /`v0\.11\.16` or newer/u);
+  assert.match(text, /ENGINE_CAPABILITY_PREFLIGHT_REQUIRED/u);
+  assert.match(text, /CLI_UNKNOWN/u);
+  assert.match(text, /do not write a receipt/u);
 });

@@ -8,7 +8,7 @@
 
 [English](./README.md) · 简体中文 · [日本語](./README.ja.md) · [한국어](./README.ko.md) · [Français](./README.fr.md)
 
-![status](https://img.shields.io/badge/status-0.1.0--candidate.41-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
+![status](https://img.shields.io/badge/status-0.1.0--candidate.42-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
 
 ![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.11.15-blue)
 
@@ -26,7 +26,7 @@
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# 68466e7419c9a74ae861bc68ebf7bcfd8d4b538eac66059ab0f05b720c915556
+# c61bf3990e57a5506b796b935b6d259c6330736660663b8e96ac10828cb0e6a3
 ```
 
 该摘要发布在这里、在 `SECURITY.md` 中，以及 GitHub 发布说明里。**如果你算出来的值对不上，就停下**——不要运行任何东西，也不要"先试试看"。对不上，正是这套机制在起作用。
@@ -186,7 +186,7 @@ Helper 的职责没有变——在它运行之前证明这份发布。而它所�
 
 ## 状态，如实相告
 
-- `0.1.0-candidate.41` 是一个**预发布候选**，恰好支持 TCRN Workflow `v0.11.15`。
+- `0.1.0-candidate.42` 是一个**预发布候选**，恰好支持 TCRN Workflow `v0.11.15`。
 - 安装与移除在两种宿主上都**仅限测试根目录**；不声称支持实时的 Codex 或 Claude Code 宿主。
 - **自建的 Ed25519 签名链已于 2026-07-19 移除**。它从来就没有被锚定过：它所依赖的摘要与密钥指纹，都没有发布在任何用户能独立获取的地方，所以这条链对本仓库之外的任何人都什么也证明不了。取代它的东西更简单也更诚实：一个*真正被发布*在多个独立位置的引导程序摘要、编译进该引导程序的被接受发布摘要、GitHub 不可变发布，以及可复现构建链。
 - 三项 Claude Code 专有行为（settings 片段可逆性、用户级与项目级优先级、CLAUDE.md 回退）是在**被钉定的 Workflow 发布**中实现并证明的，不在本仓库——确切的证据映射见 `skill/tcrn-workflow-helper/references/trust-contract.md`。
