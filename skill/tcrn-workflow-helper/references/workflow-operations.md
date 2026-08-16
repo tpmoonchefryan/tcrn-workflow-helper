@@ -186,10 +186,10 @@ by dozens of records, so it is worth stating the order that keeps it governed:
    chain records every record separately regardless.
 4. **Create parents before children.** `--parent-id` must name an existing
    record: Initiative, then Epics, then Stories, then Subtasks. Capture each
-   new id from `record.id` in the receipt as you go — the budgeted `*-list`
-   views do not carry external keys, so if you need the key→id map after the
-   fact, read the materialized `views/index.json` or the event log, not
-   `work-list`.
+   new id from `record.id` in the receipt as you go. If you need the key→id map
+   after the fact, `work-list` carries `externalKey` on each record, as does the
+   materialized `views/index.json`; the event log is the fallback when neither
+   projects.
 5. **Plan to the verification boundary — Stories are the deepest
    planning-time record.** A Story is the point where "done" can be judged;
    below it, Subtasks describe *how* the work is done, which is a guess until

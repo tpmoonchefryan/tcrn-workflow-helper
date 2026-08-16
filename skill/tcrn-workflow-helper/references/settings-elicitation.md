@@ -17,16 +17,30 @@ settings. The flow is strict and observation-grounded:
 
 ## The current catalog is the only settings vocabulary
 
-The pinned engine catalog currently registers exactly these four keys in the
-`workspace_configuration` layer:
+Every registered key sits in the one `workspace_configuration` layer. The keys
+this document elicits are:
 
 - `backup.cadence` — enum: `gate-close`, `session-end`, or `manual`;
 - `backup.destination` — absolute destination path, outside the Workspace and
   its control tree;
+- `design.authority` — the URL of the documentation of the design system this
+  workspace treats as its authority. Optional; a workspace with no design system
+  leaves it unset. Purely declarative: the engine never fetches this address and
+  never checks what is behind it, because doing so would cross the offline
+  boundary. Its value set is the whole web rather than a closed roster, so it is
+  not vocabulary and does not appear in the dictionary — which also means a
+  typo here is not caught for you;
 - `driver.capabilityProfile` — registered string profile, with the deployed
   guidance's `frontier` and `standard` choices recorded as user intent;
 - `workspace.generatedArtifactsPath` — Workspace-relative generated-artifacts
   path.
+
+The rest of the catalog is elicited elsewhere and is no less registered:
+`engine.requiredVersion` in `references/first-run-wizard.md` and
+`references/platform-layout.md`, and the `execution.*` family in
+`references/execution-config.md`. **Do not read this list as the catalog's
+extent** — ask the engine. A document that enumerates a catalog is stale from
+the moment the next key is admitted, and this one has been.
 
 The catalog read is the authority for type, layer, default, and current value.
 The backup retention count is not a registered setting key: it is a prose-only

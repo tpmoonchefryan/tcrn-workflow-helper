@@ -102,15 +102,37 @@ anchor for exactly this reason.
 ## 5. Rebuild the artifacts, in dependency order
 
 ```sh
-pnpm archive                       # skill archive, source archive, SBOM
-# rebind candidate-manifest.json: skillArchiveSha256, sourceArchiveSha256,
-# and workflow.{version,commit,tree,tagObject}
+node scripts/create-skill-archive.mjs --output artifacts/skill-archive.json
+# EXPECTED_ARCHIVE_SHA256 (step 3) and then the anchor digest (step 4) are derived
+# from this file, and the anchor cannot be published until the bootstrap is final
+node scripts/create-source-archive.mjs --output artifacts/source-archive.json
+node scripts/sbom.mjs --output artifacts/sbom.json
+```
+
+The skill archive covers `skill/` only; the source archive covers everything except
+`artifacts/`. So the bootstrap and the six anchor documents must be **final before
+the source archive is built**, and the skill archive must be built **before**
+`EXPECTED_ARCHIVE_SHA256` can be set. That is why steps 3–5 interleave rather than run
+in the order they are numbered.
+
+## 6. Run the whole suite. Not a subset.
+
+**Run it before binding the manifest, not after.** `pnpm test` rewrites `artifacts/`
+as a side effect — `push-gate` says so itself, in the comment above its suite step —
+and a manifest bound before the suite is silently reverted by it. Bind after:
+
+```sh
+pnpm test                          # rewrites artifacts/
+# NOW rebind candidate-manifest.json: skillArchiveSha256, sourceArchiveSha256, and
+# workflow.{repository,version,commit,tree,tagObject} — derive the workflow block from
+# the bootstrap's own IDENTITY rather than retyping it, so the two cannot drift
 rm -f artifacts/checksums.txt      # the generator publishes, it does not overwrite
 pnpm checksums
 pnpm verify
 ```
 
-## 6. Run the whole suite. Not a subset.
+`push-gate` runs last, and it judges the **committed** tree: run it after the commit,
+or its first two failures are just your own uncommitted bytes reported twice.
 
 Any commit touching `bootstrap/trusted-bootstrap.mjs`, `IDENTITY`, an
 `EXPECTED_*` constant, or anything under `manifests/` **must** run `pnpm test`

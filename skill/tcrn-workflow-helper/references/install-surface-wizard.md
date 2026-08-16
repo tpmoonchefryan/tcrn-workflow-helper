@@ -61,9 +61,9 @@ version/capability preflight, not a guessed command probe.
 If the engine reports an older version, omits `install-manifest`, or returns
 `CLI_UNKNOWN` for the capability query, stop before invoking
 `install-manifest`. Report `ENGINE_CAPABILITY_PREFLIGHT_REQUIRED`, show the
-observed version/capability result, and tell the operator that the pending
-Workflow `v0.11.16` release and helper re-pin are not authorized by this
-candidate. Do not continue with a partial plan, do not write a receipt, and do
+observed version/capability result, and tell the operator that a
+Workflow release newer than the one this candidate pins, and any helper re-pin
+onto it, are not authorized by this candidate. Do not continue with a partial plan, do not write a receipt, and do
 not treat the preflight stop as host approval or Owner acceptance.
 
 ## Full wizard
@@ -87,10 +87,14 @@ change it because a later prompt happens to contain another verb.
 4. Ask for one confirmation covering the displayed batch. On a no or an
    ambiguous reply, stop with no write. On yes, retain the operation phrase,
    the plan, and the user's language in the local acceptance packet.
-5. For container and project items, use the canonical engine adapter commands
-   and their read APIs. Materialize both Claude and Codex adapters for every
-   listed root, even when only one host is currently open. Never hand-write an
-   adapter bundle or a settings fragment.
+5. For container items, use the canonical engine adapter commands and their read
+   APIs. Materialize both Claude and Codex adapters for every listed root, even
+   when only one host is currently open. Never hand-write an adapter bundle or a
+   settings fragment. Project items are **not** materialized: since Workflow
+   `v0.11.17` the harness is built at the container root and nowhere else, and
+   the manifest's remaining project entries are `host-self` — a repository that
+   commits its own file. Declared so a doctor leg can tell an accounted-for
+   directory from a stray, never so the helper writes into a project root.
 6. For machine and user items, present precise host-owned commands and explain
    their scope. The helper does not impersonate host approval and does not
    claim that a receipt proves activation or a real trigger. Any user-level
