@@ -159,13 +159,13 @@ cannot write user-level configuration — both of its layers refuse that scope �
 adapter verb can place or restore that hook. An agent that removes it (or a machine
 rebuilt from scratch) has no supported route back, and the honest instruction is to
 write it into the project's own settings and say so, not to pretend a verb did it.
-Every other part of host wiring goes through the adapter/MCP verbs as described.
+Every other part of host wiring goes through the adapter verbs as described.
 
 The `AGENTS.md` seed is the operating-contract teaching template: it points
    to the prose → settings → template → engine route, names the platform
    boundary, and leaves authority-bearing decisions to the governed chain. It is
    ordinary prose, not a control-tree file. The host-wiring step likewise uses
-   the existing adapter/MCP installation and activation verbs with the host's
+   the existing adapter installation and activation verbs with the host's
    own approval surface; it must not hand-edit `~/.claude/settings.json`, Codex
    configuration, or hooks as a shortcut. Installation, host approval, and a
    real host trigger remain separate evidence claims.

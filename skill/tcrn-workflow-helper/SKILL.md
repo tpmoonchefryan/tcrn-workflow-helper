@@ -15,10 +15,14 @@ below — Deliberation Triggers and Recording Triggers — instead describe when
 would otherwise decide. Reading them in a session that never installs anything
 is the expected case.
 
-Supports TCRN Workflow `v0.11.17` on two Agent App hosts, Codex and
+Supports TCRN Workflow `v0.11.18` on two Agent App hosts, Codex and
 Claude Code, with host-neutral protocols. The pinned release ships a governed
-seven-command operator surface, the same catalog as structured MCP tools, and
-reversible project-local activation for both hosts. Two of its capabilities are
+seven-command operator surface over one transport — the CLI — and reversible
+project-local activation for both hosts. Earlier candidates described the same
+catalog as structured MCP tools; `v0.11.18` retires that transport. It derived
+every tool from the command catalog and held no logic of its own, every catalog
+verb was already `cli`, and the authority contract it consumed is unchanged and
+exercised through the CLI. Two of its capabilities are
 newer than most guidance written about this engine, including guidance that
 shipped in earlier copies of this Skill: the event chain is readable page by page
 (`event-list`), and a workspace has a governed route to a new path or a new

@@ -35,8 +35,8 @@ Ask which layer owns the answer before editing anything:
    its genre carries headings and prose. A binding receipt connects an instance
    to the admitted template version and digest.
 4. **Engine** — graph state, permissions, gates, actors, receipts, and event
-   history belong to the engine. Read them through CLI/MCP public faces and
-   write them only through the ceremony. Never smuggle an engine decision into
+   history belong to the engine. Read them through its public CLI and write
+   them only through the ceremony. Never smuggle an engine decision into
    prose, a setting, or a private module import.
 
 The route is a placement rule, not a suggestion to add more files. If a needed

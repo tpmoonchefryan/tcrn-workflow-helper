@@ -10,9 +10,9 @@ non-canonical scalar encodings fail closed.
 
 The accepted Workflow release is repository
 `https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v0.11.17`,
-commit `312c9ff6aed9483feb8e736a2acf9f6b49406fc1`, tree
-`bb105cf4a61ba6973159e2b629d3e856edda471e`, and tag object
-`8810a2d495916ea664282c5533b6b4480a4f6388`.
+commit `25df67e8dc771f3de69eefa786a7c81cf5cc0985`, tree
+`40f49fd6a2728f15faa5c8f9802d1ff74ced7f87`, and tag object
+`56a267ebb9d6be86e3d198fc224ff634a23ad343`.
 
 ## Out-of-band trust anchor (root of trust)
 
@@ -76,7 +76,8 @@ remain test-root-only and never write to a live host Skill location.
 This candidate supports two Agent App hosts, Codex and Claude Code, over one
 host-neutral protocol surface. The pinned Workflow release ships reversible,
 project-local SessionStart activation for both hosts, plus a seven-command
-operator surface and the same catalog as structured MCP tools. All remain inert
+operator surface on the CLI. The structured MCP tool catalog earlier candidates
+pinned is retired in `v0.11.18`. All remain inert
 until separately pinned and authorized. The current exact SessionStart
 definitions are code- and fixture-proven; historical host receipts cover
 superseded definitions, so no current live activation is claimed. None of those
@@ -118,10 +119,12 @@ special-file rejection):
 repository at exactly the pinned identity above proves Claude settings-fragment
 merge/remove byte-reversibility, user-vs-project precedence, Codex inert install
 and exact-definition approval boundaries, persona-free SessionStart definitions,
-cross-host hostile-input parity, the pinned operator-authority grant, and the
-structured MCP catalog. This candidate ships no settings, hook, operator, or MCP
-surface of its own; those behaviors execute only inside the pinned Workflow
-release.
+cross-host hostile-input parity, and the pinned operator-authority grant. The
+structured MCP catalog this list used to name went with the transport in
+`v0.11.18`; the grant object survives in the bundle because dropping a required
+field of `tcrn.operator-authority-bundle.v1` would be a schema break rather than
+a cleanup. This candidate ships no settings, hook, or operator surface of its
+own; those behaviors execute only inside the pinned Workflow release.
 
 **Not claimed by this candidate**: current exact live activation on either host,
 approved network clone/update execution (this candidate's `plan-network` emits a

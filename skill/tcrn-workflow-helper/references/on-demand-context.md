@@ -14,10 +14,17 @@ The helper (this Skill's trust boundary) exposes only trust/lifecycle verbs
 `install`/`update`/`reinstall`/`uninstall`). It has **no** work/knowledge query
 command, on purpose — that keeps the verifier and the product in separate trust
 domains. The commands below belong to the installed **TCRN Workflow** engine and
-are invoked through the platform's **MCP read face** (`tcrn-workflow-aos-read`,
-tools prefixed `tcrn_remote_read_`), each naming a **partition** (the workspace
-path is supplied by the topology, never by the caller). Reads go through MCP, not
-SSH; SSH direct is break-glass only (see the platform root `CLAUDE.md`).
+are invoked through the installed engine's **CLI**, each naming the workspace it
+reads.
+
+Where the chains are hosted by an AOS cockpit rather than sitting on the
+operator's machine, the same reads are forwarded through **AOS's** read face
+(`tcrn-workflow-aos-read`, tools prefixed `tcrn_remote_read_`), each naming a
+**partition** so the workspace path comes from the topology and never from the
+caller. That face belongs to AOS, not to the engine: `v0.11.18` retires the
+engine's own MCP transport, so a deployment with no cockpit has no MCP in this
+path at all. On either route, SSH direct is break-glass only (see the platform
+root `CLAUDE.md`).
 
 ## What `context-route` actually does — and does NOT do
 
