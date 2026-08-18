@@ -199,3 +199,7 @@ Déclencher ces délibérations par la prose reste consultatif et non fiable par
 ## Licence
 
 [Apache-2.0](./LICENSE)
+
+## Communauté
+
+[Code de conduite](./CODE_OF_CONDUCT.md) · [Contribuer](./CONTRIBUTING.md) · [Sécurité](./SECURITY.md)

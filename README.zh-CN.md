@@ -199,3 +199,7 @@ Helper 的职责没有变——在它运行之前证明这份发布。而它所�
 ## 许可证
 
 [Apache-2.0](./LICENSE)
+
+## 社区
+
+[行为准则](./CODE_OF_CONDUCT.md) · [参与贡献](./CONTRIBUTING.md) · [安全](./SECURITY.md)

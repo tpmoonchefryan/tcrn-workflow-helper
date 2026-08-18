@@ -199,3 +199,7 @@ helper の役割は変わりません——動く前にリリースを証明す�
 ## ライセンス
 
 [Apache-2.0](./LICENSE)
+
+## コミュニティ
+
+[行動規範](./CODE_OF_CONDUCT.md) · [コントリビューション](./CONTRIBUTING.md) · [セキュリティ](./SECURITY.md)

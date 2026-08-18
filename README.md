@@ -202,3 +202,7 @@ Prose triggering of these deliberations is advisory and unreliable-by-design pen
 ## License
 
 [Apache-2.0](./LICENSE)
+
+## Community
+
+[Code of Conduct](./CODE_OF_CONDUCT.md) · [Contributing](./CONTRIBUTING.md) · [Security](./SECURITY.md)

@@ -199,3 +199,7 @@ helper의 역할은 그대로입니다 — 돌기 전에 릴리스를 증명하�
 ## 라이선스
 
 [Apache-2.0](./LICENSE)
+
+## 커뮤니티
+
+[행동 강령](./CODE_OF_CONDUCT.md) · [기여 안내](./CONTRIBUTING.md) · [보안](./SECURITY.md)
