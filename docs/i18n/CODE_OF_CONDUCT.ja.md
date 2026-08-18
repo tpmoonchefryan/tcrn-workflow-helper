@@ -1,8 +1,8 @@
-<!-- tcrn-doc-synced-to: CODE_OF_CONDUCT.md 1ed3df3ee7690b0fb084668be4f4be58440a9baa2c93920b3747d08b88948ca5 -->
+<!-- tcrn-doc-synced-to: CODE_OF_CONDUCT.md 7d0020e73a6a7a01e2f0cb3c068a98e66f6175a71cb426f8295aff1e8445a942 -->
 
-> **英語版が正本です。** この翻訳は便宜のために提供されるものであり、両者が異なる場合は [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) にある英語のテキストが優先されます。
+> **英語版が正本です。** この翻訳は便宜のために提供されるものであり、両者が異なる場合は [CODE_OF_CONDUCT.md](../../CODE_OF_CONDUCT.md) にある英語のテキストが優先されます。
 
-[English](./CODE_OF_CONDUCT.md) · [简体中文](./CODE_OF_CONDUCT.zh-CN.md) · 日本語 · [한국어](./CODE_OF_CONDUCT.ko.md) · [Français](./CODE_OF_CONDUCT.fr.md)
+[English](../../CODE_OF_CONDUCT.md) · [简体中文](./CODE_OF_CONDUCT.zh-CN.md) · 日本語 · [한국어](./CODE_OF_CONDUCT.ko.md) · [Français](./CODE_OF_CONDUCT.fr.md)
 
 # 行動規範
 
