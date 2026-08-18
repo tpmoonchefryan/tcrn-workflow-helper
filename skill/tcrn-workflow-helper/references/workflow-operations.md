@@ -16,13 +16,20 @@ the catalog is what the engine actually enforces.
 
 One thing the catalog does *not* carry is the set of legal values a flag
 accepts. It marks `--kind` as a string, but not *which* strings — and those are
-not open-ended. In Workflow `v0.3.1` the create path admits only the four
-planning kinds (Initiative, Epic, Story, Subtask) and refuses the rest with
-`CLI_ARGUMENT_MALFORMED`, even though the protocol's shape check recognises more
-kinds than the create path will open. So a thing the planning kinds do not name
-— a defect met and deferred, say — lands as a Story under the pinned release; a
-distinct kind for it is a change to the create whitelist read from the protocol
-source, not a value some flag already reaches.
+not open-ended. The protocol carries eight kinds; the create path opens them one
+at a time as the mechanism each needs lands, and refuses the rest with
+`CLI_ARGUMENT_MALFORMED`. At `v0.13.0` it admits six — Initiative, Epic, Story,
+Subtask, Incident, Release — with Review and Knowledge still closed. Read the
+whitelist from the source rather than from this sentence: it has already moved
+twice (Incident in `v0.3.2`, Release in `v0.5.0`), and a count written down here
+is a count that will be wrong again.
+
+The same paragraph applies to `--outcome-class`, which the catalog also types as
+a bare string. `v0.13.0` narrowed what the write path will mint without narrowing
+what a record may hold: `gate-create` takes `role_decision` or
+`owner_intent_required`, `conference-close` takes everything except `blocked`.
+All five classes stay valid in the schema and in replay, so historical records
+are unaffected.
 
 The verbs named below are named because a routing decision hinges on them, not
 to serve as an inventory.
@@ -41,7 +48,7 @@ a scratch workspace created for that purpose and discarded after.
 | The user is trying to | Reach for | Because |
 | --- | --- | --- |
 | Track a piece of work and its status | `project-*` / `work-*` | The work graph is the record: Initiative → Epic → Story → Subtask, each mutation an event on the chain. |
-| Block something from being called done until a condition is met | `gate-*` | A pending gate refuses the transition to `done` with `WORKSPACE_GATE_PENDING`, at the command *and* again on replay. Prose intent does not block; a gate does. |
+| Block something from being called done until a condition is met | `gate-*` | An unsatisfied gate refuses the transition to `done` with `WORKSPACE_GATE_PENDING`, at the command *and* again on replay. Prose intent does not block; a gate does. Since `v0.13.0` only `satisfied` clears — moving a gate to `blocked` does not release the work item, and never should have. |
 | Record a decision, a disagreement, or who argued what | `conference-*` | Positions and minutes land on the same chain. Closing a conference distills each decision into a knowledge candidate that links back to it. |
 | Remember something durably, with provenance | `knowledge-*` | Metadata-first reads, explicit body access, promotion under CAS. See `on-demand-context.md` before fetching anything. |
 | Know the current state before deciding | `status`, the `*-list` verbs | `status` reads authority and never returns a stale-view code; list verbs are budgeted windows over materialized views. |
@@ -129,7 +136,8 @@ by dozens of records, so it is worth stating the order that keeps it governed:
    the part nobody can reconstruct later. Two shapes of that append bite in
    practice:
    - **A long position will not fit in one record.** The engine caps a single
-     position at 2,048 UTF-8 **bytes** and rejects the append with
+     position at 8,192 UTF-8 **bytes** — with the workspace's own writing budget
+     in `conference.positionBudgetBytes`, default 4,096 — and rejects the append with
      `CONFERENCE_BUDGET_EXCEEDED` rather than truncating — a few hundred
      words of CJK is already over. Split on paragraph boundaries into
      sequential positions under the *same* actor id, keyed `POS-<AGENT>-1`,
@@ -396,7 +404,46 @@ The ten blocks add to, and do not replace, the old record contract: phenomenon
 and rerunnable evidence, concrete fix items, a falsifiable red/green acceptance,
 and decision points with their current ruling/status. The Goal must also say who
 changes what, the purpose anchor, the compliance criterion, and the accountable
-decider. `work-create --kind Story --scope ...` is the atomic new-record path;
+decider — **in either working language**, since `v0.13.0`: `为谁`/`beneficiary`,
+`目的锚`/`purpose anchor`, `符合性判据`/`compliance criterion`,
+`判定人`/`decider`. The language a deployment writes in is a generation and
+display preference, not a compliance criterion; the validator accepts both, so
+switching it turns nothing red. One consequence to know rather than discover: the
+decider anchor is also what arms the Owner-acceptance gate, so a Goal naming Owner
+as decider needs a `--decided-by` minutes backlink before `done`, in either
+language.
+
+**A small Story still owes all ten blocks — write the empty ones and move on.**
+The recurring temptation is to ask for a shorter contract for work that is one
+sitting's effort. The cheaper answer, and the one the platform ruled for, is a
+canned skeleton: paste the block below, fill Goal and Acceptance Criteria, and
+leave the rest as explicit no-content lines. That costs a few lines of boilerplate
+and keeps one contract for every Story, which is worth more than the lines saved.
+
+```
+## Goal
+为谁: … / 目的锚: … / 符合性判据: … / 判定人: …
+## Requirements
+现象与证据: … / 修复项: …
+## Acceptance Criteria
+GIVEN … WHEN … THEN …
+## Business Background
+无——一坐即完,背景见 Goal 的目的锚。
+## Preconditions
+无——不依赖前置状态。
+## Assumptions
+无——不引入假设。
+## Use Cases & Examples
+无——验收判据即用例。
+## Feature Toggle & Setting
+无——无开关。
+## Permissions
+无——不改权限面。
+## Implementation Notes
+决策点及裁定状态: …
+```
+
+`work-create --kind Story --scope ...` is the atomic new-record path;
 `work-annotate --scope ...` replaces the full advisory scope under numeric CAS;
 `ready`, `active`, and `done` transitions revalidate the current scope. Existing
 terminal history remains append-only; every non-terminal Story must be migrated

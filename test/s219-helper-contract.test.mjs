@@ -7,7 +7,7 @@ import test from "node:test";
 const helperRoot = fileURLToPath(new URL("../", import.meta.url));
 const skillRoot = join(helperRoot, "skill", "tcrn-workflow-helper");
 const catalogSource = join(helperRoot, "..", "tcrn-workflow", "packages", "core", "src", "settings.ts");
-const settingPattern = /\b(?:backup\.cadence|backup\.destination|design\.authority|driver\.capabilityProfile|engine\.requiredVersion|execution\.claudeCodeSubagentPlan|execution\.codexSubagentPlan|execution\.independenceFloor|execution\.maxConcurrentSubagents|execution\.maxDispatchDepth|execution\.personalessDispatch|execution\.subagentPolicy|workspace\.generatedArtifactsPath)\b/gu;
+const settingPattern = /\b(?:backup\.cadence|backup\.destination|conference\.positionBudgetBytes|design\.authority|driver\.capabilityProfile|engine\.requiredVersion|execution\.claudeCodeSubagentPlan|execution\.codexSubagentPlan|execution\.independenceFloor|execution\.maxConcurrentSubagents|execution\.maxDispatchDepth|execution\.personalessDispatch|execution\.subagentPolicy|workspace\.generatedArtifactsPath)\b/gu;
 
 async function markdownFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -32,6 +32,7 @@ test("S219 helper teaching contract is catalog-backed and has three chapters", a
   assert.deepEqual(registered.sort(), [
     "backup.cadence",
     "backup.destination",
+    "conference.positionBudgetBytes",
     "design.authority",
     "driver.capabilityProfile",
     "engine.requiredVersion",

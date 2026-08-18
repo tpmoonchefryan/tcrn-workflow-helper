@@ -23,6 +23,12 @@ this document elicits are:
 - `backup.cadence` — enum: `gate-close`, `session-end`, or `manual`;
 - `backup.destination` — absolute destination path, outside the Workspace and
   its control tree;
+- `conference.positionBudgetBytes` — how many UTF-8 bytes one conference
+  position may carry in this workspace. Default 4,096; the engine's own ceiling
+  is 8,192 and the setting cannot be raised past it. Enforced when writing, and
+  deliberately not at replay: lowering it refuses new writes without
+  invalidating a position already on the chain. Counted in bytes, so CJK text
+  reaches it about three times sooner than its character count suggests;
 - `design.authority` — the URL of the documentation of the design system this
   workspace treats as its authority. Optional; a workspace with no design system
   leaves it unset. Purely declarative: the engine never fetches this address and

@@ -15,22 +15,27 @@ below — Deliberation Triggers and Recording Triggers — instead describe when
 would otherwise decide. Reading them in a session that never installs anything
 is the expected case.
 
-Supports TCRN Workflow `v0.11.18` on two Agent App hosts, Codex and
-Claude Code, with host-neutral protocols. The pinned release ships a governed
-seven-command operator surface over one transport — the CLI — and reversible
-project-local activation for both hosts. Earlier candidates described the same
-catalog as structured MCP tools; `v0.11.18` retires that transport. It derived
-every tool from the command catalog and held no logic of its own, every catalog
-verb was already `cli`, and the authority contract it consumed is unchanged and
-exercised through the CLI. Two of its capabilities are
-newer than most guidance written about this engine, including guidance that
-shipped in earlier copies of this Skill: the event chain is readable page by page
-(`event-list`), and a workspace has a governed route to a new path or a new
-machine (the five `relocation-*` verbs). Those activation paths are
-inert until separately authorized; their current exact SessionStart definitions
-are code- and fixture-proven, but no current live host activation is claimed.
-This helper drives none of those surfaces: its own mutating commands are
-test-root-only and nothing here touches a live host binary.
+Supports TCRN Workflow `v0.13.0` on two Agent App hosts, Codex and Claude Code,
+with host-neutral protocols.
+
+Four facts about the pinned release, each of which contradicts guidance you may
+meet elsewhere — including older copies of this Skill:
+
+- **The CLI is the only transport.** There are no MCP tools; every catalog verb
+  is `cli`. Guidance describing structured MCP tools is describing a retired
+  candidate.
+- **No live host activation is claimed.** The activation paths are inert until
+  separately authorized. This helper drives none of them: its own mutating
+  commands are test-root-only and nothing here touches a live host binary.
+- **`event-list` and the five `relocation-*` verbs exist.** They are newer than
+  most writing about this engine, so a document that says the chain cannot be
+  read page by page, or that a workspace cannot move, is stale rather than
+  authoritative.
+- **`v0.13.0` tightened two gates and raised one budget.** A gate now clears
+  `done` only when `satisfied` — flipping it to `blocked` no longer releases the
+  work item. Story purpose anchors accept either working language. A single
+  conference position may carry up to 8,192 bytes, with the per-workspace
+  writing budget in `conference.positionBudgetBytes` (default 4,096).
 
 This Skill's prose (SKILL.md + references) may be distributed into a live host
 skills folder by a standard installer, but a distributed copy has **no authority
@@ -147,17 +152,15 @@ attribution claim, not proof of identity. Faithful transcription is therefore
 the whole of the guarantee, which is why positions are carried verbatim rather
 than summarised.
 
-A single position nevertheless has an **engine byte budget** — 2,048 bytes of
-UTF-8 at the pinned release — and the engine rejects an oversized one outright
-with `CONFERENCE_BUDGET_EXCEEDED` naming `position`; it does not truncate. The
-budget is counted in bytes, not characters, so non-Latin text reaches it far
-sooner than its length suggests (CJK runs about three bytes per character,
-putting the ceiling near 680 characters). When a position does not fit, split
-it on paragraph boundaries and record the parts as **sequential positions under
-the same `actorId`**, distinct external keys (`POS-<AGENT>-1`, `POS-<AGENT>-2`)
-and a `1/2`, `2/2` marker in each body so the reading order survives; the parts
-concatenate back to the original text. Continuation exists to carry the whole
-position, and is never a licence to summarise one into the budget.
+A single position has an **engine byte budget** — at `v0.13.0` a fixed ceiling of
+8,192 UTF-8 bytes, with the workspace's own writing budget declared in
+`conference.positionBudgetBytes` (default 4,096). The engine rejects an oversized
+position outright with `CONFERENCE_BUDGET_EXCEEDED` naming `position`; it does not
+truncate. Bytes, not characters — CJK runs about three bytes per character. When a
+position genuinely does not fit, split it into sequential positions under the same
+`actorId` and **never summarise it into the budget**; the full protocol is in
+`references/workflow-operations.md`, and the convention that owns it is the
+platform's `deliberation-adoption-convention.md`.
 
 This section is otherwise **advisory only**. Deciding when to deliberate from prose
 signals is **unreliable-by-design**: prose cannot be trusted to fire
