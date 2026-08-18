@@ -474,12 +474,14 @@ concurrency: you state which version you believe you are building on, and the
 engine refuses the write if someone else got there first (`WORKSPACE_CAS_MISMATCH`,
 which is retriable *after re-planning* — re-read, re-derive, re-issue).
 
-Nineteen verbs take `--expected-version`. Thirteen of them also accept the
+Most mutating verbs take `--expected-version`, and most of those also accept the
 literal `head`, which derives the current version under the held lease and skips
-the read-then-write two-step: `project-create`, `project-update`,
-`project-delete`, `work-create`, `work-transition`, `work-delete`,
-`conference-open`, `conference-append-position`, `conference-close`,
-`conference-cancel`, `gate-create`, `gate-transition`, `gate-delete`.
+the read-then-write two-step. **Read which from the catalog, not from here**: the
+flag carries a `headSentinel` marker in `commands` output, so the answer is one
+query away and is right for the copy you are actually invoking. A roster written
+into this page was wrong within two releases — it named thirteen `head`-accepting
+verbs when the catalog had twenty-nine, and an agent trusting it did a read it
+did not need before every `work-annotate`.
 
 Use `head` only when the decision does not depend on record contents you read
 earlier. It forfeits lost-update detection by design: a concurrent writer's
@@ -489,8 +491,9 @@ correct choice, and the knowledge-marker verbs reject `head` outright
 (`CLI_ARGUMENT_MALFORMED`) precisely so this cannot be papered over.
 
 **The knowledge-marker verbs count a different version from the chain.**
+Every verb that writes the knowledge store — `knowledge-create` as much as
 `knowledge-rebase`, `knowledge-promote`, `knowledge-retire` and
-`knowledge-reverify` take the knowledge store's *own* marker version, which
+`knowledge-reverify` — takes the knowledge store's *own* marker version, which
 advances independently of the workspace version and is usually a much smaller
 number. Passing the chain version yields a `KNOWLEDGE_CAS_MISMATCH` whose
 message reads `<yours>:<actual>` — e.g. `9:0` means you passed 9 and the store

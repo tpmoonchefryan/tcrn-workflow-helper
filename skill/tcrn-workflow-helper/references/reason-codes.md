@@ -66,9 +66,14 @@ Format: `CODE` — what happened / security stop? / what to do.
 - `APPROVAL_REQUIRED` — a network or mutating step ran without explicit approval.
   / no / ask the user to approve, then retry.
 - `TIME_INVALID` — a bad timestamp was supplied. / no / retry with a proper time.
+  This is the **bootstrap's** name for it; the installed engine answers
+  `TIMESTAMP_INVALID` for the same fault, and every `--at` reaches it.
 - `INVOCATION_INVALID` — the command line itself is wrong: an unknown flag, a
   missing required flag, a repeated flag, or an unknown command. / no / fix the
-  invocation and retry. This is an argument fault, never a trust finding.
+  invocation and retry. This is an argument fault, never a trust finding. Again a
+  **bootstrap** name: the engine splits the same territory into `CLI_*` codes,
+  below. Branching on the wrong namespace means waiting for a code that never
+  arrives.
 
 ## New in this candidate (guided-install surfaces)
 
@@ -87,11 +92,14 @@ These are emitted by the installed **TCRN Workflow** engine, not by
 the helper bootstrap, but the agent will surface them to the operator. Each is a
 fail-closed governance stop; none is a defect.
 
-- `WORKSPACE_GATE_PENDING` — a non-tombstoned **pending gate** anchored to a work
-  item is blocking a transition of that item to `done`. / no (governance
-  guardrail) / satisfy the gate with recorded conference minutes before moving
-  the item to `done`; do not route around the gate. (Only `done` is gated —
-  `cancelled`/`blocked`/`ready`/`active` are never blocked.)
+- `WORKSPACE_GATE_PENDING` — a non-tombstoned gate that is **not yet
+  `satisfied`** — `pending` or `blocked` alike — is anchored to a work item and
+  blocks its transition to `done`. / no (governance guardrail) / satisfy the gate
+  with recorded conference minutes before moving the item; do not route around
+  it. Moving the gate to `blocked` does **not** release the item: that was a
+  bypass, and `v0.13.0` closed it. The documented deadlock escape is still the
+  tombstone (`gate-delete`), never `blocked`. (Only `done` is gated —
+  `cancelled`/`blocked`/`ready`/`active` transitions are never blocked.)
 - `WORKSPACE_GATE_EVIDENCE_UNRESOLVED` — a gate was moved toward `satisfied` but
   its `conference-minutes:<suffix>` evidence locator does not resolve to a real,
   non-tombstoned minutes record (or the minutes do not link the gate's work
@@ -170,3 +178,107 @@ mechanism does not do.
   cannot read this workspace at all. Use the pinned release. This is why a first
   relocation version-locks a partition **even when the hop was aborted and moved no
   byte** — the ledger is append-only, so cancelling a move still writes to it.
+
+## The engine's command line (`CLI_*`)
+
+The bootstrap's `INVOCATION_INVALID` above and these are different namespaces for
+overlapping ground. An operator driving the engine sees these; branching on the
+bootstrap's name while the engine answers one of these means waiting for a code
+that never arrives.
+
+- `CLI_COMMAND_UNKNOWN` / `CLI_COMMAND_REQUIRED` — the verb does not exist, or no
+  verb was given. / no / read `commands` and use a name it lists. A verb absent
+  from the catalog of the copy you are invoking is absent, whatever some document
+  says; this is also the code a capability preflight actually gets back.
+- `CLI_ARGUMENT_UNKNOWN` / `CLI_ARGUMENT_MISSING` / `CLI_ARGUMENT_DUPLICATE` — an
+  unrecognised flag, a required flag omitted, or one flag given twice. / no / fix
+  the invocation. Note the empty-list trap: a list flag needs the `-` sentinel to
+  mean "none"; an empty string reads as a missing argument, not an empty list.
+- `CLI_ARGUMENT_MALFORMED` — the flag exists but its value is not admissible: a
+  non-integer `--expected-version`, a `--kind` outside the create path's open set,
+  or an outcome class the write path no longer mints (`gate-create` takes
+  `role_decision` or `owner_intent_required`; `conference-close` declines
+  `blocked`). / no / read the value set from the source, not from prose. A value
+  the CLI does not recognise at all travels through to the engine instead, which
+  answers with its own schema code — so an unfamiliar spelling and a retired-but
+  -legal one fail differently, on purpose.
+
+## Every mutation can stop here (workspace surface)
+
+- `WORKSPACE_CAS_MISMATCH` — someone else wrote between your read and your write.
+  / no / **retriable only after re-planning**: re-read, re-derive, re-issue. Do
+  not resend the same delta with a bumped number. `--expected-version head`
+  resolves under the held lease and skips the read-then-write, but it forfeits
+  lost-update detection by design — use it only when the mutation does not depend
+  on record contents you read earlier.
+- `WORKSPACE_LOCKED` — another writer holds the lease. / no / back off and
+  re-invoke. Do not busy-loop and never clear a lease by deleting its file; that
+  is a fail-closed corruption path. `lease-inspect` diagnoses before you act.
+- `WORKSPACE_VIEW_STALE` — a materialized view lags authority. / no / read-only
+  and transient; `status` reads authority and never raises it.
+- `WORKSPACE_EVENT_CORRUPT` — the control tree was written by something other than
+  the engine, or an event fails its replay predicate. / yes / **reading stops
+  working too, not just writing.** An editor that reformats on save, a linter, a
+  sync daemon, or an agent reaching for a file-write tool all do this. Restore the
+  whole tree from a verified snapshot; never repair by hand. One non-corruption
+  cause looks identical and is worth ruling out first: an engine older than the
+  release that introduced a record or a bound refuses the chain with this same
+  code. Check the copy's version before concluding the bytes are damaged.
+- `WORKSPACE_GATE_IDENTITY_REQUIRED` / `WORKSPACE_GATE_IDENTITY_REFUSED` — an
+  `owner_intent_required` gate needs an out-of-band roster (`--identity-authority`
+  plus its digest) and an `--actor` that roster permits; the second code means the
+  roster was supplied and does not permit that actor. / no / obtain the roster
+  from where it is published and name a permitted actor. This is authorization,
+  not authentication: the engine can refuse an impermissible identity, never prove
+  who typed the command.
+- `WORKSPACE_STORY_SCOPE_REQUIRED` / `WORKSPACE_STORY_SCOPE_INVALID` — a new Story
+  must carry its full scope atomically, and the ten-block contract is re-checked
+  on every move to `ready`, `active`, or `done`. / no / complete the blocks and
+  the four Goal anchors — since `v0.13.0` in either working language.
+- `WORKSPACE_OWNER_ACCEPTANCE_REQUIRED` — a Story whose Goal names Owner as its
+  decider is being moved to `done` without a deciding-minutes backlink. / no /
+  record the ruling, then `work-annotate --decided-by`.
+
+## Protocol shape and graph (`protocol-common`, `work-model`)
+
+- `TIMESTAMP_INVALID` / `EXTERNAL_KEY_INVALID` — the instant is not strict
+  RFC 3339, or the key is outside its grammar (upper-case alphanumeric segments
+  joined by hyphens; an underscore is not admissible). / no / correct and resend.
+- `INVALID_TRANSITION` / `GRAPH_PARENT_KIND_INVALID` / `REFERENTIAL_INTEGRITY` /
+  `TOMBSTONE_REFERENCED` — the status jump is not on the frozen matrix (`planned`
+  cannot reach `active` directly), the parent is the wrong kind for the child
+  (Initiative → Epic → Story → Subtask; Initiative and Release are parentless), the
+  reference names nothing, or it names a tombstoned record. / no / fix the shape.
+  For a record that is *born* already in progress, `work-create --status` sets the
+  birth state — the matrix governs existing records, not new ones.
+
+## Deliberation records (`conference-v1`)
+
+- `CONFERENCE_BUDGET_EXCEEDED` — a text field overran its bound. **Two different
+  bounds report this same code**, and the message tells them apart: the engine's
+  fixed ceiling on one position (8,192 bytes at `v0.13.0`), and this workspace's
+  own writing budget (`conference.positionBudgetBytes`, default 4,096 — its
+  message names the value). Every other conference text field keeps 2,048, and the
+  bounded arrays have their own caps. / no / for a position, split into sequential
+  positions under the same `actorId` and **never summarise into the budget**;
+  bytes, not characters, so CJK reaches it about three times sooner than length
+  suggests.
+- `CONFERENCE_INDEPENDENCE_REQUIRED` — `execution.independenceFloor` covers this
+  conference type and the close did not declare `--execution-form independent`.
+  / no / declare it truthfully, or have the floor changed through the settings
+  ceremony. Do not relabel a single-context deliberation to satisfy the floor.
+- `KNOWLEDGE_HIGH_WATER_MISMATCH` / `KNOWLEDGE_CAS_MISMATCH` — **only**
+  `conference-close --distill` touches the knowledge store. The first means the
+  store trails the chain head: run `knowledge-rebase` first. The second means you
+  passed a chain version where the store's own marker version was wanted; its
+  message reads `<yours>:<actual>`, which is the fastest way to read the true
+  marker. A close without `--distill` never meets either.
+- `KNOWLEDGE_DISPOSABLE_ACK_REQUIRED` — `knowledge-init` refuses to build the
+  store until the caller acknowledges what it is. / no / pass the acknowledgement
+  flag. The refusal is the teaching: the store is a derived, disposable index over
+  the chain, not a second place facts live, and anything it holds can be rebuilt
+  from the events. Acknowledging that is what keeps a later `knowledge-rebase`
+  from looking like data loss.
+- `CONTEXT_AUTHORITY_REQUIRED` — a context route was asked for without the
+  authority input it requires. / no / supply the authority the verb names; this is
+  a missing input, not a trust finding.

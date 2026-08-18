@@ -10,9 +10,17 @@ non-canonical scalar encodings fail closed.
 
 The accepted Workflow release is repository
 `https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v0.13.0`,
-commit `4ce6e793cdca088213e897308773541a8bee7119`, tree
-`a74f2317daf565d63a0161a0bcfe336669b56827`, and tag object
-`57b6f290886128abccdb1b297a76623fec60a04b`.
+commit `229adc5b4350b49357aa791a8c200e80adc5bf51`, tree
+`7ec14dab7eeffdcf8f2f44b69b9af8ebe33071cf`, and tag object
+`49026ca7da9a00c6f68a9000d4f61eccead7935e`.
+
+These four values are prose restating what `bootstrap/trusted-bootstrap.mjs`
+pins, and the bootstrap is the authority — a reader who finds them disagreeing
+should believe the bootstrap and treat this paragraph as the defect. That is not
+hypothetical: the previous candidate shipped three ids here that named a commit
+the release had moved past, while the bootstrap and the candidate manifest both
+carried the right ones. A test now holds the two together, so the next
+disagreement is caught before it is published rather than by a reader.
 
 ## Out-of-band trust anchor (root of trust)
 
@@ -75,7 +83,7 @@ remain test-root-only and never write to a live host Skill location.
 
 This candidate supports two Agent App hosts, Codex and Claude Code, over one
 host-neutral protocol surface. The pinned Workflow release ships reversible,
-project-local SessionStart activation for both hosts, plus a seven-command
+project-local SessionStart activation for both hosts, plus a governed
 operator surface on the CLI. The structured MCP tool catalog earlier candidates
 pinned is retired in `v0.11.18`. All remain inert
 until separately pinned and authorized. The current exact SessionStart

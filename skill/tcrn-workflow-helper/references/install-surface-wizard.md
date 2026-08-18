@@ -1,6 +1,6 @@
 # Installation-surface wizard
 
-This document is the candidate.43 language and intent contract for TCRN
+This document is the language and intent contract for TCRN
 Workflow installation and update requests. It is guidance, not an authority
 source. The engine, its install manifest, and the host's approval surface
 remain authoritative.
@@ -59,8 +59,13 @@ read-only capabilities. The installation-surface wizard requires Workflow
 version/capability preflight, not a guessed command probe.
 
 If the engine reports an older version, omits `install-manifest`, or returns
-`CLI_UNKNOWN` for the capability query, stop before invoking
-`install-manifest`. Report `ENGINE_CAPABILITY_PREFLIGHT_REQUIRED`, show the
+`CLI_COMMAND_UNKNOWN` for the capability query, stop before invoking
+`install-manifest`. (`CLI_COMMAND_UNKNOWN` is the engine's actual code for an
+unrecognised verb — earlier copies of this document said `CLI_UNKNOWN`, which no
+release has ever emitted, so an agent branching on it waited for a code that
+could not arrive. That is exactly the false green the preflight exists to
+prevent.) Report `ENGINE_CAPABILITY_PREFLIGHT_REQUIRED` — a helper-side label,
+not an engine code — show the
 observed version/capability result, and tell the operator that a
 Workflow release newer than the one this candidate pins, and any helper re-pin
 onto it, are not authorized by this candidate. Do not continue with a partial plan, do not write a receipt, and do

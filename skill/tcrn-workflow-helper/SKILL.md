@@ -21,9 +21,11 @@ with host-neutral protocols.
 Four facts about the pinned release, each of which contradicts guidance you may
 meet elsewhere — including older copies of this Skill:
 
-- **The CLI is the only transport.** There are no MCP tools; every catalog verb
-  is `cli`. Guidance describing structured MCP tools is describing a retired
-  candidate.
+- **The CLI is the only transport.** The engine ships no MCP server; guidance
+  describing structured MCP tools is describing a retired candidate. Nearly every
+  catalog verb is `cli` — the handful that are not are marked `fixture-only` and
+  are not an operator surface. Read `availability` from the catalog rather than
+  assuming it.
 - **No live host activation is claimed.** The activation paths are inert until
   separately authorized. This helper drives none of them: its own mutating
   commands are test-root-only and nothing here touches a live host binary.
@@ -62,8 +64,8 @@ then run the full wizard only after an explicit yes. The wizard uses the
 engine's install manifest as its single installation-surface source, but first
 requires a read-only version/capability preflight for the install-manifest
 surface. The preflight stops before that verb when the engine is older than
-`v0.11.16` or does not advertise the capability; it never turns `CLI_UNKNOWN`
-into a false green. Engine receipts, host approval, and real trigger evidence
+`v0.11.16` or does not advertise the capability; it never turns
+`CLI_COMMAND_UNKNOWN` into a false green. Engine receipts, host approval, and real trigger evidence
 remain separate.
 
 For a multi-project setup, the wizard's resolved tree follows

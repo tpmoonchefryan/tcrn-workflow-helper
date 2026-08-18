@@ -83,9 +83,11 @@ activation. See `docs/skills-registry.md` for the release/publication boundary.
    dependency fetch — run `pnpm install --frozen-lockfile --ignore-scripts`
    and `pnpm build` in the checkout. Tell the user plainly: dependency
    lifecycle scripts stay disabled, so installing executes no third-party
-   code. Offer `pnpm verify:p1` afterwards — twenty offline gates re-proving
-   the checkout on their own machine is the best trust demonstration a first
-   run can give.
+   code. Offer `pnpm verify:p1` afterwards — the engine's whole offline gate
+   sequence re-proving the checkout on their own machine is the best trust
+   demonstration a first run can give. (The sequence's own roster is
+   `scripts/p1-sequence.mjs`; it has grown before and a count written here would
+   be stale rather than reassuring.)
 6. **Create the Workspace** — this step is an elicitation, not a default:
    never choose a location the user has not seen as a question.
    **Observe first**: look at the directory the user works in. A single
@@ -259,8 +261,12 @@ The `AGENTS.md` seed is the operating-contract teaching template: it points
 Two questions come up and both have a wrong default. "I already have AOS running"
 and "I have been working locally and now want AOS" are answered in
 `aos-integration.md` — read it then rather than improvising. The short form of
-both: chains never move, AOS never holds the record, and its arrival adds a
-second store that is precious in a way a projection is not.
+both: AOS never holds the record, and its arrival adds a second store that is
+precious in a way a projection is not. This sentence used to open with "chains
+never move", which the relocation family retired — a workspace *can* be moved,
+through governed verbs, and the corrected account is in `aos-integration.md`.
+What has not changed is the half that matters here: moving a chain changes its
+address, never who holds the record.
 
 ## Rules the agent must not break
 

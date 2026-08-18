@@ -24,8 +24,8 @@ this document elicits are:
 - `backup.destination` — absolute destination path, outside the Workspace and
   its control tree;
 - `conference.positionBudgetBytes` — how many UTF-8 bytes one conference
-  position may carry in this workspace. Default 4,096; the engine's own ceiling
-  is 8,192 and the setting cannot be raised past it. Enforced when writing, and
+  position may carry in this workspace. Default 4,096; the setting's own range is
+  512–8,192, the upper bound being the engine's ceiling — it cannot be raised past it. Enforced when writing, and
   deliberately not at replay: lowering it refuses new writes without
   invalidating a position already on the chain. Counted in bytes, so CJK text
   reaches it about three times sooner than its character count suggests;
