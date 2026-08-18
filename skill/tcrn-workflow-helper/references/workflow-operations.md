@@ -10,8 +10,9 @@ change, and this document defines *what there is to change and when*.
 
 Run `commands` first. It emits the schema-valid, byte-stable `COMMAND_CATALOG`:
 every verb, its flags, each flag's `valueKind`, whether the verb mutates, and its
-availability. **Enumerate capability from that output, never from prose** — this
-document included. Anything here that disagrees with the catalog is wrong, and
+availability. For one verb rather than all of them, `<verb> --help` returns that
+verb's entry alone — same shape, same reason code. **Enumerate capability from
+that output, never from prose** — this document included. Anything here that disagrees with the catalog is wrong, and
 the catalog is what the engine actually enforces.
 
 One thing the catalog does *not* carry is the set of legal values a flag

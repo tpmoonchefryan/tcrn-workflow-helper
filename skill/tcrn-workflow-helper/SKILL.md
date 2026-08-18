@@ -15,7 +15,7 @@ below — Deliberation Triggers and Recording Triggers — instead describe when
 would otherwise decide. Reading them in a session that never installs anything
 is the expected case.
 
-Supports TCRN Workflow `v0.13.0` on two Agent App hosts, Codex and Claude Code,
+Supports TCRN Workflow `v0.14.0` on two Agent App hosts, Codex and Claude Code,
 with host-neutral protocols.
 
 Four facts about the pinned release, each of which contradicts guidance you may
@@ -38,6 +38,16 @@ meet elsewhere — including older copies of this Skill:
   work item. Story purpose anchors accept either working language. A single
   conference position may carry up to 8,192 bytes, with the per-workspace
   writing budget in `conference.positionBudgetBytes` (default 4,096).
+- **`v0.14.0` made every verb answer for itself, and gave the read surface a
+  headroom report.** `<verb> --help` returns that verb's catalog entry — every
+  flag, whether it is required, and what kind of value it takes — so an argument
+  shape is one call away rather than a refusal to interpret. `status` now carries
+  a `budgets` block: each view's bytes against the canonical ceiling, the largest
+  event segment, and the record count against its cap. Two refusals are new and
+  mean opposite things: `WORKSPACE_VIEW_BUDGET_EXCEEDED` is raised before
+  anything is written and the chain is untouched, while a receipt carrying
+  `viewProjection: "unwritten"` reports a write that **did** land whose derived
+  view did not — do not retry that one, run `recover`.
 
 This Skill's prose (SKILL.md + references) may be distributed into a live host
 skills folder by a standard installer, but a distributed copy has **no authority
@@ -154,7 +164,7 @@ attribution claim, not proof of identity. Faithful transcription is therefore
 the whole of the guarantee, which is why positions are carried verbatim rather
 than summarised.
 
-A single position has an **engine byte budget** — at `v0.13.0` a fixed ceiling of
+A single position has an **engine byte budget** — since `v0.13.0` a fixed ceiling of
 8,192 UTF-8 bytes, with the workspace's own writing budget declared in
 `conference.positionBudgetBytes` (default 4,096). The engine rejects an oversized
 position outright with `CONFERENCE_BUDGET_EXCEEDED` naming `position`; it does not
