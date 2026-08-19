@@ -172,7 +172,7 @@ Helper 的改动型命令（`install`/`update`/`reinstall`/`uninstall`）只做�
 
 ## 被钉定的 Workflow 发布治理什么
 
-Helper 的职责没有变——在它运行之前证明这份发布。而它所钉定的这个版本，TCRN Workflow `v0.14.0`，带来了一个受治理的表面，技能的参考文档会教操作者去驱动它：
+Helper 的职责没有变——在它运行之前证明这份发布。而它所钉定的这个版本，TCRN Workflow `v1.0.0`，带来了一个受治理的表面，技能的参考文档会教操作者去驱动它：
 
 - **会议与门治理**——审议被记录在事件日志上（`conference-open` / `-append-position` / `-close` / `-cancel`），而一个未满足的门会阻止工作项到达 `done`，直到会议纪要证据将其解决（`WORKSPACE_GATE_PENDING`、`WORKSPACE_GATE_EVIDENCE_UNRESOLVED`）。
 - **执行者留痕**——一旦启用，每个改动型动词都必须归属一个执行中的执行者，缺失或格式错误都失败即关闭（`WORKSPACE_ACTOR_REQUIRED`、`WORKSPACE_ACTOR_INVALID`）。
@@ -186,7 +186,7 @@ Helper 的职责没有变——在它运行之前证明这份发布。而它所�
 
 ## 状态，如实相告
 
-- `1.0.0` 是一个**预发布候选**，恰好支持 TCRN Workflow `v0.14.0`。
+- `1.0.0` 是一个**预发布候选**，恰好支持 TCRN Workflow `v1.0.0`。
 - 安装与移除在两种宿主上都**仅限测试根目录**；不声称支持实时的 Codex 或 Claude Code 宿主。
 - **自建的 Ed25519 签名链已于 2026-07-19 移除**。它从来就没有被锚定过：它所依赖的摘要与密钥指纹，都没有发布在任何用户能独立获取的地方，所以这条链对本仓库之外的任何人都什么也证明不了。取代它的东西更简单也更诚实：一个*真正被发布*在多个独立位置的引导程序摘要、编译进该引导程序的被接受发布摘要、GitHub 不可变发布，以及可复现构建链。
 - 三项 Claude Code 专有行为（settings 片段可逆性、用户级与项目级优先级、CLAUDE.md 回退）是在**被钉定的 Workflow 发布**中实现并证明的，不在本仓库——确切的证据映射见 `skill/tcrn-workflow-helper/references/trust-contract.md`。

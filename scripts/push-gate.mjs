@@ -150,9 +150,15 @@ const helperVersion = JSON.parse(await text("package.json")).version ?? null;
 if (typeof helperVersion !== "string") fail("PUSH_GATE_HELPER_VERSION_UNREADABLE", "package.json version");
 const statusDocuments = ["README.md", "README.zh-CN.md", "README.ja.md", "README.ko.md", "README.fr.md"];
 for (const document of statusDocuments) {
-  const statusLine = (await text(document)).split("\n").find((line) => /`0\.\d+\.\d+[^`]*`/u.test(line) && /`v\d+\.\d+[^`]*`/u.test(line));
+  // 1.0.0: this locator used to require a leading 0, which wrote "the helper version is
+  // pre-1.0" into the gate as an invariant. It held only until the first release past it,
+  // and that release made every status line unfindable -- the check reporting MISSING for
+  // a line that was present and merely stale. A gate that cannot survive the release it
+  // guards is worse than none. Which value is CORRECT still comes from package.json and
+  // IDENTITY; only the locator widened.
+  const statusLine = (await text(document)).split("\n").find((line) => /`\d+\.\d+\.\d+[^`]*`/u.test(line) && /`v\d+\.\d+[^`]*`/u.test(line));
   if (statusLine === undefined) { fail("PUSH_GATE_STATUS_LINE_MISSING", document); continue; }
-  const statedVersion = /`(0\.\d+\.\d+[^`]*)`/u.exec(statusLine)?.[1] ?? null;
+  const statedVersion = /`(\d+\.\d+\.\d+[^`]*)`/u.exec(statusLine)?.[1] ?? null;
   if (typeof helperVersion === "string" && statedVersion !== helperVersion) fail("PUSH_GATE_STATUS_VERSION_STALE", `${document}: says ${String(statedVersion)}, package.json ${String(helperVersion)}`);
   const statedSupport = /`(v\d+\.\d+[^`]*)`/u.exec(statusLine)?.[1] ?? null;
   if (statedSupport !== identity.version) fail("PUSH_GATE_STATUS_SUPPORT_STALE", `${document}: supports ${String(statedSupport)}, IDENTITY ${String(identity.version)}`);
