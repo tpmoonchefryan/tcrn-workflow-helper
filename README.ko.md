@@ -26,7 +26,7 @@
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# 5425a657cc12defa255933b39d983d6e519406b0f28084aefce35c74eeb52ecd
+# 577ff7f1204d4a6f52629b391a05791fec94e9bc2a70f19b5ce3edbf73ddc213
 ```
 
 이 다이제스트는 여기, `SECURITY.md`, 그리고 GitHub 릴리스 노트에 공개되어 있습니다. **계산한 값이 맞지 않으면 멈추십시오** — 아무것도 실행하지 말고, "그래도 한번 해보자"도 하지 마십시오. 불일치는 이 장치가 제대로 작동하고 있다는 뜻입니다.

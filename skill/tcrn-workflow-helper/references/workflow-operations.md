@@ -280,10 +280,24 @@ by dozens of records, so it is worth stating the order that keeps it governed:
 
 One practice ties the two trees together: when chain-authorized work lands in a
 repository — the implementing commit, the tag, the release notes — carry the
-record's external key in the message (`feat!: visual language v2
+record's **full** external key in the message (`feat!: visual language v2
 (ACME-DS-INIT-001)`). The git history then indexes into the governance record
 without a lookup table, and an auditor holding either artifact can find the
 other.
+
+**Full** is the whole of the rule, and it is the half that gets dropped. Writing
+`INIT-001` instead is the natural thing to do — it is how these documents refer to
+records in prose, and on this platform it is four times more common in commit
+messages than the complete key. It is also ambiguous: partitions number
+independently, so `INIT-009` names a different record in each of them. Measured on
+2026-08-19, 242 of 609 completed cross-project records — two in five — had a short
+form that also named a record in another partition (`TCRN-CROSS-INC-227`). An
+auditor holding a commit that says `INIT-009` cannot tell which chain it means, and
+the lookup table this practice exists to avoid is exactly what they then need.
+
+Nothing checks this today, in either direction, which is why the gap was an
+impression until it was counted: 56% of completed records carry no citation in any
+repository's history at all.
 
 ## Before building it, look for it
 
