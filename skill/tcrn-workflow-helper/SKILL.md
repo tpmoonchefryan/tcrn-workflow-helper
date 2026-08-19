@@ -15,7 +15,7 @@ below — Deliberation Triggers and Recording Triggers — instead describe when
 would otherwise decide. Reading them in a session that never installs anything
 is the expected case.
 
-Supports TCRN Workflow `v1.0.0` on two Agent App hosts, Codex and Claude Code,
+Supports TCRN Workflow `v1.0.1` on two Agent App hosts, Codex and Claude Code,
 with host-neutral protocols.
 
 Four facts about the pinned release, each of which contradicts guidance you may

@@ -1,6 +1,6 @@
 {
   "name": "tcrn-workflow-helper",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Trusted bootstrap and Codex Skill for TCRN Workflow.",
   "license": "Apache-2.0",
