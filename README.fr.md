@@ -26,7 +26,7 @@ L'amorceur est la seule chose que vous ayez jamais à croire ; vérifiez-le donc
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# 577ff7f1204d4a6f52629b391a05791fec94e9bc2a70f19b5ce3edbf73ddc213
+# 7d40d170d65482a503d4c61cf09b4941d28b0eff50cb6eb627704e9d07b602a0
 ```
 
 Cette empreinte est publiée ici, dans `SECURITY.md` et dans les notes de version GitHub. **Si ce que vous calculez ne correspond pas, arrêtez-vous** — n'exécutez rien, n'essayez pas « quand même ». Une divergence, c'est le système qui fonctionne.
@@ -186,7 +186,7 @@ Déclencher ces délibérations par la prose reste consultatif et non fiable par
 
 ## Statut, honnêtement
 
-- `0.1.0-candidate.47` est un **candidat de pré-version** prenant en charge exactement TCRN Workflow `v0.14.0`.
+- `1.0.0` est un **candidat de pré-version** prenant en charge exactement TCRN Workflow `v0.14.0`.
 - L'installation et la suppression sont **limitées aux racines de test** sur les deux hôtes ; aucune prise en charge active de Codex ou Claude Code n'est affirmée.
 - **La chaîne de signature Ed25519 maison a été supprimée le 2026-07-19.** Elle n'a jamais été ancrée : l'empreinte et le doigt de clé dont elle dépendait n'étaient publiés nulle part où un utilisateur pouvait les obtenir indépendamment, si bien que la chaîne ne prouvait rien à quiconque hors de ce dépôt. Ce qui la remplace est plus simple et honnête : une empreinte d'amorceur *réellement publiée* à des endroits indépendants, des empreintes de release acceptées compilées dans cet amorceur, les releases immuables GitHub et la chaîne de build reproductible.
 - Les trois comportements propres à Claude Code (réversibilité du fragment de réglages, précédence utilisateur/projet, repli CLAUDE.md) sont implémentés et prouvés **dans la release Workflow épinglée**, pas dans ce dépôt — voir `skill/tcrn-workflow-helper/references/trust-contract.md` pour la carte exacte des preuves.
