@@ -48,6 +48,15 @@ meet elsewhere — including older copies of this Skill:
   anything is written and the chain is untouched, while a receipt carrying
   `viewProjection: "unwritten"` reports a write that **did** land whose derived
   view did not — do not retry that one, run `recover`.
+- **`v0.15.0` uses local segmented storage for new workspaces.** New event
+  history is canonical NDJSON in numbered byte-bounded segments with `.idx`,
+  label/time, and manifest sidecars; the `file-segmented` backend is selected
+  by default and the legacy count-based event files remain readable. Reads use
+  the newest atomic replay snapshot plus its tail, and a damaged replay
+  snapshot returns `WORKSPACE_SNAPSHOT_INVALID` rather than silently replaying
+  the whole history. Knowledge bodies and time-attestation receipts have the
+  same disposable legacy-to-segmented migration path; their metadata remains
+  the source of record.
 
 This Skill's prose (SKILL.md + references) may be distributed into a live host
 skills folder by a standard installer, but a distributed copy has **no authority

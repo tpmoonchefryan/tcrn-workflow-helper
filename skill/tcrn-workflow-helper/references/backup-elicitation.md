@@ -23,6 +23,10 @@ are first-class — always double-quote them.
 - The quiesce/settle preconditions (`recover`, `validate`, the lease as the
   quiesce proof) that a provable snapshot depends on are provided by the pinned
   TCRN Workflow release.
+- The read-path replay snapshot under `snapshots/` is distinct from this backup
+  receipt. It is an engine-maintained performance checkpoint, not a backup
+  destination and not a replacement for the whole-control-tree snapshot this
+  runbook teaches.
 
 ## Two doctrines to state before starting
 

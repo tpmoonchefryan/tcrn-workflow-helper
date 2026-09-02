@@ -26,7 +26,7 @@
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# 66f11c46d4e519302b56b870f6ea2caf6bac0c58f69023a8f1883deff98e919b
+# ee61a092b96b16ca1207d5a259a493b4ab3354d1aba52cc6536dd1a474dd8d1b
 ```
 
 该摘要发布在这里、在 `SECURITY.md` 中，以及 GitHub 发布说明里。**如果你算出来的值对不上，就停下**——不要运行任何东西，也不要"先试试看"。对不上，正是这套机制在起作用。

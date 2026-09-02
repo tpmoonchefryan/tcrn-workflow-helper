@@ -216,6 +216,10 @@ that never arrives.
   is a fail-closed corruption path. `lease-inspect` diagnoses before you act.
 - `WORKSPACE_VIEW_STALE` — a materialized view lags authority. / no / read-only
   and transient; `status` reads authority and never raises it.
+- `WORKSPACE_SNAPSHOT_INVALID` — the engine's replay snapshot or its manifest
+  is malformed, damaged, or no longer matches the event prefix. / yes / do not
+  fall back to a full replay; rebuild the engine replay snapshot through the
+  governed repair path and keep the append-only event segments unchanged.
 - `WORKSPACE_EVENT_CORRUPT` — the control tree was written by something other than
   the engine, or an event fails its replay predicate. / yes / **reading stops
   working too, not just writing.** An editor that reformats on save, a linter, a

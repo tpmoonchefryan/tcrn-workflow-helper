@@ -26,7 +26,7 @@ L'amorceur est la seule chose que vous ayez jamais à croire ; vérifiez-le donc
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
-# 66f11c46d4e519302b56b870f6ea2caf6bac0c58f69023a8f1883deff98e919b
+# ee61a092b96b16ca1207d5a259a493b4ab3354d1aba52cc6536dd1a474dd8d1b
 ```
 
 Cette empreinte est publiée ici, dans `SECURITY.md` et dans les notes de version GitHub. **Si ce que vous calculez ne correspond pas, arrêtez-vous** — n'exécutez rien, n'essayez pas « quand même ». Une divergence, c'est le système qui fonctionne.

@@ -190,6 +190,10 @@ The `AGENTS.md` seed is the operating-contract teaching template: it points
    control tree restores whole or not at all. Do not say a workspace can
    never move — the pinned release has a governed route for that, and it is a
    separate ceremony rather than a restore performed elsewhere.
+   Also show the storage choices: new event data uses byte-bounded
+   `events/*.ndjson` segments and sidecars, replay checkpoints live under
+   `snapshots/`, and disposable knowledge bodies can use segmented storage
+   while `metadata/` stays one record per id.
 8. **Declare the driver capability profile** — ask once, in plain language: is the
    agent driving this deployment a current top-tier model, or a smaller/older one?
    Record the answer as `driver.capabilityProfile` (`frontier` or `standard`) per

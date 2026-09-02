@@ -29,6 +29,24 @@ this document elicits are:
   deliberately not at replay: lowering it refuses new writes without
   invalidating a position already on the chain. Counted in bytes, so CJK text
   reaches it about three times sooner than its character count suggests;
+- `storage.segmentBytes` — the serialized-byte limit for a new event segment.
+  Default 16 MiB; the engine bounds the value and uses the workspace storage
+  version to keep legacy count-based segments readable. Changing it affects
+  future segment rolling only; it never rewrites event history;
+- `storage.backend` — the local data-plane choice, either `file` or
+  `file-segmented`. The default is `file-segmented`; unknown values are refused
+  instead of silently falling back to the compatibility backend;
+- `storage.snapshotEveryEvents` — the number of events between atomic replay
+  snapshots. Default 512; a damaged replay snapshot is a hard read failure,
+  never a silent full-replay fallback;
+- `injection.budgetBytes` — the default UTF-8 byte budget for the metadata-only
+  knowledge injection surface. Default 32,768; an explicit call budget wins;
+- `knowledge.aggregateBytes` — the source-of-truth marker, metadata, and body
+  byte ceiling for the knowledge store. Default 131,072; the engine canonical
+  byte limit remains the upper bound and the derived index is not charged twice;
+- `retrieval.scopeExcerptBytes` — the default UTF-8 byte window for a
+  `work-list` search excerpt. Default 512; the command's explicit
+  `--scope-bytes` value wins;
 - `design.authority` — the URL of the documentation of the design system this
   workspace treats as its authority. Optional; a workspace with no design system
   leaves it unset. Purely declarative: the engine never fetches this address and

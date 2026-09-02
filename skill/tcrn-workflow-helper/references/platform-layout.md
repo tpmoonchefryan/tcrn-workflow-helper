@@ -56,6 +56,16 @@ mutating call reads the current workspace head, supplies the expected version
 and actor, and passes the partition's attestation destination when that verb
 supports it. A copied directory at another path is not a second authority.
 
+Inside a workspace, new event writes use the local `file-segmented` layout:
+`events/000001.ndjson` carries canonical lines, the matching `000001.idx`
+provides point locations, and `labels.idx`, `time.idx`, and `manifest.json`
+describe derived indexes. `snapshots/manifest.json` points to the newest atomic
+replay checkpoint. A legacy count-based event segment remains readable. The
+knowledge store keeps `metadata/<id>.json` as its metadata source and may move
+`bodies/<id>.body` into segmented `bodies/*.ndjson` with sidecar indexes.
+Attestation receipts may likewise be migrated from `<eventHash>.json` into
+numbered NDJSON segments; the migration preserves full receipt values.
+
 ## Partition and key-prefix rules
 
 Partition names are stable path components, not display labels. They contain no

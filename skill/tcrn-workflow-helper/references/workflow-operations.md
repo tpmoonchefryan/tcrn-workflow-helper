@@ -55,6 +55,13 @@ a scratch workspace created for that purpose and discarded after.
 | Know the current state before deciding | `status`, the `*-list` verbs | `status` reads authority and never returns a stale-view code; list verbs are budgeted windows over materialized views. |
 | Recover a workspace that refuses writes | `lease-inspect`, then `recover` | Diagnose before acting. Never delete lease files by hand — that is a fail-closed corruption path. |
 | Protect the workspace before a risky change | `snapshot-manifest` / `snapshot-verify` | See `backup-elicitation.md`. Cadence is advisory — the agent proposes, the user decides — and it names a concrete moment: under `gate-close`, the proposal belongs in the same breath as reporting a gate `satisfied`. |
+
+New local event writes use numbered byte-bounded `events/*.ndjson` segments.
+Their point, label, time, and manifest sidecars are derived and rebuildable;
+the newest replay checkpoint is named by `snapshots/manifest.json`, while the
+append-only event segments remain the authority. A legacy count-based segment
+is still readable. Disposable knowledge bodies and time-attestation receipts
+may be migrated to the same segmented form without changing their values.
 | Carry a work item's authoritative scope on the record | `work-annotate` | An external key is a compressed label; what it stands for lives in decomposition positions a later reader may never open. Writing the scope and its deciding minutes onto the record closes that gap — see "Scope on the record" below. |
 | Move a workspace to a different path, or onto a different machine | `relocation-plan` first, then `relocation-vacate` / `-adopt`, with `relocation-inspect` at both addresses afterwards | The engine binds five absolute roots, so copying a control tree elsewhere produces an unreadable tree rather than a second live authority. These verbs move the *binding*; the operator moves the bytes. Read the one-way doors below before proposing the first hop. |
 | Batch Initiatives into a release train and ship them together | `work-create --kind Release` + `work-annotate --sprint` | A sprint is a delivery batch, not a work-tree node. The Release record is the train; members attach by the member-side `advisory:sprint` tag — see "Sprint delivery batches" below. |
