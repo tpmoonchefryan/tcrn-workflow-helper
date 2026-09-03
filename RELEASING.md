@@ -91,7 +91,7 @@ changed and nothing under `skill/` did, stop and find out why before continuing.
 Steps 2 and 3 changed the bootstrap's bytes, so the SHA-256 a user checks by
 hand is now different. Publish the new value in **all six**:
 
-`README.md`, `README.zh-CN.md`, `README.ja.md`, `README.ko.md`, `README.fr.md`,
+`README.md`, `README.en.md`, `README.ja.md`, `README.ko.md`, `README.fr.md`,
 `SECURITY.md` — and in the GitHub release notes.
 
 This is the step that gets missed, because it is the consequence of an edit

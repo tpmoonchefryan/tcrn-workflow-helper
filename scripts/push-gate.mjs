@@ -59,7 +59,7 @@ const bootstrapText = bootstrapBytes.toString("utf8");
 
 // 2. The out-of-band anchor. This is the only value a user can check independently, so
 //    every document that publishes it must publish the current one and no stale one.
-const anchorDocuments = ["README.md", "README.zh-CN.md", "README.ja.md", "README.ko.md", "README.fr.md", "SECURITY.md"];
+const anchorDocuments = ["README.md", "README.en.md", "README.ja.md", "README.ko.md", "README.fr.md", "SECURITY.md"];
 const punctuation = /[\p{P}\p{S}]/u;
 const whitespace = /\s/u;
 for (const document of anchorDocuments) {
@@ -148,7 +148,7 @@ else if (supports !== identity.version) fail("PUSH_GATE_SKILL_SUPPORT_STALE", `S
 //     alone carries (so a stale number reads as stale, not as a missing line).
 const helperVersion = JSON.parse(await text("package.json")).version ?? null;
 if (typeof helperVersion !== "string") fail("PUSH_GATE_HELPER_VERSION_UNREADABLE", "package.json version");
-const statusDocuments = ["README.md", "README.zh-CN.md", "README.ja.md", "README.ko.md", "README.fr.md"];
+const statusDocuments = ["README.md", "README.en.md", "README.ja.md", "README.ko.md", "README.fr.md"];
 for (const document of statusDocuments) {
   // 1.0.0: this locator used to require a leading 0, which wrote "the helper version is
   // pre-1.0" into the gate as an invariant. It held only until the first release past it,

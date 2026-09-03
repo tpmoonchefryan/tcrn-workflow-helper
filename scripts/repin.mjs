@@ -14,7 +14,7 @@ const execFile = promisify(execFileCallback);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const workflowRoot = resolve(root, '..', 'tcrn-workflow');
 const workflowRepository = 'https://github.com/tpmoonchefryan/tcrn-workflow.git';
-const anchorDocuments = ['README.md', 'README.zh-CN.md', 'README.ja.md', 'README.ko.md', 'README.fr.md', 'SECURITY.md'];
+const anchorDocuments = ['README.md', 'README.en.md', 'README.ja.md', 'README.ko.md', 'README.fr.md', 'SECURITY.md'];
 const readmeDocuments = anchorDocuments.filter(path => path.startsWith('README.'));
 const skillPrefix = 'skill/tcrn-workflow-helper/';
 const sourceArchiveSchema = 'tcrn.workflow.helper.source-archive.v2';

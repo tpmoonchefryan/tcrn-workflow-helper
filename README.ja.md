@@ -2,204 +2,91 @@
 
 # TCRN Workflow Helper
 
-### 手作業で一つのファイルを一度だけ確認する。あとはそれが、他のすべてを拒みます。
+### 手で確かめるファイルは一つだけ、一度だけ。あとはこれが代わりに拒否します
 
-**単一ファイル・依存ゼロのブートストラップが、コードが一行でも動く前に、そのリリースが公開されたものと寸分違わないことを証明します。**
+**単一ファイル、依存ゼロのブートストラップ。リリースの一行が動く前に、それが公開されたものと同一であることを証明します。**
 
-[English](./README.md) · [简体中文](./README.zh-CN.md) · 日本語 · [한국어](./README.ko.md) · [Français](./README.fr.md)
+[简体中文](./README.md) · [English](./README.en.md) · 日本語 · [한국어](./README.ko.md) · [Français](./README.fr.md)
 
-![status](https://img.shields.io/badge/status-0.1.0--candidate.47-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
+![status](https://img.shields.io/badge/status-1.0.1-blue) ![deps](https://img.shields.io/badge/dependencies-0-success) ![files](https://img.shields.io/badge/bootstrap-1%20file-brightgreen) ![force](https://img.shields.io/badge/--force-does%20not%20exist-critical)
 
-![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v0.14.0-blue)
+![license](https://img.shields.io/badge/license-Apache--2.0-lightgrey) ![node](https://img.shields.io/badge/node-%E2%89%A5%2024-informational) ![network](https://img.shields.io/badge/network-none-important) ![hosts](https://img.shields.io/badge/hosts-Claude%20Code%20%C2%B7%20Codex-blueviolet) ![supports](https://img.shields.io/badge/TCRN%20Workflow-v1.0.1-blue)
 
-[まずこれを確認](#まずこれを確認) · [なぜこのプロジェクトが存在するのか](#なぜこのプロジェクトが存在するのか) · [何を強制するのか](#何を強制するのか) · [クイックスタート](#クイックスタート) · [率直な回答](#率直な回答) · [ライセンス](#ライセンス)
+[まずこのファイルを確かめる](#まずこのファイルを確かめる) · [何を解決するか](#何を解決するか) · [誰のためのものか](#誰のためのものか) · [何を強制するか](#何を強制するか) · [3 分ではじめる](#3-分ではじめる) · [現在の状態](#現在の状態) · [ドキュメント](#ドキュメント)
 
 </div>
 
 ---
 
-> **一文で言うと**：小さなファイルを一つ、複数の独立した場所で公開されている digest と照合するだけです——それ以降、そのファイルは、レビューされたものとバイト単位で同一でないリリースを暗号学的に拒み続けます。`--force` はありません。
+## まずこのファイルを確かめる
 
-## まずこれを確認
-
-ブートストラップは、あなたが信頼しなければならない唯一のものです。ですから、それが語ることを信じる前に、それ自体を確認してください。コマンド一つ、比較一回です。
+信頼しなければならないのはブートストラップだけです。ですから、それが言うことを信じる前に、それ自体を確かめてください。コマンド一つ、比較一つです。
 
 ```sh
 shasum -a 256 bootstrap/trusted-bootstrap.mjs
 # ee61a092b96b16ca1207d5a259a493b4ab3354d1aba52cc6536dd1a474dd8d1b
 ```
 
-この digest はここ、`SECURITY.md`、そして GitHub のリリースノートで公開されています。**計算した値が一致しなければ、そこで止めてください**——何も実行せず、「とりあえず試す」こともしないでください。一致しないことこそ、この仕組みが働いている証拠です。
+このダイジェストは三か所で公開されています。ここ、`SECURITY.md`、そして GitHub のリリースノートです。**計算した値が一致しなければ、そこで止めてください。** 何も実行せず、とりあえず試すこともしないでください。不一致は、この仕組みが働いている証拠です。
 
-## なぜこのプロジェクトが存在するのか
+## 何を解決するか
 
-リポジトリからエージェントのスキルやワークフローを導入することは、サプライチェーン上の判断であり、たいていは目隠しのまま行われます。
+スキルやワークフローがリポジトリから届きます。しかし、これから実行しようとしているバイト列が、誰かが実際にレビューしたバイト列であることを示すものは何もありません。
 
-- **リリースの同一性がない**。`git clone` が渡してくれるのは*なんらかの*コミットであって、レビューされ受理されたリリースに結びつけるものは何もありません。
-- **バイト列を縛るものが何もない**。静かに差し替えられたアーカイブや、脆弱な旧版へのダウングレードは、本物と見分けがつきません。個人発行者が自分で作った署名鍵はこれを解決しません——同じ未回答の問いを一つ左にずらすだけです。解決するのは、*ダウンロードとは独立に*入手できる digest です。
-- **信頼が、信頼すべき当の対象から自己起動している**。多くのインストーラーはアーカイブ*の中の*ファイルでそのアーカイブを検証します——それは何も証明しません。このリポジトリの初期候補は、もっと見栄えのする衣装でまさにその誤りを犯しました：ルート指紋がユーザーの手の届くどこにも公開されていない Ed25519 署名チェーンです。そのチェーンは取り繕われるのではなく削除され、いま読んでいるのが正直な版です。
+TCRN Workflow Helper は、その問題を一度の手作業の確認にまとめます。ブートストラップを確かめたあとは、どのリリースのバイト列を受け入れるかは、あなたの判断ではなく暗号によって決まります。`--force` はありません。その選択肢自体が存在しないからです。
 
-Helper は TCRN Workflow に対する答えです：単一ファイル・依存ゼロのブートストラップが、対応する二つのホスト（Codex または Claude Code）のいずれにおいても、**Workflow のコードが実行される前に、リリースのバイト列と同一性を完全に検証します**。いずれかの検査が失敗すれば、安定した機械可読の reason code とともに停止します。
-
-## あなたに向いているか
+## 誰のためのものか
 
 | | |
 | --- | --- |
-| ✅ **向いています** | 大切なマシンで他人のエージェントワークフローを動かそうとしていて、インストール対象自身が描いた緑のチェックマーク以上のものが欲しい場合。あるいは、あなたがそうしたワークフローを公開する側で、鍵基盤を自分で運用することなく、利用者にリリースを信じる*本当の*理由を与えたい場合。 |
-| ❌ **おそらく向きません** | 自分で書いたワークフローを、自分しか触らないマシンに入れる場合。バイト列の出所はすでに分かっており、これは答え済みの問いに手順を一つ足すだけです。 |
+| **向いている** | 自分のマシンで TCRN Workflow を動かし、コードが実行される前にバイト列を確認したい場合。一度の手作業の確認と引き換えに、以後の自動的な拒否を受け入れられる場合。 |
+| **向いていない** | リリースのバイト列の出所を保証する必要がない場合、あるいはダウンロードしたものをそのまま実行して構わない場合。 |
 
-## 何を強制するのか
+## 何を強制するか
 
 | 保証 | 仕組み |
 | --- | --- |
-| **再現可能な成果物** | スキルアーカイブ、ソースアーカイブ、SBOM は決定的です。クリーンクローンの CI リプレイがそれらをゼロから再構築し、digest がコミット済みのものと一致することを主張します。誰でもバイト列を再構築して確認できる——これが第一の信頼原理です。 |
-| **厳密なリリース同一性** | 受理された Workflow リリースは、リポジトリ URL、バージョン、commit、tree、**そして**注釈付きタグオブジェクトで固定され、実際の Git チェックアウトに対して検査されます。Git のオブジェクト id は内容ハッシュなので、この結びつきは自己認証的です。 |
-| **固定されたリリースバイト列** | 受理されたアーカイブと provenance の digest は `bootstrap/trusted-bootstrap.mjs` 自身にコンパイルされています。それ以外のアーカイブはフェイルクローズします（`IDENTITY_MISMATCH`）。ブートストラップ自身の SHA-256 こそ、上で手作業で確認するただ一つの値です。 |
-| **ロールバック防止** | GitHub のイミュータブルリリース：タグは移動できず、アセットは差し替えられません。古いリリースも固定 digest の比較で失敗します。各ブートストラップはちょうど一つのアーカイブしか受理しないからです。 |
-| **敵対的アーカイブへの安全性** | パストラバーサル、絶対パス、制御文字、非 NFC パス、重複およびケース衝突するパス、リンク、特殊ファイル、エントリ単位の digest 改竄、エントリ/バイト上限——すべて展開*前に*拒否されます。 |
-| **ライブホストの保護** | install、update、reinstall、uninstall は使い捨ての `tcrn-helper-test-*` ルート内**のみ**で動作します。`.claude` または `.codex` を含むパスは——大文字小文字を問わず——ファイルシステムを探る前に拒否されます（`LIVE_LOCATION_FORBIDDEN`）。 |
-| **トランザクショナルなライフサイクル** | すべての変更はステージングされジャーナル化されたトランザクションであり、そのクラッシュ復旧は本物の `SIGKILL` 注入で証明されています。失敗した操作はバイト単位で同一の以前の状態と、残渣ゼロを残します。 |
+| **再現可能な成果物** | スキルアーカイブ、ソースアーカイブ、SBOM は決定的です。クリーンクローンの CI がゼロから再構築し、ダイジェストがコミット済みのものと一致することを表明します。誰でもバイト列を再構築して確認できます。 |
+| **正確なリリース同一性** | 受理された Workflow リリースは、リポジトリ URL、バージョン、コミット、ツリー、注釈付きタグオブジェクトで固定され、実際の Git チェックアウトに対して検査されます。Git のオブジェクト id は内容ハッシュなので、この束縛は自己認証的です。 |
+| **固定されたリリースバイト** | 受理されたアーカイブと来歴のダイジェストはブートストラップ自身にコンパイルされています。それ以外のアーカイブは `IDENTITY_MISMATCH` で閉じて失敗します。 |
+| **ロールバック防止** | GitHub の不変リリース：タグは動かせず、資産は差し替えられません。古いリリースも固定ダイジェストの比較に通りません。ブートストラップはそれぞれ一つのアーカイブしか受け入れないからです。 |
+| **敵対的アーカイブへの防御** | パストラバーサル、絶対パス、制御文字、非 NFC パス、重複と大文字小文字の衝突、リンク、特殊ファイル、エントリ単位のダイジェスト改竄、エントリ数とバイト数の上限は、すべて展開の前に拒否されます。 |
+| **稼働環境の保護** | インストール、更新、再インストール、アンインストールは、使い捨ての `tcrn-helper-test-*` ルート内でのみ動きます。`.claude` や `.codex` を含むパスは、大文字小文字を問わず、ファイルシステムを調べる前に `LIVE_LOCATION_FORBIDDEN` で拒否されます。 |
+| **トランザクショナルなライフサイクル** | すべての変更は段階的でジャーナル付きのトランザクションで、クラッシュ復旧は実際の `SIGKILL` 注入で証明されています。失敗した操作はバイト単位で同一の元の状態を残し、残骸はゼロです。 |
 
-## クイックスタート
+## 3 分ではじめる
 
 ```sh
-# run the full proof suite (offline; expect 10-20 minutes — it includes real SIGKILL fault injection)
+# 完全な証明スイートを走らせる（オフライン。実際の SIGKILL 障害注入を含むため 10 分から 20 分）
 npm test
 
-# validate a release bundle before anything executes
+# 何かが実行される前にリリースバンドルを検証する
 node bootstrap/trusted-bootstrap.mjs validate \
   --archive <archive.json> --provenance <provenance.json> --state <state.json>
 
-# verify a copy of this Skill that a standard installer placed in ~/.claude/skills (read-only)
+# インストーラがスキルフォルダに置いた複製を読み取り専用で検証する
 node bootstrap/trusted-bootstrap.mjs verify-installed-copy \
-  --installed-dir <~/.claude/skills/tcrn-workflow-helper> \
+  --installed-dir <スキルフォルダ/tcrn-workflow-helper> \
   --provenance <provenance.json> --state <state.json> --marker <marker.json>
 
-# resolve exactly one approved Workflow checkout (rejects ambiguity, symlinks, dirty trees)
-node bootstrap/trusted-bootstrap.mjs resolve --root <workflow-checkout>
-
-# plan a network operation (prints a static plan; performs nothing)
-node bootstrap/trusted-bootstrap.mjs plan-network --approved true --operation clone
-
-# test-root-only lifecycle (explicit approval required)
-node bootstrap/trusted-bootstrap.mjs install --test-root <dir>/tcrn-helper-test-x \
-  --archive ... --provenance ... --state ... --approved true
+# 受理された Workflow チェックアウトをちょうど一つ解決する（曖昧さ、シンボリックリンク、汚れた作業ツリーは拒否）
+node bootstrap/trusted-bootstrap.mjs resolve --root <workflow-チェックアウト>
 ```
 
-成功時は正規化された JSON レシートが一つだけ出力されます（`TRUST_VALIDATED`、`ROOT_RESOLVED`、`NETWORK_PLAN_APPROVED`、`INSTALL_COMPLETED`、`UNINSTALL_COMPLETED`）。失敗時は安定した reason code が一つ。その中間はありません。
+成功すると正規形の JSON レシートが一つ出ます（`TRUST_VALIDATED`、`ROOT_RESOLVED`、`NETWORK_PLAN_APPROVED`、`INSTALL_COMPLETED`、`UNINSTALL_COMPLETED`）。失敗すると安定した理由コードが一つ出ます。その中間はありません。
 
-## 日々の使い方
+## 現在の状態
 
-上のコマンド群は信頼の機械装置です。日々の仕事であなたが自分で走らせることはほとんどありません——走らせるのはエージェントであり、このリポジトリの本当の製品は、エージェントに手渡される規律のほうです。
+- `1.0.1` は最初の受理済みリリースで、TCRN Workflow `v1.0.1` を正確に支援します。
+- ブートストラップは単一ファイルです。依存ゼロ、ネットワークなし、テレメトリなし。
+- ネットワーク操作は計画するだけで実行しません。`plan-network` は静的な計画を表示し、要求は一切送りません。
 
-1. **一度だけ配置する。** エージェント（または任意の標準的な skills インストーラ）に `skill/tcrn-workflow-helper/` をホストの skills フォルダへ置かせます——Claude Code なら `~/.claude/skills` かプロジェクトの `.claude/skills`。配置はただのファイルであり、そこからコードは一切実行されません。
-2. **一度だけ信頼する。** ダウンロードした `trusted-bootstrap.mjs` を上に公開された SHA-256 と照合し、配置済みコピーを読み取り専用で検査させます：`verify-installed-copy` は `INSTALLED_COPY_VALIDATED` を返すか、どこが違うかを正確に名指しします。以降のセッションはこの読み取り専用チェックを毎回再実行するため、古い・改変されたコピーは何かを導く前に捕まります。
-3. **セットアップは会話で。** エージェントに TCRN Workflow のセットアップを頼みます。Skill の初回ウィザードが残りの手順を——あなたにも——平易な言葉で案内します：承認された唯一の Workflow チェックアウトの解決（`ROOT_RESOLVED`）、ワークスペースの作成、バックアップ先と節目の選択。パスを打つ必要はありません。
-4. **あとは普通に働く。** Skill はエージェントに、どんな仕事の瞬間が記録に値するか——決定、分解、完了した成果物、争いのある「完了」——そしてどの動詞がそれを記録するかを教えます。貫かれる硬い規則は一つ：エージェントは提案するだけで、あなたの明示的な同意なしには何も書き込まれません。土台のループを自分の目で見たければ、Workflow リポジトリの `docs/tutorial/governed-loop.md` に、証明で釘付けされたチュートリアルがあります。
+## ドキュメント
 
-### Skills レジストリ経由のインストール
+アーキテクチャ、コマンドリファレンス、主張とゲート、既知の限界は、TCRN Workflow リポジトリの [wiki](https://github.com/tpmoonchefryan/tcrn-workflow/wiki) にあります。本リポジトリは独自の wiki を持ちません。
 
-公開ソースについて Owner の承認を得た後は、標準のコピー型インストーラを使います。
-
-```sh
-npx skills add tpmoonchefryan/tcrn-workflow-helper \
-  --skill tcrn-workflow-helper \
-  --global --agent claude-code --agent codex --copy --yes
-```
-
-インストーラは Skill ファイルを配置するだけで、`trusted-bootstrap.mjs` が信頼ルートを独立して検証します。スクラッチ検証では `<scratch-host>/.claude/skills` と `<scratch-host>/.agents/skills` を使い、シンボリックリンクのルートを検証済みコピーとは扱いません。
-
-あなたのものであり続けるのは、すべての決定。エンジンのものであり続けるのは、その強制。検証可能であり続けるのは、その全部です。
-
-## 信頼チェーンの組み立て方
-
-```mermaid
-flowchart TD
-    K[bootstrap/trusted-bootstrap.mjs<br/>verified against its published SHA-256] --> Verify
-    subgraph Verify["trusted-bootstrap.mjs — before any Workflow code runs"]
-        A[skill archive<br/>path-safe · digest-checked entries] --> D{archive SHA-256 equals the<br/>digest compiled into this bootstrap?}
-        D --> ID{checkout identity equals the pinned<br/>Workflow release?}
-    end
-    ID -->|yes| R[resolve one clean Workflow checkout<br/>remote · version · dirty-tree checks]
-    ID -->|no| F[fail closed:<br/>stable reason code]
-    R --> T[test-root-only transactional install]
-```
-
-## 率直な回答
-
-### なぜ依存ゼロなのか
-
-ブートストラップ*こそ*が信頼境界だからです。あらゆる依存は、検証が存在する前に走るコードになります——まさにこのプロジェクトが塞ぐ穴です。`bootstrap/trusted-bootstrap.mjs` は Node 組み込みのみを使い、リリーススクリプトも同じ規律を共有します。
-
-### では技術者でない利用者はどう導入するのか
-
-スキルの散文部分（`SKILL.md` と `references/`）は、標準的なスキルインストーラーによってライブホストのスキルフォルダ（たとえば `~/.claude/skills`）へ配布して構いません——その配置はただのファイルであり、そこからコードは走りません。信頼はその後に来ます：**独立に入手した**ブートストラップが——上で公開された SHA-256 と照合済みで——ディスク上のそのコピーを `verify-installed-copy` で読み取り専用に検証し、機械が確認できるマーカーを書きます。そのマーカーが存在して初めて、案内付きの**初回実行ウィザード**（`references/first-run-wizard.md`）が進み、すべての reason code を平易な言葉で説明しながらセットアップを導きます。配布は標準インストーラー、信頼は暗号学的ブートストラップ、というわけです。
-
-### なぜ helper 自身のコマンドは本物のスキル配置先にインストールできないのか
-
-helper の変更系コマンド（`install`/`update`/`reinstall`/`uninstall`）は検証とライフサイクルのみを担い、テストルート限定にとどまります。それらを通じたライブホストの有効化は、別途ゲートされたリリース判断です。ガードは構造的です：ライブ配置の検査はテストルートの検査よりも前、そしていかなるファイルシステム探査よりも前に走り、大文字小文字を畳んで比較し（大文字小文字を区別しないファイルシステム上の `.Claude` もすり抜けられません）、テストで覆われています。
-
-### 同一性の固定はなぜここまで厳しいのか——リポジトリ、バージョン、commit、tree、さらにタグオブジェクトまで
-
-各項目が別々の攻撃を潰します：リポジトリ URL は似せた remote を止め、バージョンは「リポジトリは正しいがリリースが違う」を止め、commit と tree はタグ名を保ったままの履歴改変を止め、タグオブジェクトは既存のタグ名を別のバイト列へ付け替えることを止めます。すべては実際の Git オブジェクト id で検証されます——内容ハッシュであり、自己認証的で、誰の署名にも依存しません。
-
-### テストスイートは実際に何を覆っているのか
-
-**87 テスト、すべてオフライン**（`node:net` を使う唯一の箇所は、特殊ファイル拒否のためのローカル unix ドメインソケットのフィクスチャです）：
-
-- トラストマトリクス：固定 digest の不一致、改竄された provenance、改竄されたアーカイブエントリ——それぞれが正確な reason code を主張します。
-- ライフサイクル：install / update / reinstall / uninstall を、バイト単位で同一のプライベートワークスペース保全、あらゆる有効な注入点での本物の `SIGKILL`（障害目録は実際の操作から発見され、手書きの一覧ではありません）、異なる PID の競合者によるロック競合、置換・外来ファイルの保全とともに。
-- インストール済みコピーの検証：標準インストーラーが配置したスキルディレクトリの読み取り専用再構築、改竄 → 正確な reason code、シンボリックリンクの拒否、state/marker パスに対するライブ配置の拒否。
-- ライブ配置ガード：ユーザーレベル、プロジェクトレベル、`.codex`、そして両ホスト形状におけるケース変種パス。
-- 再現性：`LANG`/`LC_ALL`/`TZ`/`umask` を撹乱した環境での決定的アーカイブ、コミット済み成果物とのバイト一致、そしてクリーンクローンによる完全な CI リプレイ（`npm run ci:replay`）。
-- 順序付け：digest を生むあらゆる走査はコードユニットで比較し、ロケールでは比較しません——ホストが別の言語を話すという理由でインストールが拒まれることは決してありません。
-
-### なぜ CI リプレイのレシートはコミット成果物でないのか
-
-検証の実行を証明するレシートが、それ自体は何によっても裏づけられていない、という状態を避けるためです。以前の候補版は `ci-replay-readback.json` をコミットしていましたが、レビューの結果、どのゲートにも束縛されておらず、公開履歴の外にあるコミットを参照していることが分かりました。現在これは再生成される CI 出力（gitignore 対象）であり、コミットされるアーティファクト集合は、すべてのゲートが相互に束縛するちょうど 5 ファイルです：`candidate-manifest.json`、`checksums.txt`、`sbom.json`、`skill-archive.json`、`source-archive.json`。
-
-## リポジトリ構成
-
-| パス | 内容 |
-| --- | --- |
-| `bootstrap/trusted-bootstrap.mjs` | 単一ファイルの信頼境界：アーカイブ検証、固定されたリリースバイト digest、同一性の固定、トランザクショナルなライフサイクル。**使用前に SHA-256 を帯域外で確認してください。** |
-| `skill/tcrn-workflow-helper/` | Agent Skill のペイロード：`SKILL.md`、トラストコントラクト、settings 聴取リファレンス、ホスト別メタデータ。このディレクトリこそ、固定アーカイブが含む中身です。 |
-| `manifests/` | バイト単位で複製された Workflow リリースの provenance。これは*自己申告のローカルビルド声明*（タイムスタンプはゼロ化）であって、ホスト型ビルダーの証明ではありません——digest で固定されているため差し替えは不可能で、第三者による確認可能性は再現ビルドの連鎖から来ます。 |
-| `artifacts/` | 五つの再現可能なリリース成果物。 |
-| `scripts/` | 決定的なアーカイブ/SBOM/チェックサム生成器、リリース検証器、CI リプレイ、プッシュゲート。 |
-| `test/` | 87 テストの証明スイート。 |
-| `RELEASING.md` | リリースのランブック——強制される順序、provenance の複製ルール、信頼面に触れるコミットのフルスイート規則。 |
-
-## 固定された Workflow リリースが統治するもの
-
-helper の役割は変わりません——動く前にリリースを証明すること。そして固定しているリリース、TCRN Workflow `v1.0.1` は、スキルのリファレンスがオペレーターに操作を教える統制された面を備えています。
-
-- **カンファレンスとゲートの統治**——熟議はイベントログに記録され（`conference-open` / `-append-position` / `-close` / `-cancel`）、未充足のゲートは、カンファレンス議事録の証拠が解決するまで作業項目が `done` に達するのを阻みます（`WORKSPACE_GATE_PENDING`、`WORKSPACE_GATE_EVIDENCE_UNRESOLVED`）。
-- **アクター署名**——有効化されると、すべての変更系動詞は行為したアクターを帰属させねばならず、欠落や不正形式ではフェイルクローズします（`WORKSPACE_ACTOR_REQUIRED`、`WORKSPACE_ACTOR_INVALID`）。
-- **アクティベーションのはしご**——統制面は単一のグローバルスイッチではなく、段階的で可逆な段を通じて有効化されます。統制レコードのないワークスペースの挙動は変わりません。
-- **バックアップとリストア**——密閉された、同一パスの全ツリースナップショットと、決定的なレシートおよびバイト単位の証明（`snapshot-manifest` / `snapshot-verify` → `SNAPSHOT_VERIFIED`）。`skill/tcrn-workflow-helper/references/backup-elicitation.md` を参照。
-- **統制された再配置**——ワークスペースは新しいパスや新しいマシンへ向かう、記録された経路を持ちます（`relocation-plan` / `-vacate` / `-adopt` / `-abort` / `-inspect`）。これらの動詞が動かすのは束縛であり、バイトはオペレーターが運び、イベントは一つも書き換えられません。フォークを防ぐのではなく、フォークを可視にします——頼る前にリリースの `docs/adr/0003-workspace-relocation.md` を読んでください。
-- **読めるイベントチェーン**——`event-list` はイベントをそのまま、ページ単位で返すため、`export` が拒否するほど大きなチェーンでも消費者が再導出できます。
-- **蒸留**——統制されたストア上での照合済み知識蒸留。
-
-これらの熟議を散文で引き起こすことは助言的であり、gate-v1 までは設計上信頼できません。スキルはそれを明示し、信頼できる強制は機械が確認できるゲートに委ねます。
-
-## ステータス、正直に
-
-- `1.0.1` は**プレリリース候補**で、TCRN Workflow `v1.0.1` をちょうど対象とします。
-- インストールと削除は両ホストとも**テストルート限定**であり、ライブの Codex / Claude Code ホスト対応は主張しません。
-- **自前で構築した Ed25519 署名チェーンは 2026-07-19 に削除されました**。それは一度も錨を持ちませんでした：依存していた digest と鍵指紋は、ユーザーが独立に入手できるどこにも公開されておらず、このリポジトリの外の誰に対しても何も証明しませんでした。それに代わるものは、より単純で正直です：*実際に公開されている*ブートストラップ digest、そのブートストラップにコンパイルされた受理リリース digest、GitHub のイミュータブルリリース、そして再現ビルドの連鎖です。
-- Claude Code 固有の三つの挙動（settings フラグメントの可逆性、ユーザー対プロジェクトの優先順位、CLAUDE.md フォールバック）は、このリポジトリではなく**固定された Workflow リリース**で実装・証明されています——正確な証拠対応は `skill/tcrn-workflow-helper/references/trust-contract.md` を参照してください。
-
-## サポートとセキュリティ
-
-- 質問 → GitHub Discussions ｜ 不具合 → Issues。
-- セキュリティ報告 → GitHub の非公開脆弱性報告（`SECURITY.md` を参照）。
+本リポジトリ内の文書：[コントリビュート](./CONTRIBUTING.md) · [セキュリティ](./SECURITY.md) · [行動規範](./CODE_OF_CONDUCT.md) · [リリース手順](./RELEASING.md)
 
 ## ライセンス
 
-[Apache-2.0](./LICENSE)
-
-## コミュニティ
-
-[行動規範](./CODE_OF_CONDUCT.md) · [コントリビューション](./CONTRIBUTING.md) · [セキュリティ](./SECURITY.md)
+Apache-2.0。[LICENSE](./LICENSE) と [NOTICE](./NOTICE) を参照してください。
