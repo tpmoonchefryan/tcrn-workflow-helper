@@ -58,7 +58,8 @@ The installer only places files. Independently verify the bootstrap, then run
 the first-run wizard. A symlink is not a valid installed-copy proof. The
 platform's disposable matrix uses `<scratch>/.claude/skills/` and
 `<scratch>/.agents/skills/`; those shapes are test evidence, not live-host
-activation. See `docs/skills-registry.md` for the release/publication boundary.
+activation. See this repository's `README.md` for the install command and the
+release/publication boundary.
 
 ## Steps
 

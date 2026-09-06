@@ -18,7 +18,7 @@ is the expected case.
 Supports TCRN Workflow `v1.0.1` on two Agent App hosts, Codex and Claude Code,
 with host-neutral protocols.
 
-Four facts about the pinned release, each of which contradicts guidance you may
+Six facts about the pinned release, each of which contradicts guidance you may
 meet elsewhere — including older copies of this Skill:
 
 - **The CLI is the only transport.** The engine ships no MCP server; guidance

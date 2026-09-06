@@ -90,7 +90,7 @@ evidence that justifies it. A point not in this list does not vary.
 | Instrument selection (`workflow-operations.md`) | `standard` gets a fixed session-start freshness step; `frontier` gets the principle | A stale index answered structural questions for five consecutive Initiatives without anyone noticing |
 
 Adding a row is a payload change like any other: it needs its own evidence, and it
-rides the next candidate batch (`RELEASING.md`, step 0).
+rides the next payload change to this Skill.
 
 ## Eliciting and changing it
 

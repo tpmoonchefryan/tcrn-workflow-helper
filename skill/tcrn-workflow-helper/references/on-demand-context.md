@@ -37,15 +37,18 @@ authority policy to that set, returning the admitted metadata-first references
 and candidate verbs — never by the router itself.
 
 One current-state fact belongs here rather than in a footnote: in the pinned
-release, `context-route` is one of the twelve governed verbs that require an
-out-of-band authority the shipped CLI cannot accept, so a well-formed shell
-invocation stops at `CONTEXT_AUTHORITY_REQUIRED` ("Out-of-band context authority
-is required"). Getting that far takes the right flags — `--request`,
-`--profile-receipt`, `--authority` — and this document used to describe a
-`--workspace` invocation, which never reaches the authority check at all: it
-refuses at `CLI_ARGUMENT_UNKNOWN`. The distinction matters because one refusal
-means "correct call, missing authority" and the other means "this call was never
-valid". Selection and reading (steps 1, 3 and 4 below) are unaffected. Until the
+release, `context-route` is the only verb in the 87-entry catalog whose
+out-of-band authority receipt is a required flag, and the shipped CLI cannot
+issue one, so a well-formed shell invocation stops at
+`CONTEXT_AUTHORITY_REQUIRED` ("Out-of-band context authority is required"). One
+other verb takes an authority receipt and takes it optionally — `gate-transition`
+accepts `--identity-authority` — so "the verbs that need an authority" is a list
+of two, not a category. Getting that far takes the right flags — `--request`,
+`--profile-receipt`, `--authority`, all three required — and this document used
+to describe a `--workspace` invocation, which never reaches the authority check
+at all: it refuses at `CLI_ARGUMENT_UNKNOWN`. The distinction matters because
+one refusal means "correct call, missing authority" and the other means "this
+call was never valid". Selection and reading (steps 1, 3 and 4 below) are unaffected. Until the
 authority-supply program lands, the budget discipline is carried by the per-verb
 windows and by this document — apply the same freshness and budget restraint
 yourself, and never treat the router's refusal as a check to work around.

@@ -1,5 +1,13 @@
 # Trusted Bootstrap Contract
 
+**Where the runtime lives now.** This repository ships the Skill payload only.
+`bootstrap/trusted-bootstrap.mjs`, the release artifacts, the provenance
+manifest and the build chain that produced them are no longer distributed from
+here; obtain the runtime from the pinned Workflow release through the
+out-of-band channel described below. Every path this document names under
+`bootstrap/`, `artifacts/` or `manifests/` describes that release, not a file
+you will find beside this page.
+
 `bootstrap/trusted-bootstrap.mjs` is the trust boundary. Its inputs are bounded
 regular single-link files containing fatal-UTF-8 canonical JSON: object keys are
 recursively sorted, arrays retain their mandated order, and every document ends
@@ -32,8 +40,8 @@ anchored out-of-band, through a repository-independent channel, for exactly ONE
 thing:
 
 1. **The trusted bootstrap runtime digest** — the SHA-256 of the exact
-   `bootstrap/trusted-bootstrap.mjs`, published in this repository's `README.md`
-   and `SECURITY.md` and in the GitHub release notes. The skills installer
+   `bootstrap/trusted-bootstrap.mjs`, published in the GitHub release notes for
+   the pinned release. The skills installer
    copies only the `skill/…` prose, NOT the runtime, so the user must obtain the
    runtime through the repo-independent channel and verify it against that
    published digest before it is trusted. The verified runtime — never the copied
@@ -161,8 +169,8 @@ build statement**, not a hosted-builder attestation: it declares build type
 `tcrn.workflow.local-unpublished-candidate.v1`, builder id
 `tcrn-workflow-local`, and zeroed timestamps. It is pinned by digest so it cannot
 be swapped, but it is not third-party evidence of how the release was built. The
-reproducible-build chain (`npm run ci:replay`) is what lets a third party check
-the build, by rebuilding the artifacts from a clean checkout and asserting digest
+reproducible-build chain published with the release is what lets a third party
+check the build, by rebuilding the artifacts from a clean checkout and asserting digest
 equality with the committed ones.
 
 ## Stable reason codes
