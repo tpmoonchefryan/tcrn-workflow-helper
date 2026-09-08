@@ -47,6 +47,11 @@ this document elicits are:
 - `retrieval.scopeExcerptBytes` — the default UTF-8 byte window for a
   `work-list` search excerpt. Default 512; the command's explicit
   `--scope-bytes` value wins;
+- `retrieval.tau` — the `recall` verb's absolute score floor, in bm25
+  units. Default `1`. Selection also applies a relative floor of 0.25 times
+  the top score in the same answer, and the effective floor is whichever of
+  the two is larger. Raising it filters out more low-score results; lowering
+  it admits more weakly-relevant ones;
 - `design.authority` — the URL of the documentation of the design system this
   workspace treats as its authority. Optional; a workspace with no design system
   leaves it unset. Purely declarative: the engine never fetches this address and
