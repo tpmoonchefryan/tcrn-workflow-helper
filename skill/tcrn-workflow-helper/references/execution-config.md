@@ -17,8 +17,8 @@ does not guess a model, contact a provider, or store credentials.
   through 32 and defaults to `8`.
 - `execution.maxDispatchDepth` is a governed string integer from 1 through 4
   and defaults to `1`.
-- `execution.personalessDispatch` is `allowed` or `forbidden`, with default
-  `allowed`.
+- The retired `execution.personalessDispatch` setting is not in the current
+  catalog. A caller that names it receives `SETTINGS_KEY_UNREGISTERED`.
 
 Read `settings-catalog` before changing one. A setting write is one event and
 must use a fresh `--expected-version`, an explicit `--at`, and an actor. A
@@ -34,7 +34,7 @@ no independent Owner transition.
 
 See `model-plan.md` for the record and four write verbs. The safe sequence is:
 
-1. read `settings-catalog` and `model-plan-list`;
+1. read `settings-catalog` and the current dispatch read surfaces;
 2. create or update the plan with `model-plan-set`;
 3. append persona assignments with `model-plan-assign` or remove one with
    `model-plan-unassign`;

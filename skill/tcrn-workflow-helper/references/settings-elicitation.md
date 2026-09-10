@@ -63,6 +63,23 @@ this document elicits are:
   guidance's `frontier` and `standard` choices recorded as user intent;
 - `workspace.generatedArtifactsPath` — Workspace-relative generated-artifacts
   path.
+- `artifact.language` — the language policy for new knowledge artifacts;
+  unset keeps the supplied text unchanged and configured values require a
+  supported translation path;
+- `injection.perPromptBytes` — the per-prompt metadata-only injection budget;
+  it is bounded by the engine and applies after the session budget;
+- `knowledge.articlesPath` — the workspace-relative directory for Markdown
+  knowledge articles;
+- `model.economyTier` — the legacy model economy-tier declaration, read from
+  the current catalog and never inferred by the helper;
+- `retrieval.promptLanguages` — the languages accepted by the retrieval
+  prompt surface;
+- `execution.dispatchClasses` — the behaviour bits for each dispatch class;
+- `execution.dispatchMode` — the selected dispatch mode, such as `frontier`
+  or `eco`;
+- `execution.dispatchModes` — the class-to-tier mappings for named modes;
+- `execution.dispatchTiers` — the per-host `flagship`, `main`, and `economy`
+  model/effort rows.
 
 The rest of the catalog is elicited elsewhere and is no less registered:
 `engine.requiredVersion` in `references/first-run-wizard.md` and
