@@ -484,6 +484,23 @@ authority substitute. The source-to-rule conservation registry is
 `tcrn-workflow/scripts/policy/story-rule-conservation.json`; every retained,
 stricter, or deferred rule needs a positive leg and a deletion red leg.
 
+The brief also names a task classification from the current dispatch
+configuration. A class whose `verify` behaviour bit is true requires a
+non-empty task-level verification command; `mustVerify` rejects dispatch when
+that command is absent. One dispatch carries one deliverable, and a one-command
+operation remains in the driving session. After the worker reports completion,
+`scripts/review-evidence.mjs` reads the exact chain work item and executes its
+`advisory:verify`; it stores the real runner output separately from before/after
+the engine test result's `tests` array count and `countCoverage` AST counts, then compares fixed base/head diff entries and
+untracked files with the file list declared before execution. Files outside that
+list are reported in `outOfBounds`, and caller-supplied pass or count claims are
+not accepted. The review result is the evidence reference on the `done`
+closeout. Until this rule takes effect, the existing per-item gate procedure
+remains in force; afterwards, task-level verify, proportional tests and review
+evidence close the task, while the full acceptance-gate roster runs after the
+final candidate commit and before external publication. A cadence change does
+not remove a gate.
+
 ## Before any mutation: three things the engine will insist on
 
 Every mutating verb requires an explicit workspace path, a strict RFC 3339

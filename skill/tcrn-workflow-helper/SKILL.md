@@ -257,6 +257,26 @@ scales with the driving agent's capability (the pinned release's README,
 "Driver assumptions"), and nothing here promises an offer fires at the right
 moment.
 
+## Dispatch readiness and review evidence
+
+Every dispatch brief names its task classification from the current dispatch
+configuration. When that class has `verify: true`, a non-empty task-level
+verification command is required; `mustVerify` refuses a brief that omits it.
+One brief carries one deliverable, and a one-command operation stays with the
+driving session. After completion, run
+`tcrn-workflow/scripts/review-evidence.mjs` against the exact work item: it
+executes the chain's `advisory:verify`, records the real test-run output apart
+from the engine test result's `tests` array count and before/after `countCoverage`
+AST counts, and measures fixed base/head diff
+entries plus untracked files against the file list declared before execution.
+The result's `outOfBounds` list is not cleared by changing the list afterwards,
+and caller-supplied passed or count values are not evidence. Attach the three
+rows to the `done` closeout. Until this rule takes effect, the existing per-item
+gate procedure remains in force; after it takes effect, task-level verify,
+risk-proportional tests and review evidence close tasks, while the full
+acceptance-gate roster runs after the final candidate commit and before external
+publication. A lower cadence never removes a gate.
+
 ## Trust Gate
 
 1. Read `references/trust-contract.md` before an installation or root decision.
