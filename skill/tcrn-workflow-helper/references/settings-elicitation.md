@@ -44,6 +44,11 @@ this document elicits are:
 - `knowledge.aggregateBytes` — the source-of-truth marker, metadata, and body
   byte ceiling for the knowledge store. Default 131,072; the engine canonical
   byte limit remains the upper bound and the derived index is not charged twice;
+- `fitness.windowDays` — the number of complete UTC observation days used by
+  `retire-proposals` and `retire-sweep`. Default 90; missing or invalid days
+  are incomplete evidence, never zero activity;
+- `fitness.minEvents` — the minimum observed telemetry events required before a
+  small card can be considered for automatic retirement. Default 1;
 - `retrieval.scopeExcerptBytes` — the default UTF-8 byte window for a
   `work-list` search excerpt. Default 512; the command's explicit
   `--scope-bytes` value wins;

@@ -373,6 +373,14 @@ lifecycle that makes knowledge *reachable* is three verbs, not one:
   act, not an age — re-verify the cards a closing Initiative touched, so the
   catalogue does not quietly empty itself over time.
 
+Fitness and retirement are separate from that explicit lifecycle:
+`retire-proposals` reads the configured complete-UTC-day window and emits
+base-digest-bound removal diffs; `retire-sweep` applies only the approved
+small-card rule. Articles, decision records, gates, and rule/verify artifacts
+are never deleted by the sweep. A `SessionStart` hook may run the same bounded
+sweep once per UTC day, and a missing or invalid observation day is not counted
+as zero activity.
+
 And a catalogue only earns its keep if it is **read at the right moment** — the
 store is silent between queries, so retrieval is something you do, not something
 that arrives. Query it *as the matching work begins*: decomposing an Initiative,

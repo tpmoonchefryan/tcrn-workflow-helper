@@ -76,6 +76,13 @@ exists.
 - `knowledge-body` — returns a single record's body **only when explicitly
   requested** for that one record.
 - `knowledge-freshness` — checks freshness metadata.
+- `retire-proposals` — read-only fitness output with complete-window counts,
+  pending retirement candidates, historical retirement records, and
+  base-digest-bound rule/verify removal diffs;
+- `retire-sweep` — runs the bounded automatic sweep. Only active default small
+  cards with a complete configured window and zero retrieval/reference counts
+  are retired; rules, gates, verify artifacts, articles, and decision records
+  remain proposals or observations.
 
 Where the chains are hosted by an AOS cockpit rather than sitting on the operator's
 machine, the same reads are forwarded through **AOS's** read face, whose tools are
