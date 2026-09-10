@@ -381,6 +381,27 @@ are never deleted by the sweep. A `SessionStart` hook may run the same bounded
 sweep once per UTC day, and a missing or invalid observation day is not counted
 as zero activity.
 
+TCRN-CROSS-INC-295 tightens the observation reader: an empty daily file or a
+parseable event stream does not prove continuous collection. A collector must
+provide an `observation-coverage` receipt after the covered UTC day ends, with
+`coveredFrom` and `coveredUntil` delimiting the full day, all four channels
+(`retrieval`, `reference`, `trigger`, `verify`), `collectionErrors: 0`,
+`availability: "available"`, and `recordCount`/`sourceDigest` matching the
+ordered non-coverage records in that day. Unknown/unavailable input, conflicting
+receipts, missing coverage or subsequent changes make the day unproven. The
+digest proves input consistency, not that a collector actually observed all
+activity: never manufacture receipts from file existence or backfill unobserved
+days. No production collector with this coverage guarantee has been verified
+by INC-295; absent its evidence the sweep must remain ineligible. Fixture
+receipts are not production evidence.
+
+Removal proposals use the artifact's own criterion: a rule with triggers or
+a verify/gate artifact with a recorded failure is retained. Arbitrary telemetry
+work ids are not removable artifacts. This fixes the proposal predicate without
+authorizing automatic rule or verify deletion, or changing the approved P1
+small-card policy. Live helper placement still requires its trust procedure;
+editing this source file is not an installation receipt.
+
 And a catalogue only earns its keep if it is **read at the right moment** — the
 store is silent between queries, so retrieval is something you do, not something
 that arrives. Query it *as the matching work begins*: decomposing an Initiative,
