@@ -277,6 +277,20 @@ risk-proportional tests and review evidence close tasks, while the full
 acceptance-gate roster runs after the final candidate commit and before external
 publication. A lower cadence never removes a gate.
 
+## Fitness and retirement
+
+Fitness is evidence about reuse, not a permission to delete arbitrary records. The
+engine's `fitness.windowDays` setting is the count of complete UTC observation days
+required by `retire-proposals` and `retire-sweep` (default 90), and
+`fitness.minEvents` is the minimum observed telemetry-event count for a small card
+(default 1). Missing or invalid days are incomplete evidence and never count as
+zero activity. `retire-proposals` is read-only and returns the window counts plus
+base-digest-bound removal diffs; `retire-sweep` applies only the adopted small-card
+rule. Articles, their index cards, decision records, gates, and rule/verify
+artifacts remain retained. Do not lower either setting to make a retirement
+eligible, and do not call a candidate archive or a local telemetry fixture
+production evidence.
+
 ## Trust Gate
 
 1. Read `references/trust-contract.md` before an installation or root decision.
