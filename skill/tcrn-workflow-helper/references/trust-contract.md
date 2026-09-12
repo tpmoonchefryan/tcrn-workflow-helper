@@ -18,9 +18,9 @@ non-canonical scalar encodings fail closed.
 
 The accepted Workflow release is repository
 `https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.0.2`,
-commit `c3d3c383d34888dc36a156d3f77921aac657d5cc`, tree
-`1d8734981d72fe5f51546a768c2eac736370cf76`, and tag object
-`128c0bf5356095275d1b90e7bc753a2d6b373159`.
+commit `cdecf628cc027a4a214427c4f0ead7b963d450b6`, tree
+`bc0750ad3a7c69eb8536e4bcdb1071e6eced8c87`, and tag object
+`d9face7655e74de66508fc46261d43086df7255a`.
 
 These four values are prose restating what `bootstrap/trusted-bootstrap.mjs`
 pins, and the bootstrap is the authority — a reader who finds them disagreeing
