@@ -530,6 +530,18 @@ evidence close the task, while the full acceptance-gate roster runs after the
 final candidate commit and before external publication. A cadence change does
 not remove a gate.
 
+Verification cadence is explicit and phase-scoped. A `development` plan selects
+local checks from changed files and dependencies and blocks unknown impact. A
+`candidate-final` or `publication` plan executes only the acceptance roster's
+top-level roots once; contained children are evidence rows, not duplicate
+processes. `merge-sensitive` rechecks roots whose inputs changed after merge.
+Reuse is allowed only for a successful terminal result whose source,
+environment, command/arguments, and baseline digests match; missing, changed,
+failed, or in-progress evidence is invalidated. The plan must expose
+`selected`, `executed`, `covered-by`, `reused`, `invalidated`, and `blocked`, and
+same-repository output work remains serial. Older briefs without this optional
+plan retain their existing compatibility verdict.
+
 ## Before any mutation: three things the engine will insist on
 
 Every mutating verb requires an explicit workspace path, a strict RFC 3339

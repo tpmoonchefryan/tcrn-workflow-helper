@@ -277,6 +277,23 @@ risk-proportional tests and review evidence close tasks, while the full
 acceptance-gate roster runs after the final candidate commit and before external
 publication. A lower cadence never removes a gate.
 
+### Verification cadence
+
+The execution brief may carry an optional `verificationPlan` with one of four
+phases: `development`, `candidate-final`, `publication`, or `merge-sensitive`.
+During development, choose local checks from the changed files and their known
+dependencies; unknown impact, an incomplete dependency, or a failed check is
+`blocked`, never a silent skip. The final and publication stages execute the
+acceptance roster's top-level roots once, while `contains` children are reported
+as `covered-by` and are not launched a second time. A merge-sensitive stage
+rechecks roots affected by the merge. Reuse requires matching source,
+environment, command/arguments, and baseline digests plus a successful terminal
+result; missing or changed inputs, failure, and in-progress results are
+`invalidated`. Plans expose `selected`, `executed`, `covered-by`, `reused`,
+`invalidated`, and `blocked`; same-repository output work is serial. This is a
+frequency rule only: it does not remove a gate or grant visual acceptance or
+publication authority.
+
 ## Fitness and retirement
 
 Fitness is evidence about reuse, not a permission to delete arbitrary records. The
