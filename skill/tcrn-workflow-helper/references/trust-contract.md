@@ -16,14 +16,16 @@ non-canonical scalar encodings fail closed.
 
 ## Candidate identity (unpublished)
 
-The current candidate targets repository
+The current provisional candidate targets repository
 `https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.0.2`,
 commit `6d1b6e1879ea220c1e685ea48961e7898cd251aa`, tree
 `a23997dcdc5266f082808996cb5eb525f1a0ee9c`, and the planned annotated-tag
 object `a080f31ec2f614585c8a9590385131e1483def73` for the recorded tag recipe.
 The tag is not created and the candidate is not published. Remote tag inspection
 identifies `v1.0.1` as the last published release; `v1.0.2` is the patch candidate
-for the complete unpublished delta.
+for the complete unpublished delta. This Pack-A version is provisional pending
+the full series freeze; if PACK-B identifies a new public capability, recompute
+the version as the last published version plus minor and zero patch.
 
 These values are candidate metadata, not a trust anchor. After publication, the
 bootstrap runtime must pin the same engine identity and its SHA-256 must be
