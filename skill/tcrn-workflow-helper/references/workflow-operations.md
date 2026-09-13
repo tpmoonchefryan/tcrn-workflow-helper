@@ -619,7 +619,7 @@ promised, so it no longer carries one.
 
 Older candidates described relocation ledger/version-lock behaviour and the
 `relocation-plan`, `relocation-vacate`, `relocation-adopt`,
-`relocation-abort`, and `relocation-inspect` verbs. The current `commands`
+`relocation-abort`, and `relocation-inspect` verbs (all retired). The current `commands`
 catalog contains none of them. Keep those names only when interpreting old
 receipts; do not invoke, recreate, or use them as a path-change procedure. A
 future engine may define a new governed route, but this helper cannot claim one.
