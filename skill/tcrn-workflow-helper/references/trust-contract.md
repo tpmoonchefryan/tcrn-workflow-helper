@@ -17,15 +17,15 @@ non-canonical scalar encodings fail closed.
 ## Candidate identity (unpublished)
 
 The current provisional candidate targets repository
-`https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.0.2`,
-commit `6d1b6e1879ea220c1e685ea48961e7898cd251aa`, tree
-`a23997dcdc5266f082808996cb5eb525f1a0ee9c`, and the planned annotated-tag
-object `a080f31ec2f614585c8a9590385131e1483def73` for the recorded tag recipe.
-The tag is not created and the candidate is not published. Remote tag inspection
-identifies `v1.0.1` as the last published release; `v1.0.2` is the patch candidate
-for the complete unpublished delta. This Pack-A version is provisional pending
-the full series freeze; if PACK-B identifies a new public capability, recompute
-the version as the last published version plus minor and zero patch.
+`https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.1.0`,
+commit `1bfb5216723283fcb680361d5128d937e8d25bf4`, tree
+`e380ea289e7aeaea39a984b62e0696bfc98db9ad`, and the planned annotated-tag
+object `f66af25b6666515b113a99290f40177a747398be` for the recorded tag recipe.
+The tag is not created and the candidate is not published. The companion Helper
+repository is version `v1.0.2`; its final commit, tree, tag recipe, archive, and
+all asset digests are fixed in the dual-version release manifest, not inferred
+from this prose. Remote tag inspection identifies `v1.0.1` as the last published
+release for both repositories.
 
 These values are candidate metadata, not a trust anchor. After publication, the
 bootstrap runtime must pin the same engine identity and its SHA-256 must be
@@ -105,10 +105,17 @@ those host surfaces is exercised here: each case family below names where its
 evidence actually lives, and nothing in this candidate involves a live `claude`
 or Codex App binary.
 
-**Proven by this candidate's own test suite** (`npm test`, offline by
-construction: neither the bootstrap nor the suite opens an internet socket —
-the only `node:net` use is a local unix-domain-socket file fixture for
-special-file rejection):
+**Proven by the Helper-local archive check**
+(`node skill/tcrn-workflow-helper/scripts/create-skill-archive.mjs --check`): the
+helper package has no `scripts` entry and therefore has no `npm test` command;
+`npm test` must not be presented as a Helper-produced proof. The archive check
+is deterministic and covers the Helper payload's sorted paths, per-file SHA-256
+digests, regular-file/symlink shape, and required `SKILL.md` entry. It does not
+claim Workflow runtime, host activation, or publication trust.
+
+**Proven by the Workflow candidate's own offline test surface** (the Workflow
+checkout's declared `pnpm test`/`pnpm verify:p1` commands; the Helper package is
+not the test runner):
 
 - archive safety: traversal, absolute paths, control characters, non-NFC
   paths, duplicate and case-colliding paths, links, special files, entry and
@@ -135,13 +142,14 @@ special-file rejection):
   disposable test root is the only write surface and that failed operations
   leave no residue.
 
-**Bound to the candidate Workflow source**: the Workflow repository at exactly
+**Bound to the Workflow candidate source**: the Workflow repository at exactly
 the candidate identity above proves the current `host-render` projection,
-user-owned hook preservation, the CLI catalog, and the pinned operator-authority
-grant through its own tests. Historical MCP, adapter, persona, and model-plan
-surfaces are not current operator paths. This helper candidate ships no live
-host configuration; projection writes execute only through the Workflow script
-after a user has approved the target and plan.
+user-owned hook preservation, the CLI catalog, and the operator-authority grant
+through its own tests. Historical MCP, adapter, persona, and model-plan surfaces
+are not current operator paths. This Helper candidate ships no live host
+configuration; projection writes execute only through the Workflow script after
+a user has approved the target and plan. These are candidate-local proofs, not
+published trust and not evidence that a host has approved or triggered them.
 
 **Not claimed by this candidate**: current exact live activation on either host,
 approved network clone/update execution (this candidate's `plan-network` emits a

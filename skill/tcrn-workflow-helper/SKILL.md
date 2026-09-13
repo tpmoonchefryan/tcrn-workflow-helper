@@ -15,10 +15,12 @@ below — Deliberation Triggers and Recording Triggers — instead describe when
 would otherwise decide. Reading them in a session that never installs anything
 is the expected case.
 
-Targets the TCRN Workflow `v1.0.2` candidate on two Agent App hosts, Codex and
-Claude Code, with host-neutral protocols. The remote `v1.0.1` tag is the last
-published release; this `v1.0.2` payload remains an unpublished candidate until
-an independently published bootstrap anchor exists.
+Targets the TCRN Workflow `v1.1.0` candidate on two Agent App hosts, Codex and
+Claude Code, with host-neutral protocols. The helper payload itself is `v1.0.2`:
+the remote `v1.0.1` tag is the last published release for both repositories, and
+the two version identities remain separate. The Workflow `v1.1.0` and Helper
+`v1.0.2` payloads remain unpublished candidates until their release and trust
+conditions are met.
 
 Current-surface facts about the candidate, each of which contradicts guidance you may
 meet elsewhere — including older copies of this Skill:
