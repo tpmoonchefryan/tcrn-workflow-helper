@@ -63,7 +63,7 @@ append-only event segments remain the authority. A legacy count-based segment
 is still readable. Disposable knowledge bodies and time-attestation receipts
 may be migrated to the same segmented form without changing their values.
 | Carry a work item's authoritative scope on the record | `work-annotate` | An external key is a compressed label; what it stands for lives in decomposition positions a later reader may never open. Writing the scope and its deciding minutes onto the record closes that gap — see "Scope on the record" below. |
-| Move a workspace to a different path, or onto a different machine | `relocation-plan` first, then `relocation-vacate` / `-adopt`, with `relocation-inspect` at both addresses afterwards | The engine binds five absolute roots, so copying a control tree elsewhere produces an unreadable tree rather than a second live authority. These verbs move the *binding*; the operator moves the bytes. Read the one-way doors below before proposing the first hop. |
+| Change a workspace path or host | No current relocation command; stop and obtain a separately supported engine operation and Owner decision | The engine binds five absolute roots. A copied or renamed control tree is not a moved authority, and the current catalog does not expose `relocation-*`. Historical relocation records are replay context only. |
 | Batch Initiatives into a release train and ship them together | `work-create --kind Release` + `work-annotate --sprint` | A sprint is a delivery batch, not a work-tree node. The Release record is the train; members attach by the member-side `advisory:sprint` tag — see "Sprint delivery batches" below. |
 
 ## Which Workspace answers which moment
@@ -85,12 +85,11 @@ partition if it is missing. Placement is permanent — there is no verb that mov
 a *record* from one partition to another — so a record put in the wrong partition
 to save a step stays there.
 
-State that limit precisely, because the pinned release makes it easy to overstate
-in the other direction. What the relocation family moves is a whole workspace's
-address: the same chain, the same records, at a new path or on a new machine. It
-moves no record between partitions and merges no two chains. So both sentences are
-true at once, and neither substitutes for the other: **a partition can change
-where it lives; a record cannot change which partition it belongs to.**
+State that limit precisely. The current engine has no workspace relocation
+family. A partition's record placement is permanent — no current verb moves a
+record between partitions — and a control-tree copy at another path does not
+change the workspace binding. Do not call a filesystem rename a relocation or
+invent a missing command.
 
 That first half has a second-order consequence for routing: the partition you are
 about to write to may not be on the machine you are on. Ask the copy that answers
@@ -616,28 +615,14 @@ promised, so it no longer carries one.
   exception.** `cat >`, `sed -i` or `rsync` over a remote shell is the same act
   with the same outcome; a write to a chain that lives on another machine must be
   performed by the engine *on that machine*.
-- **A workspace's first relocation version-locks it, and the ledger is a budget
-  rather than a log.** The hop is recorded in an append-only `relocations` field
-  of the workspace metadata, and its consequences are one-way in three separate
-  senses. First, any engine older than the release that introduced the field
-  refuses that workspace outright — not degraded reads, no reads — and that lands
-  at the vacate, so it applies even to a hop that was aborted and moved no byte.
-  Second, the ledger has a hard cap and no compaction verb, and each attempt
-  consumes entries whether or not bytes moved, so the number of moves a workspace
-  can ever make is finite; `relocation-plan` reports the remaining budget before
-  the ceremony starts, and it is worth reading out loud. Third, `relocation-abort`
-  after the destination has adopted is **not a rollback — it is a fork**, produced
-  with legal verbs and no damaged bytes, and the source cannot learn what the
-  destination did. Say all three before the first hop, not after it. Two operating
-  notes that follow: the two sides' ledger lengths are *expected* to differ,
-  because an adopt entry is written only into the destination copy and never sent
-  back, so never write a closing predicate that compares ledger lengths; and
-  closing any relocation work item requires running `relocation-inspect` at both
-  addresses the ledger names and comparing — it needs both trees at once, so no
-  single-machine verify can stand in for it. The authoritative account of what
-  this mechanism does *not* do is the pinned release's
-  `docs/adr/0003-workspace-relocation.md`, "The four ceilings"; read it rather
-  than a summary, and do not write a sentence claiming relocation prevents a fork.
+### Historical relocation family (retired)
+
+Older candidates described relocation ledger/version-lock behaviour and the
+`relocation-plan`, `relocation-vacate`, `relocation-adopt`,
+`relocation-abort`, and `relocation-inspect` verbs. The current `commands`
+catalog contains none of them. Keep those names only when interpreting old
+receipts; do not invoke, recreate, or use them as a path-change procedure. A
+future engine may define a new governed route, but this helper cannot claim one.
 
 ## Keeping the placed Skill current: distribution is signalled, not written
 
@@ -650,10 +635,9 @@ agent, at the user's direction and with the user's approval — the user's own
 host, the user's own yes.
 
 That leaves one job: making sure the placed copy has not fallen behind the
-release it should match. When a separately approved adapter activation announces
-a governed session (its persona-free SessionStart summary reaches the model's
-context), that announcement is the signal to run the check, not a substitute
-for it.
+release it should match. When a separately approved host projection or session
+announces a governed session, that announcement is the signal to run the check,
+not a substitute for it. The current catalog has no adapter activation verb.
 
 - **Each governed session, verify the placed copy against its pin.** Run the
   bootstrap's `verify-installed-copy` against the installed Skill directory.

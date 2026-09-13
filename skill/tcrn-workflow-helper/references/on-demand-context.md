@@ -37,7 +37,7 @@ authority policy to that set, returning the admitted metadata-first references
 and candidate verbs — never by the router itself.
 
 One current-state fact belongs here rather than in a footnote: in the pinned
-release, `context-route` is the only verb in the 87-entry catalog whose
+  release, `context-route` is the only verb in the current catalog whose
 out-of-band authority receipt is a required flag, and the shipped CLI cannot
 issue one, so a well-formed shell invocation stops at
 `CONTEXT_AUTHORITY_REQUIRED` ("Out-of-band context authority is required"). One

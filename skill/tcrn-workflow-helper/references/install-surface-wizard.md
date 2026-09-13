@@ -82,7 +82,7 @@ change it because a later prompt happens to contain another verb.
    Workflow identity and the helper copy with verify-installed-copy.
 2. Discover the actual platform root and existing .tcrn-workspace marker.
    Show the complete plan before writing: platform container, every project,
-   the two host adapters, machine/user guidance, the shared trust root, and
+   the two host projections, machine/user guidance, the shared trust root, and
    every partition attestation destination. A platform root is an input, never
    a constant embedded in the doctor or the language table.
 3. Read the engine's install-manifest surface. Present each item's layer,
@@ -92,22 +92,26 @@ change it because a later prompt happens to contain another verb.
 4. Ask for one confirmation covering the displayed batch. On a no or an
    ambiguous reply, stop with no write. On yes, retain the operation phrase,
    the plan, and the user's language in the local acceptance packet.
-5. For container items, use the canonical engine adapter commands and their read
-   APIs. Materialize both Claude and Codex adapters for every listed root, even
-   when only one host is currently open. Never hand-write an adapter bundle or a
-   settings fragment. Project items are **not** materialized: since Workflow
-   `v0.11.17` the harness is built at the container root and nowhere else, and
-   the manifest's remaining project entries are `host-self` — a repository that
-   commits its own file. Declared so a doctor leg can tell an accounted-for
-   directory from a stray, never so the helper writes into a project root.
+5. Treat the manifest's `engine-adapter` writer value as declarative inventory,
+   not as an executable command. The current catalog has no `adapter-*` verbs;
+   do not invoke or emulate that retired family, and never hand-write an adapter
+   bundle or settings fragment. For a host projection, use the engine checkout's
+   `scripts/host-render.mjs` with an explicit `--workspace`, `--host` (`claude-code`
+   or `codex`), and `--root`; run `--plan-only` before any approved write. Project
+   items are **not** materialized: the manifest's remaining project entries are
+   `host-self` — a repository that commits its own file. They are declared so a
+   doctor leg can tell an accounted-for directory from a stray, never so the
+   helper writes into a project root.
 6. For machine and user items, present precise host-owned commands and explain
    their scope. The helper does not impersonate host approval and does not
    claim that a receipt proves activation or a real trigger. Any user-level
    write must be separately authorized by the platform handover.
-7. After each write, read the canonical receipt back and run the platform
-   doctor with its required --platform-root argument. The doctor must consume
-   the same install manifest and must use synthetic temporary fixtures for its
-   red-leg tests; CI tests must never depend on a personal machine directory.
+7. After each engine or host-render write, read the canonical receipt or
+   host-render readback and run the platform doctor with its required
+   `--platform-root` argument. The doctor must consume the same install manifest
+   and must use synthetic temporary fixtures for its red-leg tests; CI tests must
+   never depend on a personal machine directory. A host-render receipt proves
+   only the projection write and readback, not host approval or a real trigger.
 8. Separate the evidence levels in the final report: engine materialization,
    host configuration, host approval, real runtime trigger, Owner acceptance,
    and outward publication. Record unresolved configuration differences as

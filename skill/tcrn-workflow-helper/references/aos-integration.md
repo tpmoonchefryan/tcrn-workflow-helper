@@ -54,65 +54,25 @@ refresh, and the cockpit is a reader — the chain remains the record.
 
 ## Situation B — the user has been working locally and now wants AOS
 
-Most of the help here is still "this is not the migration you are imagining".
-But the flat form of that sentence was wrong, and the correction is worth more
-than the original claim was.
+The current engine binds five absolute roots and its catalog has no
+`relocation-*` family. A byte-identical copy of a control tree at another path is
+not a second live authority and is rejected by the engine. The helper therefore
+does not teach a workspace move: do not hand-edit `roots`, copy a control tree to
+another address, or call a directory rename a relocation. A path change needs a
+separately supported engine operation and Owner decision.
 
-### The doctrine this file used to state, and its correction
+### Historical relocation doctrine (retired)
 
-**What stood here:** *the chains do not move; nothing is migrated, because AOS
-never holds the record.*
+Older Workflow candidates documented `relocation-plan`, `relocation-vacate`,
+`relocation-adopt`, `relocation-abort`, and `relocation-inspect`. Those names and
+their one-way properties are retained only to explain old receipts or replay
+history. They are absent from the current `commands` catalog and must not be
+invoked by an operator or recreated by this helper.
 
-**Why that was right when it was written.** At the releases it was written
-against, the engine bound five absolute roots and shipped no verb that could
-rebind them. A byte-identical copy of a control tree at any other path was
-refused by every read verb, so an operator who had to move a workspace had
-exactly one option — hand-editing `roots` — which nothing recorded and no
-runbook could honestly recommend. "The chains do not move" was an accurate
-description of the engine's capability, and the advice built on it (point the
-cockpit at the workspace where it already sits) was the right advice.
-
-**What changed.** The pinned release ships a governed relocation family:
-`relocation-plan`, `relocation-vacate`, `relocation-adopt`, `relocation-abort`
-and `relocation-inspect`. A workspace now has a recorded route to a new path or a
-new machine. The old sentence has to be replaced rather than softened:
-
-1. **Chains can move — but only through those verbs, and the engine moves with
-   them.** The five absolute roots are not an obstacle to work around; they are
-   the reason an unauthorized copy is inert instead of a second live authority.
-   There is no supported arrangement in which the chain sits on one host and the
-   engine that writes it runs on another.
-2. **Relocation moves the BINDING, never the bytes.** No event is rewritten and
-   no storage version changes. The operator copies the tree with ordinary OS tools
-   between a `vacate` and an `adopt` — the engine deliberately has no copy path —
-   and the event stream after a hop is byte-for-byte the stream before it. Nothing
-   about a chain's content is a migration; only its address changed.
-3. **The mechanism cannot prevent a fork. It can only make one legible.** Before
-   promising anything about this family, read the pinned release's
-   `docs/adr/0003-workspace-relocation.md`, and read its "four ceilings" section
-   rather than a summary of it. The four: it is *authorization, not
-   authentication*, so nothing proves who ran the verb; the ledger lives in the
-   one control-tree file the event hash chain does not cover and can be deleted,
-   so detection is the counterparty's capability and never the engine's; the
-   abort-stage permit is a review device rather than a barrier, because whoever
-   can mint one permit can mint the others; and a permit is a predicate over the
-   bytes presented at a path rather than a token with a spend record, so one adopt
-   permit admits the same tree on N hosts and the mandated two-sided compare is
-   green at every one of them. Every sentence of the form "relocation prevents X"
-   written about this family so far has been false. Do not write the next one.
-4. **"AOS never holds the record" is no longer true as stated — and what made it
-   untrue is not that AOS started holding records.** A cockpit host can now be the
-   machine a chain physically lives on. What holds the chain there is the *engine*,
-   in its own control tree, at its own roots; AOS's database remains a disposable
-   projection plus its own annotations, exactly as before. So the distinction the
-   old sentence was reaching for survives, and should be stated the way it is
-   actually true: **the cockpit is never the record, and the host it runs on may
-   nevertheless be where the record lives.**
-
-What has *not* changed is the thing users most often ask for: there is still no
-export, no import, no conversion, and no moment when governance data exists in two
-forms. If a conversation is heading toward "migrate my Workflow data into AOS",
-stop it there — that operation does not exist and is not what a relocation is.
+What remains true for AOS is the store boundary: the cockpit is never the
+Workflow record. A cockpit host may run an engine that owns a chain there, but
+AOS's database remains a disposable projection plus its own annotations. There
+is no Workflow-to-AOS export, import, or conversion operation.
 
 **What genuinely changes** is worth stating plainly, because two of the three are
 new obligations:
@@ -121,9 +81,9 @@ new obligations:
    annotations — assignee, labels, comments, free relations — that no chain
    holds. That data cannot be rebuilt from anything. The Workspace backup floor
    set in step 7 does not cover it; AOS carries its own export, and the user
-   should know they now have two things to back up rather than one. If the chain
-   was relocated onto the cockpit's own host, both of those things now sit on one
-   machine, so a backup taken there is a copy and not an off-site copy — see
+   should know they now have two things to back up rather than one. If a chain is
+   independently hosted on the cockpit's machine, both of those things sit on
+   one machine, so a backup taken there is a copy and not an off-site copy — see
    `backup-elicitation.md`, "When the workspace does not live on this machine".
 2. **A read becomes cheap enough to be habitual.** Before a cockpit, answering
    "what is waiting on me across four projects" meant running several list verbs
@@ -167,9 +127,9 @@ Answer from their situation, not from enthusiasm:
 
 ## The two interfaces, when the chain is on the cockpit's host
 
-Once a chain has been relocated onto the host that runs the cockpit, an operator
-working from another machine has two ways in, and confusing them is the expensive
-mistake:
+When a chain is independently configured on the host that runs the cockpit, an
+operator working from another machine has two ways in. Confusing them makes the
+wrong system appear authoritative:
 
 | Interface | Runs where | Reached how | Good for |
 | --- | --- | --- | --- |
@@ -179,9 +139,9 @@ mistake:
 **These are two interfaces onto one chain, not two copies of the truth.** Both end
 at the same event log in the same control tree. The cockpit can display nothing
 the governed session did not write, and the governed session needs nothing the
-cockpit holds. Choosing between them is choosing by act — reads on the cheap
-interface, writes on the ceremony one — and never a choice about which store is
-authoritative, because there is only one.
+cockpit holds. Reads use the cockpit when available; writes use the engine on the
+host that owns the roots. The current engine has no relocation route between
+hosts.
 
 Three things not to do, each of which looks reasonable at the moment it is
 proposed:

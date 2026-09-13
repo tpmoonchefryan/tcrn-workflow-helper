@@ -21,7 +21,7 @@ Read the current catalog and dispatch data before proposing a change:
 - `dispatch-classes-list --workspace <workspace>` returns each class's
   `dispatch` and `verify` behaviour bits;
 - `dispatch-mode-list --workspace <workspace>` returns named mappings and, with
-  `--host <host> --class <class>`, the resolved tier value.
+  `--host <claude-code|codex> --class <class>`, the resolved tier value.
 
 The host names accepted by the current renderer are `claude-code` and
 `codex`. Unknown hosts may remain in the stored open text configuration, but
@@ -37,8 +37,8 @@ shape; the helper does not maintain a second enum table.
 
 ## Host projection
 
-`node scripts/host-render.mjs --workspace <workspace> --host <host> --root
-<host-root>` is the sole renderer/writer. It creates a plan from the live
+`node scripts/host-render.mjs --workspace <workspace> --host <claude-code|codex>
+--root <host-root>` is the sole renderer/writer. It creates a plan from the live
 dispatch settings, backs up changed files, checks that each target did not
 change after planning, writes atomically, and reads every changed file back.
 `--plan-only` shows the managed paths and digests without writing.

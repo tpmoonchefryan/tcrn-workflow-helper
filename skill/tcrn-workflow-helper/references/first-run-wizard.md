@@ -112,9 +112,10 @@ release/publication boundary.
    budget, its own lease; all may share one framework checkout and the one
    `release-trust/` root. State one consequence before the first `init`:
    partition names become paths the control tree binds absolutely, and a
-   restore targets the original path — a later change of address is a
-   recorded relocation ceremony, never a rename — so choose names that
-   will not need renaming.
+   restore targets the original path. The current CLI has no relocation family,
+   so do not copy or rename a workspace to change its address; obtain a
+   separately supported engine operation and Owner decision before attempting
+   that change. Choose names that will not need renaming.
 
    ### Platform workspace initialization: one plan, one confirmation
 
@@ -140,14 +141,18 @@ release/publication boundary.
       for Claude Code and Codex.
    4. Ask for one explicit yes covering this whole displayed batch. Do not
       split the confirmation into hidden follow-up writes. After yes, execute
-      the existing public engine and adapter verbs in order, retaining every
-      receipt and readback; a refusal stops that step and does not get papered
-      over by a file copy.
+      the current public engine verbs in order, and use the engine's
+      `install-manifest` only as the installation inventory. The catalog has no
+      current `adapter-*` verbs: do not invoke or emulate them. For host-owned
+      projection, use `scripts/host-render.mjs` with an explicit root and retain
+      its plan, receipt, and readback; a refusal stops that step and does not get
+      papered over by a file copy.
 
    The preview must call out the two one-way consequences in plain language:
    enabling attestations is irreversible (there is no disable path), and a
-   partition's derived key prefix is permanent for that partition's records. A
-   future path change is a relocation ceremony, not a directory rename.
+   partition's derived key prefix is permanent for that partition's records. The
+   current CLI does not support a path change; a directory rename or copied
+   control tree is not a relocation.
 
    The settings part of the preview is live rather than hard-coded. Read
    `settings-catalog`, show each current/default value, and show the exact
@@ -157,21 +162,21 @@ release/publication boundary.
    no setting changes occur until the single batch confirmation.
 
    The host-wiring rule has one standing exception, and it is stated here rather than
-discovered: **the stop-pact `Stop` hook is registered by hand.** The adapter family
-cannot write user-level configuration — both of its layers refuse that scope — so no
-adapter verb can place or restore that hook. An agent that removes it (or a machine
-rebuilt from scratch) has no supported route back, and the honest instruction is to
-write it into the project's own settings and say so, not to pretend a verb did it.
-Every other part of host wiring goes through the adapter verbs as described.
+discovered: **the stop-pact `Stop` hook is registered by hand.** The current CLI
+has no adapter family, so no adapter verb can place or restore that hook. Use
+`scripts/host-render.mjs` for the supported host projection, with the host's own
+approval surface, and state any hand-registered hook explicitly. Never pretend
+that an install-manifest entry or a host-render receipt proves host approval or a
+real trigger.
 
 The `AGENTS.md` seed is the operating-contract teaching template: it points
    to the prose → settings → template → engine route, names the platform
    boundary, and leaves authority-bearing decisions to the governed chain. It is
-   ordinary prose, not a control-tree file. The host-wiring step likewise uses
-   the existing adapter installation and activation verbs with the host's
-   own approval surface; it must not hand-edit `~/.claude/settings.json`, Codex
-   configuration, or hooks as a shortcut. Installation, host approval, and a
-   real host trigger remain separate evidence claims.
+   ordinary prose, not a control-tree file. The host-wiring step uses the current
+   `host-render` script with the host's own approval surface; it must not hand-edit
+   `~/.claude/settings.json`, Codex configuration, or hooks as a shortcut.
+   Installation, host approval, and a real host trigger remain separate evidence
+   claims.
 
    Before the knowledge store's first initialization, explain
    `KNOWLEDGE_DISPOSABLE_ACK_REQUIRED` in one line — the store is a derived
@@ -188,9 +193,10 @@ The `AGENTS.md` seed is the operating-contract teaching template: it points
    runbook's prose-only retention count (rotation deletes oldest-first, runs
    only after a new snapshot verifies, and always names what it deleted), and state the restore
    boundary before it matters: a restore targets the original path, and the
-   control tree restores whole or not at all. Do not say a workspace can
-   never move — the pinned release has a governed route for that, and it is a
-   separate ceremony rather than a restore performed elsewhere.
+   control tree restores whole or not at all. The current CLI has no relocation
+   family; do not present a directory copy or rename as a supported workspace
+   move. A different address requires a separately supported engine operation
+   and Owner decision.
    Also show the storage choices: new event data uses byte-bounded
    `events/*.ndjson` segments and sidecars, replay checkpoints live under
    `snapshots/`, and disposable knowledge bodies can use segmented storage
@@ -246,11 +252,10 @@ The `AGENTS.md` seed is the operating-contract teaching template: it points
 
 ## After setup — expectations to state plainly
 
-- **No automatic session context by default.** The pinned release ships
-  reversible project-local activation for both hosts, but it stays inert until
-  its exact definitions, pins, and grant are separately authorized (and Codex
-  also requires host approval). If activated, its one fail-open SessionStart
-  summary is persona-free; installation alone never claims host activation.
+- **No automatic session context by default.** The candidate exposes host
+  projection through `scripts/host-render.mjs`; it stays inert until its exact
+  plan, target, and host approval are separately authorized. Installation alone
+  never claims host activation or a real host trigger.
 - **Upgrades.** A new release means a new independently published bootstrap
   digest: verify the new anchor, re-verify the placed copy, check out the new
   tag. A framework upgrade never touches Workspace bytes.
@@ -267,11 +272,9 @@ Two questions come up and both have a wrong default. "I already have AOS running
 and "I have been working locally and now want AOS" are answered in
 `aos-integration.md` — read it then rather than improvising. The short form of
 both: AOS never holds the record, and its arrival adds a second store that is
-precious in a way a projection is not. This sentence used to open with "chains
-never move", which the relocation family retired — a workspace *can* be moved,
-through governed verbs, and the corrected account is in `aos-integration.md`.
-What has not changed is the half that matters here: moving a chain changes its
-address, never who holds the record.
+precious in a way a projection is not. The current engine has no relocation
+family, so do not claim that a workspace can move through a helper or a copied
+control tree; a path change is a separate unsupported/Owner-boundary question.
 
 ## Rules the agent must not break
 

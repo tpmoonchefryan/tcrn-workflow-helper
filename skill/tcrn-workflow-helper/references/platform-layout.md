@@ -116,14 +116,16 @@ Before the first write, the wizard displays one complete plan containing:
   values for backup cadence/destination, driver profile, and any engine version
   declaration;
 - the `AGENTS.md` operating-contract seed; and
-- the host-wiring plan for Claude Code and Codex, including MCP entries and the
-  adapter-managed hook baseline.
+- the host-wiring plan for Claude Code and Codex, including the current
+  `host-render` projection and any separately approved host-owned hook steps.
 
 The user gives one explicit yes for this batch. Attestation selection is a
 one-way gate: once actor attestation is enabled, it cannot be disabled. The
-wizard says this before asking for the yes. It also says that a path change is
-a relocation ceremony, not a filesystem rename, and that a host installation
-receipt is not proof of host approval or a real trigger.
+wizard says this before asking for the yes. The current CLI has no relocation
+family, so a path change is not achieved by a filesystem rename or copied
+control tree; obtain a separately supported engine operation and Owner decision.
+A host installation or host-render receipt is not proof of host approval or a
+real trigger.
 
 `AGENTS.md` is ordinary prose. The seed teaches the prose → settings →
 template → engine route and the platform boundary; it never grants authority
@@ -132,12 +134,14 @@ and never contains private workspace data.
 ## Host wiring boundary
 
 After the platform chain and settings are initialized, host wiring is a
-separate, approved step. The agent uses the existing public adapter verbs to
-prepare and install the MCP entries and the managed hook baseline for each
-host: generate a fragment with `adapter-generate`, assess it with
-`adapter-activation-assess`, install it with `adapter-install`, and only then
-use `adapter-activate` when the host's approval is present. The fragment covers
-the Claude Code and Codex MCP entries plus the adapter-managed hooks baseline.
-It does not hand-edit user-level Claude or Codex configuration, and it does not
-claim activation merely because an installation receipt exists. Host approval,
-live trigger evidence, and governed chain records remain separate readbacks.
+separate, approved step. The `install-manifest` output is an inventory; its
+`engine-adapter` writer label does not expose a current `adapter-*` command.
+For model/effort and harness-hook projection, run the Workflow checkout's
+`scripts/host-render.mjs` with `--workspace`, `--host` (`claude-code` or
+`codex`), and `--root`; inspect `--plan-only` before an approved write. The
+renderer preserves user-owned hooks and writes only its declared fields. The
+stop-pact hook remains a separately registered, user-owned step. Never hand-edit
+user-level Claude or Codex configuration as a shortcut, and do not claim
+activation merely because a host-render or installation receipt exists. Host
+approval, live trigger evidence, and governed chain records remain separate
+readbacks.

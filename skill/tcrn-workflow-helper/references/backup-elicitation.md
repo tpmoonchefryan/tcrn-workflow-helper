@@ -34,26 +34,10 @@ are first-class — always double-quote them.
    unchanged and is not a limitation to route around: the engine binds five
    absolute roots, so a restored tree at any other path is refused by every read
    verb rather than quietly adopted. Restore in place at the original `<root>`.
-
-   **Half of this doctrine is retired, and the half that is retired is the
-   interesting one.** It used to continue: *root rebind (a new path or machine) has
-   no apply path in this release.* That was true of the releases it was written
-   against; it is not true of the pinned one, which ships `relocation-plan`,
-   `relocation-vacate`, `relocation-adopt`, `relocation-abort` and
-   `relocation-inspect`. What survives is the same-path rule for a restore. What is
-   withdrawn is the claim of impossibility — and with it the habit of telling an
-   operator that a workspace can never change machines.
-
-   Keep the two apart when explaining them, because they are different operations
-   with different receipts, different authorities and different failure modes:
-   **a restore puts a verified copy back where it came from; a relocation is a
-   separate recorded ceremony that changes where a workspace is bound.** Never
-   present relocation as "restoring to a new machine". If a workspace legitimately
-   has to move, restore it at its original path first, prove it, and relocate from
-   there. Before proposing a first hop, state the one-way properties the operator
-   has to know — they are in `references/workflow-operations.md` under one-way
-   doors, and the authoritative account is the pinned release's
-   `docs/adr/0003-workspace-relocation.md`.
+   The current CLI has no relocation family. A copied or renamed control tree is
+   not a moved workspace; obtain a separately supported engine operation and
+   Owner decision before changing an address. Historical relocation names in
+   older records are compatibility data only.
 2. **Lockstep-only.** Snapshot and restore the WHOLE `.tcrn-workflow` control
    tree — both the workspace event log and the knowledge store together. A
    partial restore bricks the store and is unrecoverable by design.
@@ -123,9 +107,9 @@ are first-class — always double-quote them.
 
 1. **Quiesce.** End every agent session. Never restore over a live workspace.
 2. **Copy the tree back to the ORIGINAL `<root>`** (whole control tree, both
-   stores together — never a partial restore). If the workspace is meant to end
-   up somewhere else, this step does not change: restore here, then run the
-   relocation ceremony as its own operation.
+   stores together — never a partial restore). A different destination is not a
+   supported restore target in the current CLI; do not copy the control tree
+   there and call it a move.
 3. **Prove the restored tree** with `snapshot-verify --root "<root>" --manifest
    "<receipt>"`; expect `SNAPSHOT_VERIFIED`.
 4. **Validate both stores** (`validate` and `knowledge-validate`) before agents
@@ -183,10 +167,11 @@ consequences to state before the first off-host backup:
   credentials question rather than a preference: the end that can authenticate to
   the other is the end that starts it. Deciding that from convenience produces a
   configuration that cannot actually run.
-- **A cadence pointed at a local path keeps succeeding after the chain moves, and
-  covers nothing.** It finds no workspace, reports no error, and the silence reads
-  as health. A backup check whose subject may have moved has to assert what it
-  found, not merely that it finished.
+- **A cadence pointed at the wrong local path can succeed while covering
+  nothing.** It finds no workspace, reports no error, and the silence reads as
+  health. A backup check whose subject is on another host has to query that host
+  and assert what it found, not merely that it finished. The current CLI offers
+  no relocation command to repair a path mismatch.
 
 ## Never a backup destination
 

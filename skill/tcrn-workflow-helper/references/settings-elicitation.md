@@ -40,7 +40,7 @@ this document elicits are:
   snapshots. Default 512; a damaged replay snapshot is a hard read failure,
   never a silent full-replay fallback;
 - `injection.budgetBytes` — the default UTF-8 byte budget for the metadata-only
-  knowledge injection surface. Default 32,768; an explicit call budget wins;
+  knowledge injection surface. Default 131,072; an explicit call budget wins;
 - `knowledge.aggregateBytes` — the source-of-truth marker, metadata, and body
   byte ceiling for the knowledge store. Default 131,072; the engine canonical
   byte limit remains the upper bound and the derived index is not charged twice;

@@ -1,51 +1,99 @@
 # Execution settings and host dispatch policy
 
-The execution surface is now split by authority. Workspace policy remains in
-the settings catalog; a subagent model plan is a governed complex setting value
-that hosts read before dispatch. The engine records names and assignments but
-does not guess a model, contact a provider, or store credentials.
+The current execution surface is the engine's dispatch configuration plus the
+separate `host-render` projection script. The engine records policy, class
+behaviour, named tier mappings, and per-host model/effort values; it does not
+contact a provider, infer a model, or store credentials.
 
-## Closed policy settings
+## Current policy settings
 
-- `execution.subagentPolicy` is `allowed`, `review-only`, or `forbidden`, with
-  default `allowed`. It is declarative: hosts honour it and the engine keeps
-  the exact value.
-- `execution.independenceFloor` is `none`, `verification`,
-  `verification-and-risk`, or `all`, with default `none`. Where it covers a
-  conference type, `conference-close` requires `--execution-form independent`.
-- `execution.maxConcurrentSubagents` is a governed string integer from 1
-  through 32 and defaults to `8`.
-- `execution.maxDispatchDepth` is a governed string integer from 1 through 4
-  and defaults to `1`.
-- The retired `execution.personalessDispatch` setting is not in the current
-  catalog. A caller that names it receives `SETTINGS_KEY_UNREGISTERED`.
+These registered settings are read from `settings-catalog` and written through
+the normal `settings-set` ceremony with a fresh expected version, explicit
+timestamp, and actor:
 
-Read `settings-catalog` before changing one. A setting write is one event and
-must use a fresh `--expected-version`, an explicit `--at`, and an actor. A
-failed value is a named engine refusal; the helper must not invent a fallback.
+- `execution.subagentPolicy`: `allowed`, `review-only`, or `forbidden`; default
+  `allowed`.
+- `execution.independenceFloor`: `none`, `verification`,
+  `verification-and-risk`, or `all`; default `none`. A covered conference close
+  must truthfully declare `--execution-form independent`.
+- `execution.maxConcurrentSubagents`: string integer from 1 through 32; default
+  `8`.
+- `execution.maxDispatchDepth`: string integer from 1 through 4; default `1`.
 
-## Active plan references
+The retired `execution.personalessDispatch` key is not registered. A caller that
+names it receives the engine's `SETTINGS_KEY_UNREGISTERED` refusal.
 
-`execution.claudeCodeSubagentPlan` and `execution.codexSubagentPlan` are the two
-host-specific active references. An unset reference means that host's own
-default. A set reference must name an existing plan for the matching host; the
-engine refuses a missing plan. A plan is not a separate work entity, and it has
-no independent Owner transition.
+## Current dispatch configuration
 
-See `model-plan.md` for the record and four write verbs. The safe sequence is:
+Read the current values before proposing a change:
 
-1. read `settings-catalog` and the current dispatch read surfaces;
-2. create or update the plan with `model-plan-set`;
-3. append persona assignments with `model-plan-assign` or remove one with
-   `model-plan-unassign`;
-4. set the matching active reference with `settings-set`;
-5. retain the receipts and read both surfaces back.
+1. `settings-catalog --workspace <workspace>` returns the four dispatch keys:
+   `execution.dispatchClasses`, `execution.dispatchMode`,
+   `execution.dispatchModes`, and `execution.dispatchTiers`.
+2. `dispatch-classes-list --workspace <workspace>` returns each class's
+   `dispatch` and `verify` behaviour bits.
+3. `dispatch-mode-list --workspace <workspace>` returns named mappings; add
+   `--host <claude-code|codex> --class <class>` to obtain the resolved tier and
+   model/effort value for one host and class.
 
-Removing a plan that an active reference names is refused by the engine. Remove
-the setting reference first, then remove the plan. No endpoint, token, API key,
-or authenticated URL belongs in a plan or on the governed chain.
+The closed tier order is `flagship`, `main`, `economy`. An empty tier row is a
+real empty value. The renderer falls down the selected mode's mapping and emits
+no host model write when the selected `plan` class cannot resolve a value.
 
-The old host-configuration and persona-binding write family is retired from the
-public catalog. Historical events remain replay-compatible, but a current
-caller receives `CLI_COMMAND_UNKNOWN` for those retired verbs. Do not revive a
-retired command in the helper or portal as a compatibility shortcut.
+Use the current dispatch write verbs, not a model-plan editor:
+
+- `dispatch-classes-set` merges class behaviour bits;
+- `dispatch-mode-set` merges one named class-to-tier mapping;
+- `dispatch-tiers-set` merges one host's tier table; and
+- `settings-set` changes scalar settings such as `execution.dispatchMode`.
+
+Each mutating call must use the workspace path, a fresh numeric
+`--expected-version` (or the catalog-advertised `head` sentinel when the
+decision does not depend on earlier record contents), strict RFC 3339 `--at`, and
+the acting `--actor`. Re-read `status` immediately before a numeric-CAS write.
+
+## Host projection
+
+`host-render` is not an engine catalog verb. It is the Workflow checkout's
+`scripts/host-render.mjs` and is the sole renderer/writer for host-owned
+projection files:
+
+```sh
+node scripts/host-render.mjs \
+  --workspace <workspace> \
+  --host <claude-code|codex> \
+  --root <host-root> \
+  --plan-only
+```
+
+The script reads dispatch settings from the selected workspace. `--plan-only`
+shows managed paths, before/after digests, resolved values, and drift without
+writing. An approved write uses the same command without `--plan-only`; use
+`--backup-dir <directory>` when a separate backup location is required. Use
+`--hooks-only` when synchronising the generated harness hooks while the model
+plan is unresolved. The script checks target digests before writing, writes
+atomically, reads every changed file back, and restores only bytes that still
+match its transaction target after a later failure.
+
+Claude projection owns the root `model`,
+`CLAUDE_CODE_EFFORT_LEVEL`, harness-hook registrations, the `CLAUDE.md` bridge,
+and `model`/`effort` frontmatter in `.claude/agents/<class>.md`. Codex projection
+owns root `model` and `model_reasoning_effort` in `.codex/config.toml` plus the
+generated `.codex/hooks.json`. Other host fields and unrelated hooks remain
+user-owned. A host-render receipt proves only the projection transaction and
+readback; it does not prove host approval or a real model trigger.
+
+## Historical compatibility only
+
+Older chains may contain model-plan records, persona/profile assignments, or
+host-configuration events. They remain replay data where the engine permits,
+but `model-plan-*`, `persona-*`, `persona-binding-*`, and host-configuration
+verbs are not current operator commands. The current CLI returns
+`CLI_COMMAND_UNKNOWN` for those retired names. Do not recreate them in the
+helper or portal; use the dispatch settings and `host-render` surface above.
+
+The catalog's `execution.claudeCodeSubagentPlan` and
+`execution.codexSubagentPlan` entries are legacy model-plan-history references,
+not a live plan editor. Do not set them unless a current engine contract
+explicitly requires it; their presence in `settings-catalog` does not make the
+retired commands available.

@@ -15,10 +15,12 @@ below — Deliberation Triggers and Recording Triggers — instead describe when
 would otherwise decide. Reading them in a session that never installs anything
 is the expected case.
 
-Supports TCRN Workflow `v1.0.2` on two Agent App hosts, Codex and Claude Code,
-with host-neutral protocols.
+Targets the TCRN Workflow `v1.0.2` candidate on two Agent App hosts, Codex and
+Claude Code, with host-neutral protocols. The remote `v1.0.1` tag is the last
+published release; this `v1.0.2` payload remains an unpublished candidate until
+an independently published bootstrap anchor exists.
 
-Six facts about the pinned release, each of which contradicts guidance you may
+Current-surface facts about the candidate, each of which contradicts guidance you may
 meet elsewhere — including older copies of this Skill:
 
 - **The CLI is the only transport.** The engine ships no MCP server; guidance
@@ -29,10 +31,11 @@ meet elsewhere — including older copies of this Skill:
 - **No live host activation is claimed.** The activation paths are inert until
   separately authorized. This helper drives none of them: its own mutating
   commands are test-root-only and nothing here touches a live host binary.
-- **`event-list` and the five `relocation-*` verbs exist.** They are newer than
-  most writing about this engine, so a document that says the chain cannot be
-  read page by page, or that a workspace cannot move, is stale rather than
-  authoritative.
+- **The current catalog is the capability authority.** `event-list` is present,
+  while `relocation-*`, `adapter-*`, `model-plan-*`, and `persona-*` are not
+  current CLI verbs. Older descriptions of those families are historical
+  replay context only and must not be invoked. Host projection is the separate
+  `scripts/host-render.mjs` path; it is not an engine catalog verb.
 - **`v0.13.0` tightened two gates and raised one budget.** A gate now clears
   `done` only when `satisfied` — flipping it to `blocked` no longer releases the
   work item. Story purpose anchors accept either working language. A single
@@ -100,14 +103,13 @@ boundaries. The document is guidance only: the engine remains the authority.
 
 ## Where the chain lives, and the two interfaces onto it
 
-A governed chain does not have to sit on the machine the agent is running on, and
-at the pinned release it can be moved to another one through governed verbs. So an
-operating session's first question is not what a verb does but **which host holds
-the chain about to be read or written** — and it is answered by looking, never by
-remembering. The engine binds five absolute roots: whichever installed copy
-answers at that path is the copy in play, and a byte-identical tree at any other
-path is refused rather than quietly used. Two hosts means two installed copies,
-two version numbers and two command catalogs, so "does this verb exist" is a
+A governed chain may be read or written only through the engine copy that is
+bound to its five absolute roots. The current catalog has no relocation family:
+there is no supported `relocation-*` operation, and copying or hand-editing a
+control tree at another path does not move its authority. An operating session's
+first question is therefore **which host holds the chain about to be read or
+written** — answered by looking, never by remembering. Two hosts means two
+installed copies and two command catalogs, so "does this verb exist" is a
 question about the copy actually being invoked.
 
 When the chain and the engine sit on another host, there are exactly two ways to
@@ -121,11 +123,13 @@ one chain**:
   host*, driven over an authenticated remote shell, one governed verb at a time,
   with the receipt read back on the operator's machine.
 
-**Moving between them changes interface, never truth.** There is no export, no
-import, and no second store to reconcile: both paths end at the same event log on
-the same host, and the reading interface can show nothing the ceremony interface
-did not write. Which one to use is decided by the act, not by preference — a read
-belongs on the cheap interface, and every write belongs on the ceremony one.
+**Changing interfaces does not change the chain.** Both paths end at the same
+event log on the same host, and the reading interface can show nothing the
+ceremony interface did not write. Which one to use is decided by the act, not by
+preference — a read belongs on the reading interface, and every write belongs on
+the engine ceremony on the host that owns the roots. If a deployment needs a
+different address, stop and obtain a separately supported engine operation; do
+not present a file copy as a move.
 
 Two rules follow, and both have been broken in practice:
 
@@ -134,14 +138,13 @@ Two rules follow, and both have been broken in practice:
    locally, and it fails the same way — the chain then refuses reads too. A write
    to a chain on another host must be performed by the engine *on that host*.
 2. **A check that reads only the local machine proves nothing about the remote
-   one.** After a chain moves, a backup routine or freshness check still pointed at
-   the old local path keeps reporting success while covering nothing: it finds no
-   workspace, raises no error, and the silence reads as health. Verifying that
-   something reached another host means asking that host.
+   one.** A backup routine or freshness check pointed at the wrong local path can
+   report success while covering nothing. Verifying a remote chain means asking
+   the host that owns it.
 
 `references/aos-integration.md` carries the cockpit-specific form of this, and
-`references/workflow-operations.md` carries the relocation family's one-way
-properties.
+the historical relocation notes in `references/workflow-operations.md` are
+explicitly non-operational.
 
 ## Deliberation Triggers (advisory)
 
@@ -353,9 +356,9 @@ checksum, provenance, root, or archive checks. Read
 - `references/aos-integration.md` covers the AOS questions that come up during
   setup — a cockpit already running on the machine, a user moving from local-only
   Workflow to AOS, and the two interfaces onto a chain that lives on the cockpit's
-  host — including the read verbs a cockpit needs, the correction to this file's
-  retired "the chains do not move" doctrine, and the boundary this helper will not
-  cross (it explains AOS; it never installs or drives it).
+  host — including the read verbs a cockpit needs, the current no-relocation
+  boundary, and the boundary this helper will not cross (it explains AOS; it never
+  installs or drives it).
 - `references/on-demand-context.md` defines how the agent fetches only
   prompt-relevant work/knowledge on demand — the Skill teaches querying, never
   carries data.
@@ -368,15 +371,14 @@ checksum, provenance, root, or archive checks. Read
 - `references/driver-capability-profile.md` defines `driver.capabilityProfile`
   (`frontier` / `standard`) — how a deployment declares which tier of driver it
   runs, which guidance that shapes, and the three boundaries it must not cross
-- `references/model-plan.md` defines the host-scoped subagent model plan,
-  active setting references, and its four governed write verbs.
-  (authority and audit constraints never vary; the user declares it and the agent
-  never infers it; engine limits stay out of it).
+- `references/model-plan.md` documents the current dispatch-tier settings and
+  `host-render` projection, and labels legacy model-plan/persona records as
+  historical (authority and audit constraints never vary; the user declares the
+  capability profile and the agent never infers it; engine limits stay out of it).
 - `references/backup-elicitation.md` defines the snapshot backup runbook and
   live-sync warning (external backup destination, `backup.cadence` /
-  `backup.destination` settings), for the pinned release's snapshot surface —
-  including what a restore is still same-path about, what the pinned release's
-  relocation family changed about that, and what a backup means once the
+  `backup.destination` settings), for the candidate's snapshot surface —
+  including the same-path restore boundary and what a backup means once the
   workspace is not on the operator's machine.
 - `references/workflow-operations.md` routes a governed situation to the feature
   that answers it (work graph, gates, conferences, knowledge, recovery,

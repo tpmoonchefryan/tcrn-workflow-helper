@@ -14,21 +14,23 @@ recursively sorted, arrays retain their mandated order, and every document ends
 in one newline. Strings must be well-formed Unicode; unsafe integers and
 non-canonical scalar encodings fail closed.
 
-## Required identity
+## Candidate identity (unpublished)
 
-The accepted Workflow release is repository
+The current candidate targets repository
 `https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.0.2`,
-commit `76672379efaf2a3b32db10720613dcae6b386f13`, tree
-`482c0d4d05fed63c511ef73b020d808f7981fe4c`, and tag object
-`08846e00ba0e6d1a205f846fd6fd72b26805a7db`.
+commit `6d1b6e1879ea220c1e685ea48961e7898cd251aa`, tree
+`a23997dcdc5266f082808996cb5eb525f1a0ee9c`, and the planned annotated-tag
+object `a080f31ec2f614585c8a9590385131e1483def73` for the recorded tag recipe.
+The tag is not created and the candidate is not published. Remote tag inspection
+identifies `v1.0.1` as the last published release; `v1.0.2` is the patch candidate
+for the complete unpublished delta.
 
-These four values are prose restating what `bootstrap/trusted-bootstrap.mjs`
-pins, and the bootstrap is the authority — a reader who finds them disagreeing
-should believe the bootstrap and treat this paragraph as the defect. That is not
-hypothetical: the previous candidate shipped three ids here that named a commit
-the release had moved past, while the bootstrap and the candidate manifest both
-carried the right ones. A test now holds the two together, so the next
-disagreement is caught before it is published rather than by a reader.
+These values are candidate metadata, not a trust anchor. After publication, the
+bootstrap runtime must pin the same engine identity and its SHA-256 must be
+published through an independent channel. Until then, a local bootstrap or this
+prose cannot make the candidate trusted. When an identity in this paragraph,
+the generated manifest, or the bootstrap disagrees, do not silently repair a
+mismatch; stop and compare the final manifest with the bootstrap.
 
 ## Out-of-band trust anchor (root of trust)
 
@@ -40,8 +42,8 @@ anchored out-of-band, through a repository-independent channel, for exactly ONE
 thing:
 
 1. **The trusted bootstrap runtime digest** — the SHA-256 of the exact
-   `bootstrap/trusted-bootstrap.mjs`, published in the GitHub release notes for
-   the pinned release. The skills installer
+   `bootstrap/trusted-bootstrap.mjs`, to be published in the GitHub release
+   notes for the approved release. The skills installer
    copies only the `skill/…` prose, NOT the runtime, so the user must obtain the
    runtime through the repo-independent channel and verify it against that
    published digest before it is trusted. The verified runtime — never the copied
@@ -52,9 +54,11 @@ An earlier candidate of this repository also claimed an Ed25519 signing root.
 Its key fingerprint and its bootstrap digest were published nowhere a user could
 independently reach, so every check ran against an anchor that shipped inside the
 download. That chain has been removed rather than dressed up; the runtime digest
-above is the only anchor, and it is now actually published.
+will be the only anchor once the approved release publishes it. The current
+candidate has no external bootstrap digest and therefore cannot pass the trust
+gate for a live placement.
 
-A runtime or copy that cannot be anchored against the published digest fails
+A runtime or copy that cannot be anchored against a published digest fails
 closed. The authority for guided setup is a **successful,
 fail-closed run of `verify-installed-copy` under the anchored runtime** (its
 receipt / process exit), not the presence of any instruction text. The
@@ -90,16 +94,14 @@ remain test-root-only and never write to a live host Skill location.
 ## Host matrix
 
 This candidate supports two Agent App hosts, Codex and Claude Code, over one
-host-neutral protocol surface. The pinned Workflow release ships reversible,
-project-local SessionStart activation for both hosts, plus a governed
-operator surface on the CLI. The structured MCP tool catalog earlier candidates
-pinned is retired in `v0.11.18`. All remain inert
-until separately pinned and authorized. The current exact SessionStart
-definitions are code- and fixture-proven; historical host receipts cover
-superseded definitions, so no current live activation is claimed. None of those
-host surfaces is exercised here: each case family below names where its evidence
-actually lives, and nothing in this candidate involves a live `claude` or Codex
-App binary.
+host-neutral projection surface. The current Workflow release exposes
+`scripts/host-render.mjs` for host-owned model/effort and harness-hook files;
+there is no current `adapter-*` CLI family and no live activation claim. The
+structured MCP tool catalog earlier candidates pinned is retired. Historical
+host receipts and profile/model-plan records remain replay data only. None of
+those host surfaces is exercised here: each case family below names where its
+evidence actually lives, and nothing in this candidate involves a live `claude`
+or Codex App binary.
 
 **Proven by this candidate's own test suite** (`npm test`, offline by
 construction: neither the bootstrap nor the suite opens an internet socket —
@@ -131,16 +133,13 @@ special-file rejection):
   disposable test root is the only write surface and that failed operations
   leave no residue.
 
-**Bound to the pinned Workflow release's hermetic proofs**: the Workflow
-repository at exactly the pinned identity above proves Claude settings-fragment
-merge/remove byte-reversibility, user-vs-project precedence, Codex inert install
-and exact-definition approval boundaries, persona-free SessionStart definitions,
-cross-host hostile-input parity, and the pinned operator-authority grant. The
-structured MCP catalog this list used to name went with the transport in
-`v0.11.18`; the grant object survives in the bundle because dropping a required
-field of `tcrn.operator-authority-bundle.v1` would be a schema break rather than
-a cleanup. This candidate ships no settings, hook, or operator surface of its
-own; those behaviors execute only inside the pinned Workflow release.
+**Bound to the candidate Workflow source**: the Workflow repository at exactly
+the candidate identity above proves the current `host-render` projection,
+user-owned hook preservation, the CLI catalog, and the pinned operator-authority
+grant through its own tests. Historical MCP, adapter, persona, and model-plan
+surfaces are not current operator paths. This helper candidate ships no live
+host configuration; projection writes execute only through the Workflow script
+after a user has approved the target and plan.
 
 **Not claimed by this candidate**: current exact live activation on either host,
 approved network clone/update execution (this candidate's `plan-network` emits a
@@ -163,15 +162,14 @@ The authority is the runtime itself, verified out-of-band against its published
 SHA-256 — no document inside or beside the download is trusted to assert what
 the correct digest is.
 
-The release provenance
-(`manifests/complete-skill-archive.provenance.json`) is a **self-asserted local
-build statement**, not a hosted-builder attestation: it declares build type
-`tcrn.workflow.local-unpublished-candidate.v1`, builder id
-`tcrn-workflow-local`, and zeroed timestamps. It is pinned by digest so it cannot
-be swapped, but it is not third-party evidence of how the release was built. The
-reproducible-build chain published with the release is what lets a third party
-check the build, by rebuilding the artifacts from a clean checkout and asserting digest
-equality with the committed ones.
+The candidate provenance (`complete-skill-archive.provenance.json`) is a
+**self-asserted local build statement**, not a hosted-builder attestation: it
+declares build type `tcrn.workflow.local-unpublished-candidate.v1`, builder id
+`tcrn-workflow-local`, and zeroed timestamps. It is pinned by digest in the
+candidate bootstrap so it cannot be swapped, but it is not third-party evidence
+of how the candidate was built. After publication, the reproducible-build
+materials let a third party rebuild from the approved clean checkouts and assert
+digest equality; until then, these files are local candidate evidence only.
 
 ## Stable reason codes
 
