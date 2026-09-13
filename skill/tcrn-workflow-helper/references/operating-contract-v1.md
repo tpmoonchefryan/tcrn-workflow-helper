@@ -21,6 +21,15 @@ reader must route any authority-bearing claim to the engine's public read face
 and any mutation to the governed ceremony. This is the single-pole rule: one
 prose source per scope, with no parallel `CLAUDE.md` policy body.
 
+For a platform container, the root `AGENTS.md` is a resident index rather than
+a copy of every detail. Keep identity, security, permissions, true-address
+entries, and the next-read pointers resident. Load topology history, archive
+inventory, and Owner-facing presentation rules only when the audience or task
+requires them. Owner output and an internal subagent handoff are different
+audiences: a subagent uses its bound brief and role/Pack contract and does not
+receive Owner presentation prose by default. A missing or broken pointer is a
+discovery failure, not an invitation to infer or duplicate the rule.
+
 ## Chapter 2 — Route every question through four layers
 
 Ask which layer owns the answer before editing anything:

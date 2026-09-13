@@ -7,6 +7,20 @@ agent needs a work item or a knowledge record, it fetches **only the
 prompt-relevant piece, on demand**, using the Workflow's own governed query
 commands — which are metadata-first and budgeted by construction.
 
+The same boundary applies to platform prose. Treat the platform root
+`AGENTS.md` as a resident index for identity, security, permissions, true
+addresses, and the next-read pointers. Load a topology/archive/history module
+only for that question; load an Owner-output module only for an Owner-facing
+response. An internal subagent receives its bound brief, role/work/Pack
+binding, applicable safety rules, and relevant source pointers, not the generic
+Owner presentation contract or unrelated archive history. If a named module or
+pointer is missing, report the rule as `not-verifiable`; do not silently rebuild
+it from a sibling or from prompt text.
+
+Shrinking the resident file is a byte measurement, not proof that a new session
+received less context or that token cost fell. A same-input new-session
+comparison that was not directly measured remains `unknown`/`not-verifiable`.
+
 ## These are Workflow (product) read commands, run through the engine's CLI — not helper commands
 
 The helper (this Skill's trust boundary) exposes only trust/lifecycle verbs

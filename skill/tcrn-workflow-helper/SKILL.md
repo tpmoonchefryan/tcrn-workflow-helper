@@ -103,6 +103,30 @@ the single prose pole; every question routes through prose → settings →
 template → engine; and templates/hooks retain their two-layer/two-zone
 boundaries. The document is guidance only: the engine remains the authority.
 
+## Resident platform rules and audience routing
+
+When a platform root `AGENTS.md` is present, treat it as a small resident index.
+It must retain identity, security, permissions, true-address entries, and
+clear next-read pointers. Load detailed topology, archive, or history only for
+the matching question. Load Owner-facing presentation rules only when the
+response is addressed to Owner. An internal subagent instead loads its bound
+Story brief, role/work/Pack binding, applicable safety rules, and relevant
+source pointers; it does not receive the generic Owner presentation contract
+or unrelated work/archive history by default.
+
+A broken or missing pointer is a discovery failure and is reported as
+`not-verifiable`; do not infer a replacement from prompt prose or a sibling
+repository. The root-file byte count is only a documentation metric. It does
+not prove that historical context was cleared, that a new session received
+fewer tokens, or that cost fell; without a directly comparable same-input
+session measurement, those outcomes stay `unknown`/`not-verifiable`.
+
+The platform's path-free companion names are `platform-container-detail.md`
+for topology/archive history, `platform-governance-detail.md` for the
+structured handoff and gate rules, and `owner-output-contract.md` for
+Owner-facing presentation. The local index supplies their resolved location;
+this Skill does not hard-code a machine path or become their authority.
+
 ## Where the chain lives, and the two interfaces onto it
 
 A governed chain may be read or written only through the engine copy that is
