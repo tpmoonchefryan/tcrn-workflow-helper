@@ -323,6 +323,25 @@ result; missing or changed inputs, failure, and in-progress results are
 frequency rule only: it does not remove a gate or grant visual acceptance or
 publication authority.
 
+### Agent lifecycle for dispatch rounds
+
+The execution brief's additive `tcrn.agent-lifecycle.v1` declaration is the
+handoff boundary for role and Pack context. A new task/EPIC/Story Pack, rework,
+decision, or acceptance round gets a newly spawned corresponding model with its
+declared role, Pack, model, and effort, and the spawn input must carry
+`forkTurns: "none"`. A completed or terminal-blocked instance is not a target
+for a later follow-up. Reuse only the digest-bound decision or evidence index;
+do not carry the old transcript, and do not treat compaction as a new instance.
+
+The only same-instance exception is a necessary factual clarification while the
+same bounded task is still running. Mark it `phase: clarification`,
+`sameTaskRunning: true`, and `newInstance: false`, then use the host's
+`send_message` path without cancelling or restarting progress. Missing role,
+work, Pack, tool-input, or child `turn_context` evidence is
+`unknown`/`not-verifiable`; a prompt's self-description is not identity.
+`dispatch-readiness-compliance.mjs` checks the declaration, while the
+SubagentStart/SubagentStop hook records bounded facts only.
+
 ## Fitness and retirement
 
 Fitness is evidence about reuse, not a permission to delete arbitrary records. The

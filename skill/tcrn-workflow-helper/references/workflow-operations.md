@@ -35,6 +35,24 @@ are unaffected.
 The verbs named below are named because a routing decision hinges on them, not
 to serve as an inventory.
 
+## Dispatch lifecycle boundary
+
+When a brief carries a new task/EPIC/Story Pack, rework, decision, or acceptance
+round, route it to a fresh corresponding agent instance. The brief's lifecycle
+declaration must bind the role, Pack, model, effort, `newInstance: true`, and
+`forkTurns: "none"`, with source evidence that names the real collaboration
+tool input or child turn context. A terminal predecessor cannot receive a new
+round; an old task id, transcript, or compaction is not a new instance. Reuse a
+decision or evidence digest only.
+
+If the same bounded work is still running, a factual clarification is a
+different case: mark `phase: clarification`, `sameTaskRunning: true`, and
+`newInstance: false`, then send the clarification without cancelling or
+restarting the work. Missing binding or unavailable tool/turn evidence stays
+`unknown`/`not-verifiable`; prompt self-claims never establish identity. The
+engine-side `dispatch-readiness-compliance.mjs` performs the structural check;
+this helper only routes and explains it.
+
 **Probe with reads, never with writes.** The catalog marks every verb `mutates`
 or not — that flag, plus the read-only verbs, is the entire discovery surface.
 Firing a verb "to see what it does" is not discovery: a mutating verb aimed at
