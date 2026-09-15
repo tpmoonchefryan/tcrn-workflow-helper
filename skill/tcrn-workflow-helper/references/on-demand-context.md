@@ -152,3 +152,37 @@ followed the opposite pattern (injecting bulk context every turn) is exactly wha
 project is designed not to do. The failure mode to watch for is subtler than bulk
 injection, though, and this repository produced it: when the pull path refuses, an
 agent does not stop — it reads files instead, and the result looks like diligence.
+
+## Bounded task inputs (TCRN-CROSS-INC-320 / STORY-432)
+
+For a new task pack or rework round, the existing dispatch brief and adapter carry a
+compact context plan: one-sentence purpose; live role/work/Pack; current workspace and
+configuration version; exact permitted file pointers; decision and result indexes; and
+the necessary raw-evidence entry points. The adapter binds those fields to the live
+work-show and configuration before it emits the code-owned pre-spawn receipt. This is
+an input index, not a substitute for reading any source the task marks as required.
+
+Read complete mandatory instructions and required source files. A digest, index, or
+summary can point to them but cannot stand in for the required full read. A complete
+work-list may be processed locally; expose only the relevant compact records and keep
+the list's completeness/version evidence. Read in this order: manifest or explicit
+file, then a specifically named bounded directory only when those do not answer the
+question. Never make a home-directory, entire platform-root, or unbounded recursive
+scan the default. Bounded directories must be explicit and inside the declared
+repository; wildcards and parent traversal are not permitted as search roots.
+
+Routine read-only searches default to a 60-second timeout, an 8-KiB inline output
+window, and at most 100 matches. At a timeout or output/hit cap, retain the raw result
+and mark it `partial` with the next bounded scope; an empty output window is not proof
+of no matches. These are dispatch defaults, not an OS-level sandbox, and an expensive
+managed command keeps its own declared budget. Cost comparisons count response IDs
+once across the same declared input set; absent token fields stay unknown, never zero.
+A smaller packet or a fresh session alone proves neither history removal nor cost
+savings.
+
+When a task starts background work, register its process group with an exact purpose
+key such as `task:<workId>:<Pack>`. Use the existing `spawn-guard` task-scoped detect
+and owner-checked deregister path. Signal only a group registered to that same task,
+wait until every child in the group is terminal, and deregister only after the owner
+scoped detector reports empty. A missing owner registration is not-verifiable; do not
+kill or deregister another task's group by matching a command name.

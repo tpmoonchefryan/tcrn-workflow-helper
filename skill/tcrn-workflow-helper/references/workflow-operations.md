@@ -729,21 +729,30 @@ that net, which is the gap this discipline closes.
 
 The discipline, three stages:
 
-- **Spawn — reclaim in the same breath.** Never start a background load without
-  its teardown written into the same command or flow: `trap 'kill 0' EXIT`, or
-  capture the PID/PGID and `kill` it explicitly. A load whose cleanup lives in a
-  separate step that may never run is a leak waiting to happen.
-- **Register — record the group, not the pid.** At spawn, register the load's
-  process **group** id with `scripts/spawn-guard.mjs register --pgid … --pattern
-  … --purpose …`. The registry is JSONL in the workspace transient zone, outside
-  the control tree — it never touches the chain and never blocks a write. Register
-  the pgid, not a child pid: pids are reused and orphans outlive their leader, but
-  the group is the stable handle discovered live from the kernel.
-- **Detect — verify empty at teardown.** After reclaiming, run `spawn-guard.mjs
-  detect` (exit 0 clean, exit 3 residue present) or, by hand, `pgrep -x <cmd>` /
-  `ps -o pid=,pgid= -ax | awk '$2==PGID'` and confirm it is empty. When something
-  is already burning, `ps aux -r` finds the high-CPU orphans (ppid 1, in groups),
-  and `lsof -p <pid>` attributes the leaked stderr to the session that spawned it.
+- **Spawn and register — establish an owned group before cleanup can be needed.**
+  Prefer a synchronous child. If a background child is necessary, use the host's
+  explicit child/process-group handle and register that **group** immediately with
+  `scripts/spawn-guard.mjs register --pgid … --pattern … --purpose
+  "task:<workId>:<Pack>"`. The task-specific `purpose` is the ownership key; never
+  use a generic command name as permission to signal every matching process. Do
+  not use `kill 0` on an ambient executor group, which may include processes this
+  task does not own.
+- **Reclaim and verify — only the task's registered group.** On timeout, cancel,
+  or teardown, use the host's owned-child control to terminate only the PGID
+  registered under this exact purpose key. Wait for the leader and every child in
+  that group to exit. Then run `spawn-guard.mjs detect --purpose
+  "task:<workId>:<Pack>"` (exit 0 clean, exit 3 residue, exit 4 owner not
+  registered/not-verifiable). This owner-scoped detector considers only the exact
+  registered PGIDs, not other tasks' process groups or command-pattern matches.
+  `deregister --purpose … --pgid …` rechecks that the owner matches and no group
+  member remains; it refuses while any child is live. Keep the registration and
+  raw diagnostics when cleanup is incomplete. Never kill or deregister another
+  task's group.
+- **Inspect without widening scope.** The unfiltered `detect` command remains a
+  workspace-wide residue report for its legacy host use. When something is
+  already burning, narrow the investigation to a registered owner/group before
+  signaling anything; `ps aux -r` and `lsof -p <pid>` are observation tools, not
+  authorization to clean up unrelated processes.
 
 The full convention, its diagnosis recipe, and the incident sample live in the
 knowledge card `CARD-BACKGROUND-RESOURCE-GOVERNANCE` — query it (see the card

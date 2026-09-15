@@ -18,14 +18,28 @@ non-canonical scalar encodings fail closed.
 
 The current provisional candidate targets repository
 `https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.1.0`,
-commit `1bfb5216723283fcb680361d5128d937e8d25bf4`, tree
-`e380ea289e7aeaea39a984b62e0696bfc98db9ad`, and the planned annotated-tag
-object `f66af25b6666515b113a99290f40177a747398be` for the recorded tag recipe.
-The tag is not created and the candidate is not published. The companion Helper
-repository is version `v1.0.2`; its final commit, tree, tag recipe, archive, and
-all asset digests are fixed in the dual-version release manifest, not inferred
-from this prose. Remote tag inspection identifies `v1.0.1` as the last published
-release for both repositories.
+commit `3c6e1c7755423d9efbaa475f8f761ab475fade2e`, tree
+`5049f04dfc894141b515c4782a0a4d5fe4801637`, and the planned annotated-tag
+object `2669ee667335cdcc9998b0ae9fa4017ff5f7e9d5` for the exact recipe below.
+This is the clean E* source commit for the authorized serial implementation
+Pack. The annotated tag is not created and the candidate is not published. The
+companion Helper repository remains version `v1.0.2`; its final commit, tree,
+tag recipe, archive, and all asset digests are fixed in the dual-version
+release manifest, not inferred from this prose. Remote tag inspection
+identifies `v1.0.1` as the last published release for both repositories.
+
+The planned engine tag-object recipe is independently reproducible with Git's
+SHA-1 annotated-tag object framing (`tag <UTF-8 byte length>\0<recipe>`). It is
+metadata only; do not create or move this tag in the implementation Pack.
+
+```text
+object 3c6e1c7755423d9efbaa475f8f761ab475fade2e
+type commit
+tag v1.1.0
+tagger tpmoonchefryan <253097889+tpmoonchefryan@users.noreply.github.com> 1789228800 +0800
+
+TCRN Workflow v1.1.0
+```
 
 These values are candidate metadata, not a trust anchor. After publication, the
 bootstrap runtime must pin the same engine identity and its SHA-256 must be
