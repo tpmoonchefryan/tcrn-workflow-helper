@@ -43,6 +43,16 @@ dispatch settings, backs up changed files, checks that each target did not
 change after planning, writes atomically, and reads every changed file back.
 `--plan-only` shows the managed paths and digests without writing.
 
+The renderer has two explicit projection scopes. `--scope full` (the backward-
+compatible default) projects the resolved model/effort fields and hooks.
+`--scope hooks-only` projects only the managed hook fragments, whether or not a
+model plan resolves; `--hooks-only` is its compatibility alias. In that scope,
+Codex never reads or writes `.codex/config.toml`, and Claude changes only the
+`hooks` member of `.claude/settings.json` while preserving every other member.
+The apply path rejects an added non-hook target or a changed non-hook Claude
+field. The platform doctor uses the matching `hooks-only` scope by default and
+accepts `--host-render-scope full` for a full projection check.
+
 Claude projection owns only the top-level `model`, the
 `CLAUDE_CODE_EFFORT_LEVEL` environment variable, the harness hook registrations,
 the `CLAUDE.md` bridge, and the `model`/`effort` frontmatter in
