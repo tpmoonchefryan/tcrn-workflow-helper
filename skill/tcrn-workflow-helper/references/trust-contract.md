@@ -18,12 +18,13 @@ non-canonical scalar encodings fail closed.
 
 The current provisional candidate targets repository
 `https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.1.0`,
-commit `3c6e1c7755423d9efbaa475f8f761ab475fade2e`, tree
-`5049f04dfc894141b515c4782a0a4d5fe4801637`, and the planned annotated-tag
-object `2669ee667335cdcc9998b0ae9fa4017ff5f7e9d5` for the exact recipe below.
-This is the clean E* source commit for the authorized serial implementation
-Pack. The annotated tag is not created and the candidate is not published. The
-companion Helper repository remains version `v1.0.2`; its final commit, tree,
+commit `aa3706028b6bd5803ec6bf9fdef048586b56788f`, tree
+`89395f9a8b7a1a1e52c566232921530f61067b60`, and the planned annotated-tag
+object `c8781a0d6bcba39f190f8f239ef57a5d3a25c17c` for the exact recipe below.
+This is the clean E2 source commit for the bounded INC320 receipt-freeze repair;
+the source version remains `v1.1.0`. The annotated tag is not created and the
+candidate is not published. The companion Helper repository remains version
+`v1.0.2`; its final commit, tree,
 tag recipe, archive, and all asset digests are fixed in the dual-version
 release manifest, not inferred from this prose. Remote tag inspection
 identifies `v1.0.1` as the last published release for both repositories.
@@ -33,7 +34,7 @@ SHA-1 annotated-tag object framing (`tag <UTF-8 byte length>\0<recipe>`). It is
 metadata only; do not create or move this tag in the implementation Pack.
 
 ```text
-object 3c6e1c7755423d9efbaa475f8f761ab475fade2e
+object aa3706028b6bd5803ec6bf9fdef048586b56788f
 type commit
 tag v1.1.0
 tagger tpmoonchefryan <253097889+tpmoonchefryan@users.noreply.github.com> 1789228800 +0800
