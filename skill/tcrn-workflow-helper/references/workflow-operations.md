@@ -551,6 +551,16 @@ evidence close the task, while the full acceptance-gate roster runs after the
 final candidate commit and before external publication. A cadence change does
 not remove a gate.
 
+For the current-stage batch read, `work-show` is the native source for both
+dependencies and implementation outcomes. `advisory:verify` is only a
+command/locator, never execution proof. An active implementation qualifies only
+with a native result annotation carrying successful status, `ok: true`,
+`exitCode: 0`, command, evidence, and the current work revision/scope binding;
+dependencies are an explicit array, and omission is unknown rather than empty.
+Missing, failed, or stale results stay `unknown`/`not-verifiable`. A genuine
+native result note can qualify 428 without a verify command; prompts, copied
+results, and external completion stores cannot.
+
 Verification cadence is explicit and phase-scoped. A `development` plan selects
 local checks from changed files and dependencies and blocks unknown impact. A
 `candidate-final` or `publication` plan executes only the acceptance roster's

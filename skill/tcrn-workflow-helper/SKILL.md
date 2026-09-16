@@ -306,6 +306,17 @@ risk-proportional tests and review evidence close tasks, while the full
 acceptance-gate roster runs after the final candidate commit and before external
 publication. A lower cadence never removes a gate.
 
+For a formal batch's current-stage read, `work-show` remains the native source for
+both dependencies and implementation outcomes. An `advisory:verify` value is only
+a command/locator; it is not proof that the command ran. A successful active-work
+outcome must be recorded on that native work surface with an explicit successful
+status, `ok: true`, `exitCode: 0`, command, evidence locator, and the current work
+revision/scope binding. Dependencies must be an explicit array; an omitted field is
+unknown, not an empty graph. Missing, failed, or stale outcomes remain
+`unknown`/`not-verifiable`. A genuine native result note may qualify a work item
+such as 428 even when it has no `advisory:verify` command; a prompt, copied result,
+or external completion store never qualifies it.
+
 ### Verification cadence
 
 The execution brief may carry an optional `verificationPlan` with one of four
