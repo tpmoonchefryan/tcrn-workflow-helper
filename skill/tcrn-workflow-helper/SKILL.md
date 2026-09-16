@@ -290,7 +290,7 @@ moment.
 
 Every native dispatch names its task classification from the current dispatch
 configuration. When that class has `verify: true`, a non-empty task-level
-verification command is required; `mustVerify` refuses a dispatch that omits it.
+verification command is required and review evidence must retain its result.
 One dispatch carries one deliverable, and a one-command operation stays with the
 driving session. After completion, run
 `tcrn-workflow/scripts/review-evidence.mjs` against the exact work item: it

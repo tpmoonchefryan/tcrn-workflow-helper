@@ -536,7 +536,7 @@ stricter, or deferred rule needs a positive leg and a deletion red leg.
 
 The task classification comes from the current dispatch configuration. A class
 whose `verify` behaviour bit is true requires a non-empty task-level verification
-command; `mustVerify` rejects dispatch when that command is absent. One dispatch
+command and review evidence must retain its result. One dispatch
 carries one deliverable, and a one-command operation remains in the driving
 session. After the worker reports completion,
 `scripts/review-evidence.mjs` reads the exact chain work item and executes its
