@@ -123,7 +123,7 @@ session measurement, those outcomes stay `unknown`/`not-verifiable`.
 
 The platform's path-free companion names are `platform-container-detail.md`
 for topology/archive history, `platform-governance-detail.md` for the
-structured handoff and gate rules, and `owner-output-contract.md` for
+governance and gate rules, and `owner-output-contract.md` for
 Owner-facing presentation. The local index supplies their resolved location;
 this Skill does not hard-code a machine path or become their authority.
 
@@ -286,12 +286,12 @@ scales with the driving agent's capability (the pinned release's README,
 "Driver assumptions"), and nothing here promises an offer fires at the right
 moment.
 
-## Dispatch readiness and review evidence
+## Native dispatch and review evidence
 
-Every dispatch brief names its task classification from the current dispatch
+Every native dispatch names its task classification from the current dispatch
 configuration. When that class has `verify: true`, a non-empty task-level
-verification command is required; `mustVerify` refuses a brief that omits it.
-One brief carries one deliverable, and a one-command operation stays with the
+verification command is required; `mustVerify` refuses a dispatch that omits it.
+One dispatch carries one deliverable, and a one-command operation stays with the
 driving session. After completion, run
 `tcrn-workflow/scripts/review-evidence.mjs` against the exact work item: it
 executes the chain's `advisory:verify`, records the real test-run output apart
@@ -325,22 +325,23 @@ publication authority.
 
 ### Agent lifecycle for dispatch rounds
 
-The execution brief's additive `tcrn.agent-lifecycle.v1` declaration is the
-handoff boundary for role and Pack context. A new task/EPIC/Story Pack, rework,
-decision, or acceptance round gets a newly spawned corresponding model with its
-declared role, Pack, model, and effort, and the spawn input must carry
-`forkTurns: "none"`. A completed or terminal-blocked instance is not a target
-for a later follow-up. Reuse only the digest-bound decision or evidence index;
-do not carry the old transcript, and do not treat compaction as a new instance.
+A new task/EPIC/Story Pack, rework, decision, or acceptance round reads its bound
+Story with native `work-show` and resolves model/effort from the live dispatch
+settings immediately before spawn. The prompt carries only role, phase, work id,
+repository root, and red-line boundaries; no external brief, structured handoff,
+digest-derived task name, or pre-call receipt is required. The spawn input must
+carry `forkTurns: "none"`. A completed or terminal-blocked instance is not a
+target for a later follow-up. Reuse only decision or evidence digests; do not
+carry the old transcript, and do not treat compaction as a new instance.
 
 The only same-instance exception is a necessary factual clarification while the
 same bounded task is still running. Mark it `phase: clarification`,
 `sameTaskRunning: true`, and `newInstance: false`, then use the host's
 `send_message` path without cancelling or restarting progress. Missing role,
 work, Pack, tool-input, or child `turn_context` evidence is
-`unknown`/`not-verifiable`; a prompt's self-description is not identity.
-`dispatch-readiness-compliance.mjs` checks the declaration, while the
-SubagentStart/SubagentStop hook records bounded facts only.
+`unknown`/`not-verifiable`; a prompt's self-description is not identity. The
+SubagentStart/SubagentStop hook records bounded facts only; missing native
+role/provider fields stay unknown and do not block a valid dispatch.
 
 ## Fitness and retirement
 

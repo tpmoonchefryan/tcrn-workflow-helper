@@ -153,14 +153,15 @@ project is designed not to do. The failure mode to watch for is subtler than bul
 injection, though, and this repository produced it: when the pull path refuses, an
 agent does not stop — it reads files instead, and the result looks like diligence.
 
-## Bounded task inputs (TCRN-CROSS-INC-320 / STORY-432)
+## Bounded task inputs (TCRN-CROSS-STORY-320 / 435 / 436)
 
-For a new task pack or rework round, the existing dispatch brief and adapter carry a
-compact context plan: one-sentence purpose; live role/work/Pack; current workspace and
-configuration version; exact permitted file pointers; decision and result indexes; and
-the necessary raw-evidence entry points. The adapter binds those fields to the live
-work-show and configuration before it emits the code-owned pre-spawn receipt. This is
-an input index, not a substitute for reading any source the task marks as required.
+For a new task pack or rework round, read the bound Story with native `work-show`
+and resolve the current dispatch configuration immediately before the host call.
+The prompt carries only the live work id, role, phase, repository root, and red-line
+boundaries plus the source pointers named by the Story scope. There is no generated
+brief, structured handoff, digest-derived task name, or pre-call receipt, and none
+may become a second authority. The native call log is factual evidence; missing
+host-native role/provider fields stay unknown.
 
 Read complete mandatory instructions and required source files. A digest, index, or
 summary can point to them but cannot stand in for the required full read. A complete

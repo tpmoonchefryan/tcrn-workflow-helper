@@ -37,21 +37,23 @@ to serve as an inventory.
 
 ## Dispatch lifecycle boundary
 
-When a brief carries a new task/EPIC/Story Pack, rework, decision, or acceptance
-round, route it to a fresh corresponding agent instance. The brief's lifecycle
-declaration must bind the role, Pack, model, effort, `newInstance: true`, and
-`forkTurns: "none"`, with source evidence that names the real collaboration
-tool input or child turn context. A terminal predecessor cannot receive a new
-round; an old task id, transcript, or compaction is not a new instance. Reuse a
-decision or evidence digest only.
+When a task/EPIC/Story Pack, rework, decision, or acceptance round is dispatched,
+read the bound Story with native `work-show` and resolve the host, class, mode,
+model, and effort from the live dispatch settings immediately before spawn. The
+prompt carries only role, phase, work id, repository root, and red-line boundaries;
+an external brief, structured handoff, digest-derived task name, or pre-call
+receipt is not required and cannot become a second authority. A fresh round must
+use `newInstance: true` and `forkTurns: "none"`. A terminal predecessor cannot
+receive a new round; an old task id, transcript, or compaction is not a new
+instance. Reuse a decision or evidence digest only.
 
 If the same bounded work is still running, a factual clarification is a
 different case: mark `phase: clarification`, `sameTaskRunning: true`, and
 `newInstance: false`, then send the clarification without cancelling or
 restarting the work. Missing binding or unavailable tool/turn evidence stays
 `unknown`/`not-verifiable`; prompt self-claims never establish identity. The
-engine-side `dispatch-readiness-compliance.mjs` performs the structural check;
-this helper only routes and explains it.
+SubagentStart/SubagentStop hook records bounded call facts only; missing native
+role/provider fields stay unknown and do not block a valid dispatch.
 
 **Probe with reads, never with writes.** The catalog marks every verb `mutates`
 or not — that flag, plus the read-only verbs, is the entire discovery surface.
@@ -455,7 +457,7 @@ Workflow `v0.3.1` or later everywhere that chain is read — a binary that
 predates the operation refuses the whole chain, by design. Workspaces that
 never annotate are byte-identical to before.
 
-## Story scope, dispatch brief, and closeout conservation
+## Story scope, native dispatch, and closeout conservation
 
 The platform dispatch convention is the canonical rule source at
 `docs/dispatch-readiness-convention.md`; this helper copy routes to it and
@@ -517,24 +519,26 @@ GIVEN … WHEN … THEN …
 terminal history remains append-only; every non-terminal Story must be migrated
 and read back before it can move onward.
 
-The execution brief is separate from the chain. Before dispatch, validate a
-structured brief with `pnpm --dir tcrn-workflow dispatch:validate -- --brief
-<brief.json>`. It must contain non-empty `redLineBoundaries`, `filePointers`,
-`verificationCommands`, `chainCloseoutActions`, and
-`effectiveEvidenceCommands`; a missing field returns
-`DISPATCH_BRIEF_INCOMPLETE` and is a refusal to dispatch. The closeout side is
-still live-authority based: read `status`, complete `work-list`, and each
-relevant `work-show`, then run the final evidence commands after the last
-commit. A manifest, self-written result table, or self-closing flag is not an
-authority substitute. The source-to-rule conservation registry is
-`tcrn-workflow/scripts/policy/story-rule-conservation.json`; every retained,
+Native dispatch is separate from the chain's work record but reads it directly.
+Immediately before spawn, read `status`, the complete `work-list`, and each
+relevant `work-show`, then resolve the host/class/mode/model/effort through the
+current dispatch settings. The prompt carries only the live work id, role,
+phase, repository root, and red-line boundaries. No external brief, structured
+handoff, digest-derived task name, pre-call receipt, or mirrored completion
+store is required. A missing or changed work, scope, configuration, model, or
+effort refuses the relevant call; an unrelated chain append does not. Native
+role/provider fields that the host omits remain `unknown`, not authorization.
+The closeout side remains live-authority based: run the final evidence commands
+after the last commit. A manifest, self-written result table, or self-closing
+flag is not an authority substitute. The source-to-rule conservation registry
+is `tcrn-workflow/scripts/policy/story-rule-conservation.json`; every retained,
 stricter, or deferred rule needs a positive leg and a deletion red leg.
 
-The brief also names a task classification from the current dispatch
-configuration. A class whose `verify` behaviour bit is true requires a
-non-empty task-level verification command; `mustVerify` rejects dispatch when
-that command is absent. One dispatch carries one deliverable, and a one-command
-operation remains in the driving session. After the worker reports completion,
+The task classification comes from the current dispatch configuration. A class
+whose `verify` behaviour bit is true requires a non-empty task-level verification
+command; `mustVerify` rejects dispatch when that command is absent. One dispatch
+carries one deliverable, and a one-command operation remains in the driving
+session. After the worker reports completion,
 `scripts/review-evidence.mjs` reads the exact chain work item and executes its
 `advisory:verify`; it stores the real runner output separately from before/after
 the engine test result's `tests` array count and `countCoverage` AST counts, then compares fixed base/head diff entries and
@@ -556,8 +560,8 @@ Reuse is allowed only for a successful terminal result whose source,
 environment, command/arguments, and baseline digests match; missing, changed,
 failed, or in-progress evidence is invalidated. The plan must expose
 `selected`, `executed`, `covered-by`, `reused`, `invalidated`, and `blocked`, and
-same-repository output work remains serial. Older briefs without this optional
-plan retain their existing compatibility verdict.
+same-repository output work remains serial. Missing native observations remain
+`unknown`/`not-verifiable`; they do not create a parallel completion authority.
 
 ## Before any mutation: three things the engine will insist on
 
