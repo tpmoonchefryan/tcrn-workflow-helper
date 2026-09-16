@@ -18,11 +18,11 @@ non-canonical scalar encodings fail closed.
 
 The current provisional candidate targets repository
 `https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.1.0`,
-commit `56830a8e47215f7f1a50826c000af2c1602f04e0`, tree
-`7be22bcd3a4b2f62c86e6434185da6f0bebf34de`, and the planned annotated-tag
-object `9674e739d98120cbf49b279436ca7a07f71a4ea0` for the exact recipe below.
-This is the final clean E5 source identity for the bounded INC320 receipt-JSON
-totality rework and R4 CLI newline fix; E3/H3/E4 remain intermediate forward commits.
+commit `8d70751e31768ce0e25f86c1a567ffb8890eb33e`, tree
+`370ab8d0d507b1165da1475133f58951aeeebd24`, and the planned annotated-tag
+object `b2f6a670b976ce53889c9202eb65f9bf9caade2a` for the exact recipe below.
+This is the final corrected Engine identity for the bounded 435/436 and INC320
+native-evidence rework; earlier source and Helper identities remain historical.
 The source version remains `v1.1.0`. The annotated tag is not created and the
 candidate is not published. The companion Helper repository remains version
 `v1.0.2`; its final commit, tree,
@@ -35,7 +35,7 @@ SHA-1 annotated-tag object framing (`tag <UTF-8 byte length>\0<recipe>`). It is
 metadata only; do not create or move this tag in the implementation Pack.
 
 ```text
-object 56830a8e47215f7f1a50826c000af2c1602f04e0
+object 8d70751e31768ce0e25f86c1a567ffb8890eb33e
 type commit
 tag v1.1.0
 tagger tpmoonchefryan <253097889+tpmoonchefryan@users.noreply.github.com> 1789228800 +0800
