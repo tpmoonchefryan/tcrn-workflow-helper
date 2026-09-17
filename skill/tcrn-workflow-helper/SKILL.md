@@ -334,25 +334,47 @@ result; missing or changed inputs, failure, and in-progress results are
 frequency rule only: it does not remove a gate or grant visual acceptance or
 publication authority.
 
+Verification impact is derived from changed source, dependencies, configuration,
+generated artifacts, environment, and cross-repository changes. Each required
+gate is recorded as `run`, `reused`, `not-applicable`, or `not-verifiable`, with
+the basis for that state. Reuse requires matching source, environment,
+command/arguments, baseline digests, and successful terminal evidence. Run each
+top-level root once and report contained children as `covered-by`; same-
+repository output work is serial. Unknown impact is handled conservatively and
+is never a silent skip. These obligations apply whether or not a phase is named.
+
 ### Agent lifecycle for dispatch rounds
 
-A new task/EPIC/Story Pack, rework, decision, or acceptance round reads its bound
-Story with native `work-show` and resolves model/effort from the live dispatch
-settings immediately before spawn. The prompt carries only role, phase, work id,
-repository root, and red-line boundaries; no external brief, structured handoff,
-digest-derived task name, or pre-call receipt is required. The spawn input must
-carry `forkTurns: "none"`. A completed or terminal-blocked instance is not a
-target for a later follow-up. Reuse only decision or evidence digests; do not
-carry the old transcript, and do not treat compaction as a new instance.
+A new Codex task/EPIC/Story Pack, rework, decision, or acceptance round reads its
+bound Story with native `work-show` and resolves model/effort from the live
+dispatch settings immediately before spawn. The Codex prompt carries only role,
+phase, work id, repository root, and red-line boundaries; Claude Code follows its prompt for host details.
+No external brief, structured handoff,
+digest-derived task name, or pre-call receipt is required. For Codex, the spawn
+input carries `forkTurns: "none"`; this is a Codex constraint, not a claim about
+Claude Code. A completed or terminal-blocked Codex instance is not a target for a
+later follow-up. Reuse only decision or evidence digests; do not carry the old
+transcript, and do not treat compaction as a new instance.
 
-The only same-instance exception is a necessary factual clarification while the
-same bounded task is still running. Mark it `phase: clarification`,
-`sameTaskRunning: true`, and `newInstance: false`, then use the host's
-`send_message` path without cancelling or restarting progress. Missing role,
-work, Pack, tool-input, or child `turn_context` evidence is
-`unknown`/`not-verifiable`; a prompt's self-description is not identity. The
-SubagentStart/SubagentStop hook records bounded facts only; missing native
-role/provider fields stay unknown and do not block a valid dispatch.
+The only same-instance exception for a still-running bounded Codex task is a
+necessary factual clarification. Mark it `phase: clarification`,
+`sameTaskRunning: true`, and `newInstance: false`, then use Codex's `SendMessage`
+path without cancelling or restarting progress. Missing role, work, Pack,
+tool-input, or child `turn_context` evidence is `unknown`/`not-verifiable`; a
+prompt's self-description is not identity. The SubagentStart/SubagentStop hook
+records bounded facts only; missing native role/provider fields stay unknown and
+do not block a valid Codex dispatch.
+
+### Batch and hook boundary
+
+The formal batch boundary treats 420's dynamic plan and 421's qualification as
+separate interfaces. Hooks may assist with qualification or notification, and
+the Stop hook performs its qualification check; neither hook invocation is the
+formal batch trigger, which remains a separate operation. Running work, missing
+dependencies, binding or queue drift, and a security refusal stop the batch or
+make its result `not-verifiable`; they are not silently accepted. An approved
+publication, installation, or measurement is a post-action activity, not a
+current-stage prerequisite.
 
 ## Fitness and retirement
 
