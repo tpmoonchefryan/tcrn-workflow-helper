@@ -561,7 +561,9 @@ Missing, failed, or stale results stay `unknown`/`not-verifiable`. A genuine
 native result note can qualify 428 without a verify command; prompts, copied
 results, and external completion stores cannot.
 
-Verification cadence is explicit and phase-scoped. A `development` plan selects
+Verification cadence is explicit and phase-scoped. This is a frequency rule only:
+it does not remove a gate or grant visual acceptance or publication authority. A
+`development` plan selects
 local checks from changed files and dependencies and blocks unknown impact. A
 `candidate-final` or `publication` plan executes only the acceptance roster's
 top-level roots once; contained children are evidence rows, not duplicate
