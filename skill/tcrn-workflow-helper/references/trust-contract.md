@@ -18,9 +18,9 @@ non-canonical scalar encodings fail closed.
 
 The current release pair targets repository
 `https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.1.1`,
-commit `83a194d35824537787a5cba369212612d8a3478c`, tree
-`d8553c15fbbaa719b9e5c69d231c288a077b5ac1`, and the frozen annotated-tag
-object `23cc244bbc2d00ce2b3242a7726afa5abd745d9e` for the exact recipe below.
+commit `3b245c3673a0ea894935cd8145174ab85cff2c1e`, tree
+`2e5580311aec1748b5986c39944cbc90bd2807aa`, and the frozen annotated-tag
+object `ecdd5b149c378e61cfa4072dd975bfaab5187a84` for the exact recipe below.
 This append-only Engine release carries the output-session recovery guard and
 the canonical `~/.agents`/`~/.claude` install contract. The immutable v1.1.0
 Engine and v1.0.2 Helper publications remain historical prior releases. The
@@ -33,7 +33,7 @@ SHA-1 annotated-tag object framing (`tag <UTF-8 byte length>\0<recipe>`). It is
 metadata only; do not create or move this tag in the implementation Pack.
 
 ```text
-object 83a194d35824537787a5cba369212612d8a3478c
+object 3b245c3673a0ea894935cd8145174ab85cff2c1e
 type commit
 tag v1.1.1
 tagger tpmoonchefryan <253097889+tpmoonchefryan@users.noreply.github.com> 1789898000 +0800
