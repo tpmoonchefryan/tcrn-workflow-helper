@@ -14,39 +14,36 @@ recursively sorted, arrays retain their mandated order, and every document ends
 in one newline. Strings must be well-formed Unicode; unsafe integers and
 non-canonical scalar encodings fail closed.
 
-## Candidate identity (unpublished)
+## Release identity
 
-The current provisional candidate targets repository
-`https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.1.0`,
-commit `7b0089523d6456d2ea097acd8a3970bb6e2cedfa`, tree
-`d11ff5603191b466a235c7aa2a8abf9dd0562f82`, and the planned annotated-tag
-object `efb1bce0043349a3b03d905ed4a40fb55b01b372` for the exact recipe below.
-This is the final R7 Engine identity for the bounded 435/436 and INIT-051
-native-evidence rework; earlier source and Helper identities remain historical.
-The source version remains `v1.1.0`. The annotated tag is not created and the
-candidate is not published. The companion Helper repository remains version
-`v1.0.2`; its final commit, tree,
-tag recipe, archive, and all asset digests are fixed in the dual-version
-release manifest, not inferred from this prose. Remote tag inspection
-identifies `v1.0.1` as the last published release for both repositories.
+The current release pair targets repository
+`https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.1.1`,
+commit `fed393e1e06eb76b5ddf76c7d04f4a7d99090a6c`, tree
+`1a91fb59181b7d71a00ae59955a778c817889c90`, and the frozen annotated-tag
+object `8652e45f79fe22eccff302ae17bd19e4721e08c2` for the exact recipe below.
+This append-only Engine release carries the output-session recovery guard and
+the canonical `~/.agents`/`~/.claude` install contract. The immutable v1.1.0
+Engine and v1.0.2 Helper publications remain historical prior releases. The
+companion Helper release is `v1.0.3`; its final commit, tree, tag recipe,
+archive, and all asset digests are fixed in the dual-version release manifest,
+not inferred from this prose.
 
 The planned engine tag-object recipe is independently reproducible with Git's
 SHA-1 annotated-tag object framing (`tag <UTF-8 byte length>\0<recipe>`). It is
 metadata only; do not create or move this tag in the implementation Pack.
 
 ```text
-object 7b0089523d6456d2ea097acd8a3970bb6e2cedfa
+object fed393e1e06eb76b5ddf76c7d04f4a7d99090a6c
 type commit
-tag v1.1.0
-tagger tpmoonchefryan <253097889+tpmoonchefryan@users.noreply.github.com> 1789860953 +0800
+tag v1.1.1
+tagger tpmoonchefryan <253097889+tpmoonchefryan@users.noreply.github.com> 1789897891 +0800
 
-TCRN Workflow v1.1.0
+TCRN Workflow v1.1.1
 ```
 
-These values are candidate metadata, not a trust anchor. After publication, the
-bootstrap runtime must pin the same engine identity and its SHA-256 must be
-published through an independent channel. Until then, a local bootstrap or this
-prose cannot make the candidate trusted. When an identity in this paragraph,
+These values are release metadata, not a trust anchor. The bootstrap runtime
+must pin the same Engine identity and its SHA-256 must be published through an
+independent channel. When an identity in this paragraph,
 the generated manifest, or the bootstrap disagrees, do not silently repair a
 mismatch; stop and compare the final manifest with the bootstrap.
 
@@ -149,8 +146,9 @@ not the test runner):
   replacement preservation, byte-identical private Workspace state, zero
   residue — exercised once against the shared host-neutral mutation surface,
   which is the only mutation surface either host uses;
-- the live-location guard, per host shape: user-level `~/.claude/**`, project
-  `.claude/skills`, `~/.codex/**`, and case-variant components (e.g. `.Claude`)
+- the live-location guard, per host shape: Codex's canonical user-level
+  `~/.agents/**`, Claude Code's user-level `~/.claude/**`, the retired legacy
+  `~/.codex/**`, project `.claude/skills`, and case-variant components (e.g. `.Claude`)
   are rejected with `LIVE_LOCATION_FORBIDDEN` by a case-folded lexical check on
   the resolved path components, before the test-root marker gate or any
   filesystem probe, so install, update, reinstall, and uninstall cannot touch a

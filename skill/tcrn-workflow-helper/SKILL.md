@@ -15,12 +15,12 @@ below — Deliberation Triggers and Recording Triggers — instead describe when
 would otherwise decide. Reading them in a session that never installs anything
 is the expected case.
 
-Targets the TCRN Workflow `v1.1.0` candidate on two Agent App hosts, Codex and
-Claude Code, with host-neutral protocols. The helper payload itself is `v1.0.2`:
-the remote `v1.0.1` tag is the last published release for both repositories, and
-the two version identities remain separate. The Workflow `v1.1.0` and Helper
-`v1.0.2` payloads remain unpublished candidates until their release and trust
-conditions are met.
+Targets the TCRN Workflow `v1.1.1` release on two Agent App hosts, Codex and
+Claude Code, with host-neutral protocols. The helper payload itself is `v1.0.3`:
+the immutable Workflow `v1.1.0` and Helper `v1.0.2` publications remain separate
+prior releases, and the two version identities remain distinct. Publication and
+trust state for the current pair is established only by its release assets and
+independently verified bootstrap.
 
 Current-surface facts about the candidate, each of which contradicts guidance you may
 meet elsewhere — including older copies of this Skill:
@@ -408,14 +408,15 @@ production evidence.
 Require explicit user approval before network clone/update or any installation
 mutation. First produce `plan-network`; do not perform the plan implicitly.
 Use `install`, `update`, `reinstall`, and `uninstall` only through the helper's
-disposable `tcrn-helper-test-*` root gate. This candidate has no user-approved
+disposable `tcrn-helper-test-*` root gate. This release has no user-approved
 or production-root mutation surface. Preserve private Workspace bytes, use a
-staged transaction, and retain the canonical receipt. Never install into a live
-host Skill location — for Codex, the Codex Skill locations; for Claude Code,
-a user-level `~/.claude/skills` or project `.claude/skills` location. The
+staged transaction, and retain the canonical receipt. Never use the helper
+lifecycle commands against a live host Skill location. Standard distribution
+places Codex's universal user copy at `~/.agents/skills` and Claude Code's copy
+at `~/.claude/skills`; a project `.claude/skills` location is also live. The
 bootstrap rejects both host families fail-closed (`LIVE_LOCATION_FORBIDDEN`);
 installation and removal are test-root-only (`tcrn-helper-test-*`) in this
-candidate on both hosts.
+release on both hosts.
 
 ## Failure Handling
 
