@@ -18,9 +18,9 @@ non-canonical scalar encodings fail closed.
 
 The current provisional candidate targets repository
 `https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.1.0`,
-commit `93054dc8e5a03f869761d225c330592a7ce7944c`, tree
-`038f1c2412e8f291f0b546c9743dca20ec3bf0dd`, and the planned annotated-tag
-object `52b483b6de7725c36e7e5c7478010f39593ba0ca` for the exact recipe below.
+commit `7b0089523d6456d2ea097acd8a3970bb6e2cedfa`, tree
+`d11ff5603191b466a235c7aa2a8abf9dd0562f82`, and the planned annotated-tag
+object `efb1bce0043349a3b03d905ed4a40fb55b01b372` for the exact recipe below.
 This is the final R7 Engine identity for the bounded 435/436 and INIT-051
 native-evidence rework; earlier source and Helper identities remain historical.
 The source version remains `v1.1.0`. The annotated tag is not created and the
@@ -35,7 +35,7 @@ SHA-1 annotated-tag object framing (`tag <UTF-8 byte length>\0<recipe>`). It is
 metadata only; do not create or move this tag in the implementation Pack.
 
 ```text
-object 93054dc8e5a03f869761d225c330592a7ce7944c
+object 7b0089523d6456d2ea097acd8a3970bb6e2cedfa
 type commit
 tag v1.1.0
 tagger tpmoonchefryan <253097889+tpmoonchefryan@users.noreply.github.com> 1789860953 +0800
