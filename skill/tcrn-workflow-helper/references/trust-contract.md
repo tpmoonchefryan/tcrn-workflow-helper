@@ -20,7 +20,7 @@ The current release pair targets repository
 `https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.1.1`,
 commit `fed393e1e06eb76b5ddf76c7d04f4a7d99090a6c`, tree
 `1a91fb59181b7d71a00ae59955a778c817889c90`, and the frozen annotated-tag
-object `8652e45f79fe22eccff302ae17bd19e4721e08c2` for the exact recipe below.
+object `554a00704675633643b7782d4b2b6347bc911306` for the exact recipe below.
 This append-only Engine release carries the output-session recovery guard and
 the canonical `~/.agents`/`~/.claude` install contract. The immutable v1.1.0
 Engine and v1.0.2 Helper publications remain historical prior releases. The
@@ -36,7 +36,7 @@ metadata only; do not create or move this tag in the implementation Pack.
 object fed393e1e06eb76b5ddf76c7d04f4a7d99090a6c
 type commit
 tag v1.1.1
-tagger tpmoonchefryan <253097889+tpmoonchefryan@users.noreply.github.com> 1789897891 +0800
+tagger tpmoonchefryan <253097889+tpmoonchefryan@users.noreply.github.com> 1789898000 +0800
 
 TCRN Workflow v1.1.1
 ```
