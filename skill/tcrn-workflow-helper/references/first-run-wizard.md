@@ -48,7 +48,7 @@ commands remain test-root-only. Once the Owner has authorized a public source,
 the copy-oriented command is:
 
 ```sh
-npx --yes skills@1.7.0 add "tpmoonchefryan/tcrn-workflow-helper#v1.0.3" \
+npx --yes skills@1.7.0 add "tpmoonchefryan/tcrn-workflow-helper#v1.0.4" \
   --skill tcrn-workflow-helper \
   --global --agent claude-code --agent codex --copy --yes
 ```

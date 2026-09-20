@@ -17,14 +17,14 @@ non-canonical scalar encodings fail closed.
 ## Release identity
 
 The current release pair targets repository
-`https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.1.1`,
-commit `3b245c3673a0ea894935cd8145174ab85cff2c1e`, tree
-`2e5580311aec1748b5986c39944cbc90bd2807aa`, and the frozen annotated-tag
-object `ecdd5b149c378e61cfa4072dd975bfaab5187a84` for the exact recipe below.
-This append-only Engine release carries the output-session recovery guard and
-the canonical `~/.agents`/`~/.claude` install contract. The immutable v1.1.0
-Engine and v1.0.2 Helper publications remain historical prior releases. The
-companion Helper release is `v1.0.3`; its final commit, tree, tag recipe,
+`https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.1.2`,
+commit `a2d8da4c6b2337560babb540d1fc6907c6ac6677`, tree
+`7afd6ab7cdd3663d5f1d6a02c3642b88827c9396`, and the frozen annotated-tag
+object `5b5848375c8b0ad132ba25addea470f79e8ffeb5` for the exact recipe below.
+This append-only Engine release carries the managed-root host-render comparator
+and closed optional-article freshness grammar. The immutable v1.1.1 Engine and
+v1.0.3 Helper publications remain historical prior releases. The companion
+Helper release is `v1.0.4`; its final commit, tree, tag recipe,
 archive, and all asset digests are fixed in the dual-version release manifest,
 not inferred from this prose.
 
@@ -33,12 +33,12 @@ SHA-1 annotated-tag object framing (`tag <UTF-8 byte length>\0<recipe>`). It is
 metadata only; do not create or move this tag in the implementation Pack.
 
 ```text
-object 3b245c3673a0ea894935cd8145174ab85cff2c1e
+object a2d8da4c6b2337560babb540d1fc6907c6ac6677
 type commit
-tag v1.1.1
-tagger tpmoonchefryan <253097889+tpmoonchefryan@users.noreply.github.com> 1789898000 +0800
+tag v1.1.2
+tagger tpmoonchefryan <253097889+tpmoonchefryan@users.noreply.github.com> 1789909800 +0800
 
-TCRN Workflow v1.1.1
+TCRN Workflow v1.1.2
 ```
 
 These values are release metadata, not a trust anchor. The bootstrap runtime

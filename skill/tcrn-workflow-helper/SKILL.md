@@ -15,8 +15,8 @@ below — Deliberation Triggers and Recording Triggers — instead describe when
 would otherwise decide. Reading them in a session that never installs anything
 is the expected case.
 
-Targets the TCRN Workflow `v1.1.1` release on two Agent App hosts, Codex and
-Claude Code, with host-neutral protocols. The helper payload itself is `v1.0.3`:
+Targets the TCRN Workflow `v1.1.2` release on two Agent App hosts, Codex and
+Claude Code, with host-neutral protocols. The helper payload itself is `v1.0.4`:
 the immutable Workflow `v1.1.0` and Helper `v1.0.2` publications remain separate
 prior releases, and the two version identities remain distinct. Publication and
 trust state for the current pair is established only by its release assets and
