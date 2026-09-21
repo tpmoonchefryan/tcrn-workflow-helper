@@ -18,9 +18,9 @@ non-canonical scalar encodings fail closed.
 
 The current release pair targets repository
 `https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.1.2`,
-commit `169248bdeb8979f9e335b8cdee068d1d1cb6b809`, tree
-`e8f808a68f3648336a9152b328864f300067e7bc`, and the frozen annotated-tag
-object `01abc078ac6cec89ced5363c3c793b833a2ded2b` for the exact recipe below.
+commit `4a5e4c1200132303c3413297f1131c8570aaf489`, tree
+`f89f0f83eeea58a1f6ba44c5c20c441d9b4e22e1`, and the frozen annotated-tag
+object `24f1de2d5f98787de157bef323f4c73f54cbe9f1` for the exact recipe below.
 This append-only Engine release carries the managed-root host-render comparator
 and closed optional-article freshness grammar. The immutable v1.1.1 Engine and
 v1.0.3 Helper publications remain historical prior releases. The companion
@@ -33,10 +33,10 @@ SHA-1 annotated-tag object framing (`tag <UTF-8 byte length>\0<recipe>`). It is
 metadata only; do not create or move this tag in the implementation Pack.
 
 ```text
-object 169248bdeb8979f9e335b8cdee068d1d1cb6b809
+object 4a5e4c1200132303c3413297f1131c8570aaf489
 type commit
 tag v1.1.2
-tagger tpmoonchefryan <253097889+tpmoonchefryan@users.noreply.github.com> 1789909800 +0800
+tagger tpmoonchefryan <253097889+tpmoonchefryan@users.noreply.github.com> 1789976456 +0800
 
 TCRN Workflow v1.1.2
 ```
