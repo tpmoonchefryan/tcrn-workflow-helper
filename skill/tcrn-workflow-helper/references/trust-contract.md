@@ -17,28 +17,28 @@ non-canonical scalar encodings fail closed.
 ## Release identity
 
 The current release pair targets repository
-`https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.1.2`,
-commit `4a5e4c1200132303c3413297f1131c8570aaf489`, tree
-`f89f0f83eeea58a1f6ba44c5c20c441d9b4e22e1`, and the frozen annotated-tag
-object `24f1de2d5f98787de157bef323f4c73f54cbe9f1` for the exact recipe below.
-This append-only Engine release carries the managed-root host-render comparator
-and closed optional-article freshness grammar. The immutable v1.1.1 Engine and
-v1.0.3 Helper publications remain historical prior releases. The companion
-Helper release is `v1.0.4`; its final commit, tree, tag recipe,
-archive, and all asset digests are fixed in the dual-version release manifest,
-not inferred from this prose.
+`https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.1.3`,
+commit `845b1c20eb233e2bad9eab19ca8b78e16381f3d4`, tree
+`1e2adb2d328c3d3d856f5f17ea6a38ffac77a980`, and the frozen annotated-tag
+object `fb993cd76e8929eb6b5803c373b1560cd4885dc7` for the exact recipe below.
+This append-only Engine release carries the segmented time-attestation store
+repair and governed platform-root propagation through the managed hooks. The
+immutable v1.1.2 Engine and v1.0.4 Helper publications remain historical prior
+releases. The companion Helper release is `v1.0.5`; its final commit, tree,
+tag recipe, archive, and all asset digests are fixed in the dual-version
+release manifest, not inferred from this prose.
 
 The planned engine tag-object recipe is independently reproducible with Git's
 SHA-1 annotated-tag object framing (`tag <UTF-8 byte length>\0<recipe>`). It is
 metadata only; do not create or move this tag in the implementation Pack.
 
 ```text
-object 4a5e4c1200132303c3413297f1131c8570aaf489
+object 845b1c20eb233e2bad9eab19ca8b78e16381f3d4
 type commit
-tag v1.1.2
-tagger tpmoonchefryan <253097889+tpmoonchefryan@users.noreply.github.com> 1789976456 +0800
+tag v1.1.3
+tagger tpmoonchefryan <253097889+tpmoonchefryan@users.noreply.github.com> 1790156379 +0800
 
-TCRN Workflow v1.1.2
+TCRN Workflow v1.1.3
 ```
 
 These values are release metadata, not a trust anchor. The bootstrap runtime
