@@ -90,13 +90,16 @@ exists.
 - `knowledge-body` — returns a single record's body **only when explicitly
   requested** for that one record.
 - `knowledge-freshness` — checks freshness metadata.
-- `retire-proposals` — read-only fitness output with complete-window counts,
-  pending retirement candidates, historical retirement records, and
-  base-digest-bound rule/verify removal diffs;
-- `retire-sweep` — runs the bounded automatic sweep. Only active default small
-  cards with a complete configured window and zero retrieval/reference counts
-  are retired; rules, gates, verify artifacts, articles, and decision records
-  remain proposals or observations.
+- `retire-proposals` — read-only fitness statistics (`tcrn.knowledge-fitness.v2`):
+  per-artifact retrieval, reference, trigger and verify-failure counts over the
+  readable telemetry up to `--at`, plus the cards already retired with any
+  historical retirement record. It proposes nothing; `proposals` and
+  `ruleDiffs` are always empty;
+- `retire-sweep` — kept for compatibility and retires nothing
+  (`KNOWLEDGE_RETIRE_SWEEP_CONFLICT_ONLY`). The only automatic retirement is a
+  `--supersedes` write, which marks the replaced card `supersededBy`; rules,
+  gates, verify artifacts, articles, and decision records are never retired by
+  any automatic path.
 
 Where the chains are hosted by an AOS cockpit rather than sitting on the operator's
 machine, the same reads are forwarded through **AOS's** read face, whose tools are

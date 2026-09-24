@@ -392,34 +392,30 @@ lifecycle that makes knowledge *reachable* is three verbs, not one:
   act, not an age — re-verify the cards a closing Initiative touched, so the
   catalogue does not quietly empty itself over time.
 
-Fitness and retirement are separate from that explicit lifecycle:
-`retire-proposals` reads the configured complete-UTC-day window and emits
-base-digest-bound removal diffs; `retire-sweep` applies only the approved
-small-card rule. Articles, decision records, gates, and rule/verify artifacts
-are never deleted by the sweep. A `SessionStart` hook may run the same bounded
-sweep once per UTC day, and a missing or invalid observation day is not counted
-as zero activity.
+Fitness and retirement are separate from that explicit lifecycle. Knowledge
+retires automatically only at write time: a possible conflict is refused
+unless the write names `--supersedes` or `--coexist`, and `--supersedes` marks
+the older card `supersededBy` (out of default retrieval, body kept).
+`retire-proposals` is a read-only statistic (`tcrn.knowledge-fitness.v2`) of
+per-artifact counts and the cards already retired; it proposes no removal, so
+its `proposals` and `ruleDiffs` are empty. `retire-sweep` retires nothing
+(`KNOWLEDGE_RETIRE_SWEEP_CONFLICT_ONLY`), and no `SessionStart` hook runs it any
+more. Articles, decision records, gates, and rule/verify artifacts are never
+removed by any automatic path, and a card past its `maximumAgeDays` only turns
+stale.
 
-TCRN-CROSS-INC-295 tightens the observation reader: an empty daily file or a
-parseable event stream does not prove continuous collection. A collector must
-provide an `observation-coverage` receipt after the covered UTC day ends, with
-`coveredFrom` and `coveredUntil` delimiting the full day, all four channels
-(`retrieval`, `reference`, `trigger`, `verify`), `collectionErrors: 0`,
-`availability: "available"`, and `recordCount`/`sourceDigest` matching the
-ordered non-coverage records in that day. Unknown/unavailable input, conflicting
-receipts, missing coverage or subsequent changes make the day unproven. The
-digest proves input consistency, not that a collector actually observed all
-activity: never manufacture receipts from file existence or backfill unobserved
-days. No production collector with this coverage guarantee has been verified
-by INC-295; absent its evidence the sweep must remain ineligible. Fixture
-receipts are not production evidence.
-
-Removal proposals use the artifact's own criterion: a rule with triggers or
-a verify/gate artifact with a recorded failure is retained. Arbitrary telemetry
-work ids are not removable artifacts. This fixes the proposal predicate without
-authorizing automatic rule or verify deletion, or changing the approved P1
-small-card policy. Live helper placement still requires its trust procedure;
-editing this source file is not an installation receipt.
+The observation machinery built for time-based retirement is retired
+(TCRN-CROSS-MIN-225): the hooks no longer write session boundary rows, daily
+`observation-coverage` receipts, collector self-checks or
+`telemetry/summaries`, the batch entry writes no self-check, and
+`telemetry-observation` refuses with `TELEMETRY_OBSERVATION_RETIRED`. A stale
+caller that still passes `--observation-boundary` to the knowledge-inject
+script is answered `TELEMETRY_BOUNDARY_RETIRED` and nothing is written. Receipts,
+boundary rows and self-checks already written, including those an older
+installed engine keeps writing until both hosts are upgraded, stay readable
+through `telemetry-list` and `telemetry-stats` and count toward nothing; never
+manufacture or backfill them. Live helper placement still requires its trust
+procedure; editing this source file is not an installation receipt.
 
 And a catalogue only earns its keep if it is **read at the right moment** — the
 store is silent between queries, so retrieval is something you do, not something

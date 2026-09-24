@@ -378,17 +378,25 @@ current-stage prerequisite.
 
 ## Fitness and retirement
 
-Fitness is evidence about reuse, not a permission to delete arbitrary records. The
-engine's `fitness.windowDays` setting is the count of complete UTC observation days
-required by `retire-proposals` and `retire-sweep` (default 90), and
-`fitness.minEvents` is the minimum observed telemetry-event count for a small card
-(default 1). Missing or invalid days are incomplete evidence and never count as
-zero activity. `retire-proposals` is read-only and returns the window counts plus
-base-digest-bound removal diffs; `retire-sweep` applies only the adopted small-card
-rule. Articles, their index cards, decision records, gates, and rule/verify
-artifacts remain retained. Do not lower either setting to make a retirement
-eligible, and do not call a candidate archive or a local telemetry fixture
-production evidence.
+Knowledge retires automatically only at write time. A capture that scores as a
+possible conflict with an active card is refused (`KNOWLEDGE_POSSIBLE_CONFLICT`)
+unless it names `--supersedes <id>` or `--coexist true`; `--supersedes` marks the
+older card `supersededBy`, which takes it out of default retrieval while its body
+stays. Nothing else retires a card on its own: `retire-sweep` retires nothing for
+any instant, window or telemetry (`KNOWLEDGE_RETIRE_SWEEP_CONFLICT_ONLY`), a card
+past its `maximumAgeDays` only turns stale, and a knowledge store at its aggregate
+limit refuses the next write (`KNOWLEDGE_LIMIT_EXCEEDED`) instead of evicting
+anything. Fitness is evidence about reuse, never a reason to delete:
+`retire-proposals` is a read-only statistic (`tcrn.knowledge-fitness.v2`) of
+per-artifact counts over the readable telemetry up to `--at`, listed with the
+cards already retired and any historical retirement record, and its `proposals`
+and `ruleDiffs` are always empty. `fitness.windowDays` and `fitness.minEvents`
+are retired settings (a new write is refused with `SETTINGS_KEY_UNREGISTERED`);
+`--window-days` and `--min-events` are still accepted, listed back under
+`retiredInputs`, and have no effect. Settle a real conflict with `--supersedes`
+rather than by retiring the older card by hand, do not use `knowledge-retire` to
+make room or to act on low counts, and do not call a candidate archive or a
+local telemetry fixture production evidence.
 
 ## Trust Gate
 

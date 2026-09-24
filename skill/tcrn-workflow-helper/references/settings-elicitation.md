@@ -44,11 +44,6 @@ this document elicits are:
 - `knowledge.aggregateBytes` — the source-of-truth marker, metadata, and body
   byte ceiling for the knowledge store. Default 131,072; the engine canonical
   byte limit remains the upper bound and the derived index is not charged twice;
-- `fitness.windowDays` — the number of complete UTC observation days used by
-  `retire-proposals` and `retire-sweep`. Default 90; missing or invalid days
-  are incomplete evidence, never zero activity;
-- `fitness.minEvents` — the minimum observed telemetry events required before a
-  small card can be considered for automatic retirement. Default 1;
 - `retrieval.scopeExcerptBytes` — the default UTF-8 byte window for a
   `work-list` search excerpt. Default 512; the command's explicit
   `--scope-bytes` value wins;
@@ -85,6 +80,12 @@ this document elicits are:
 - `execution.dispatchModes` — the class-to-tier mappings for named modes;
 - `execution.dispatchTiers` — the per-host `flagship`, `main`, and `economy`
   model/effort rows.
+
+`fitness.windowDays` and `fitness.minEvents` are no longer settings: they
+configured the time-based knowledge retirement the engine removed, and knowledge
+now retires only through a conflicting write and `--supersedes`. A value recorded
+earlier stays readable history and has no effect, and a new `settings-set` for
+either key is refused with `SETTINGS_KEY_UNREGISTERED`. Do not offer them.
 
 The rest of the catalog is elicited elsewhere and is no less registered:
 `engine.requiredVersion` in `references/first-run-wizard.md` and
