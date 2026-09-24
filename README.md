@@ -7,8 +7,8 @@ TCRN Workflow 的 Skill 载荷。本仓库只分发 `skill/tcrn-workflow-helper/
 本仓库安装。本仓库不再携带引导器、发布归档、SBOM 或发版门；它是一份文档载荷，
 不是一条发布链路。
 
-当前工作树版本为 `1.0.5`，配套 Workflow `v1.1.3`；Workflow `v1.1.2` 与
-Helper `v1.0.4` 是保持不变的上一对不可变发布。
+当前工作树版本为 `1.0.6`，配套 Workflow `v1.2.0`；Workflow `v1.1.3` 与
+Helper `v1.0.5` 是保持不变的上一对不可变发布。
 本仓库中的版本号不构成发布或信任声明；trusted bootstrap、归档、provenance、
 manifest 与 checksums 必须由候选构建生成，并在独立 bootstrap 摘要发布后才可受信。
 
@@ -17,7 +17,7 @@ manifest 与 checksums 必须由候选构建生成，并在独立 bootstrap 摘�
 用 `skills` 安装器把 Skill 复制进两个宿主：
 
 ```sh
-npx --yes skills@1.7.0 add "tpmoonchefryan/tcrn-workflow-helper#v1.0.5" \
+npx --yes skills@1.7.0 add "tpmoonchefryan/tcrn-workflow-helper#v1.0.6" \
   --skill tcrn-workflow-helper \
   --global --agent claude-code --agent codex --copy --yes
 ```
