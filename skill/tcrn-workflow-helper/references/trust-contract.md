@@ -17,15 +17,17 @@ non-canonical scalar encodings fail closed.
 ## Release identity
 
 The current release pair targets repository
-`https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.2.0`,
-commit `514ebfb888c9c5b8437f6a77b9645aa55d11bc2f`, tree
-`e980805badcddcd7c98d172c5a5b25702637422e`, and the frozen annotated-tag
-object `f1c7e9afe076fa17eb75bc05671018ebddf939a4` for the exact recipe below.
-This append-only Engine release seals and reads observation evidence one
-channel at a time, adds the read-only `telemetry-observation` verb, and writes
-the attestation lock as one `tcrn.attestation-lock.v2` line. The immutable
-v1.1.3 Engine and v1.0.5 Helper publications remain historical prior
-releases. The companion Helper release is `v1.0.6`; its final commit, tree,
+`https://github.com/tpmoonchefryan/tcrn-workflow.git`, version `v1.2.1`,
+commit `17d9b96dce5611a09dfe1c1cc372acfb92330038`, tree
+`03f22ec795752c6c1b6eea1ff062e56f781bb18c`, and the frozen annotated-tag
+object `062659517a7944ab3489cf2beb8d0d7b454f9234` for the exact recipe below.
+This Engine patch release retires knowledge only through write-time conflict
+detection and `--supersedes`, removes the observation-day machinery (boundary
+rows, seal receipts, collector self-checks and day summaries), retires the
+`fitness.windowDays` and `fitness.minEvents` settings, and makes a
+snapshot-seeded replay and a replay from genesis read the same state. The
+immutable v1.2.0 Engine and v1.0.6 Helper publications remain historical prior
+releases. The companion Helper release is `v1.0.7`; its final commit, tree,
 tag recipe, archive, and all asset digests are fixed in the dual-version
 release manifest, not inferred from this prose.
 
@@ -34,12 +36,12 @@ SHA-1 annotated-tag object framing (`tag <UTF-8 byte length>\0<recipe>`). It is
 metadata only; do not create or move this tag in the implementation Pack.
 
 ```text
-object 514ebfb888c9c5b8437f6a77b9645aa55d11bc2f
+object 17d9b96dce5611a09dfe1c1cc372acfb92330038
 type commit
-tag v1.2.0
-tagger tpmoonchefryan <253097889+tpmoonchefryan@users.noreply.github.com> 1790261101 +0800
+tag v1.2.1
+tagger tpmoonchefryan <253097889+tpmoonchefryan@users.noreply.github.com> 1790332939 +0800
 
-TCRN Workflow v1.2.0
+TCRN Workflow v1.2.1
 ```
 
 These values are release metadata, not a trust anchor. The bootstrap runtime
